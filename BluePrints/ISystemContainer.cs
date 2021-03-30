@@ -1,6 +1,6 @@
 ﻿using HECSFramework.Core;
 
-namespace HECSFrameWork.Systems
+namespace HECSFramework.Unity
 {
     public interface ISystemContainer
     {

@@ -1,7 +1,7 @@
-﻿using HECSFramework.Unity;
+﻿using HECSFramework.Core;
 using UnityEngine;
 
-namespace HECSFrameWork.Systems
+namespace HECSFramework.Unity
 {
     public abstract class SystemBluePrint<T> : SystemBaseBluePrint where T: ISystem, new ()
     {

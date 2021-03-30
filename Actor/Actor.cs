@@ -13,7 +13,7 @@ namespace HECSFramework.Unity
         public ICommandService EntityCommandService => entity.EntityCommandService;
         public int WorldId => entity.WorldId;
         public World World => entity.World;
-        public Guid EntityGuid => entity.EntityGuid;
+        public Guid GUID => entity.GUID;
         public HECSMask ComponentsMask => entity.ComponentsMask;
         public List<ISystem> GetAllSystems => entity.GetAllSystems;
         public ComponentContext ComponentContext => entity.ComponentContext;

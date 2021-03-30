@@ -47,7 +47,6 @@ namespace HECSFramework.Unity
     public enum GuidGenerationRule
     {
         Default = 0,
-        Persistent = 1,
-        PersistentUnique = 2
+        PersistentUnique = 1
     }
 }

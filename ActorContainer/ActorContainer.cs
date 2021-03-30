@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using HECSFramework.Core;
-using HECSFrameWork;
 
 #if UNITY_EDITOR
-using HECSFrameWork.Editor;
 using UnityEditor;
 #endif
 
