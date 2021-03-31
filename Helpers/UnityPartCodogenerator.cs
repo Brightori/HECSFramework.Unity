@@ -39,7 +39,7 @@ namespace HECSFramework.Core.Generator
 
             foreach(var c in componentTypes)
             {
-                dictionaryBody.Add(new TabSimpleSyntax(3, $" {CParse.LeftScope} typeof({c.Name}), {c.Name}{BluePrint}) {CParse.RightScope},"));
+                dictionaryBody.Add(new TabSimpleSyntax(3, $" {CParse.LeftScope} typeof({c.Name}), typeof({c.Name}{BluePrint}) {CParse.RightScope},"));
             }
 
             return tree;     
@@ -52,7 +52,7 @@ namespace HECSFramework.Core.Generator
             var list = new List<(string name, string classBody)>();
 
             foreach (var c in componentTypes)
-                list.Add((c.Name, GetComponentBluePrint(c)));
+                list.Add((c.Name+BluePrint+".cs", GetComponentBluePrint(c)));
 
             return list;
         }

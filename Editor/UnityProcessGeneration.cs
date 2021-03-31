@@ -9,7 +9,8 @@ namespace HECSFramework.Unity.Generator
     {
         public const string BluePrint = "BluePrint";
 
-        private readonly string DefaultPath = "/Scripts/HECSGenerated/";
+        private const string DefaultPath = "/Scripts/HECSGenerated/";
+        private const string ComponentsBluePrintsPath = "/Scripts/BluePrints/ComponentsBluePrints/";
         private string dataPath = Application.dataPath;
 
         private const string TypeProvider = "TypeProvider.cs";
@@ -24,19 +25,25 @@ namespace HECSFramework.Unity.Generator
         public static void Test()
         {
             var generator = new CodeGenerator();
-            var unityGenerator = new UnityProcessGeneration();
+            var unityProcessGeneration = new UnityProcessGeneration();
             generator.GatherAssembly();
-            unityGenerator.SaveToFile(TypeProvider, generator.GenerateTypesMap());
-            unityGenerator.SaveToFile(MaskProvider, generator.GenerateMaskProvider());
-            unityGenerator.SaveToFile(SystemBindings, generator.GetSystemBinds());
-            unityGenerator.SaveToFile(ComponentContext, generator.GetComponentContext());
-            unityGenerator.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
-            unityGenerator.SaveToFile(BluePrintsProvider, generator.GetComponentsBluePrintsProvider());
+            unityProcessGeneration.SaveToFile(TypeProvider, generator.GenerateTypesMap());
+            unityProcessGeneration.SaveToFile(MaskProvider, generator.GenerateMaskProvider());
+            unityProcessGeneration.SaveToFile(SystemBindings, generator.GetSystemBinds());
+            unityProcessGeneration.SaveToFile(ComponentContext, generator.GetComponentContext());
+            unityProcessGeneration.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
+
+            //generate blue prints
+            var list = generator.GenerateComponentsBluePrints();
+            foreach (var c in list)
+                unityProcessGeneration.SaveToFile(c.name, c.classBody, ComponentsBluePrintsPath);
+
+            unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetComponentsBluePrintsProvider());
         }
 
-        private void SaveToFile(string name, string data)
+        private void SaveToFile(string name, string data, string pathToDirectory = DefaultPath)
         {
-            var path = dataPath + DefaultPath + name;
+            var path = dataPath + pathToDirectory + name;
 
             if (!Directory.Exists(dataPath + DefaultPath))
                 Directory.CreateDirectory(dataPath + DefaultPath);
