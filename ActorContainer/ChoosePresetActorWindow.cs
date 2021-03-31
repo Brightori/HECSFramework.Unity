@@ -28,7 +28,7 @@ namespace HECSFramework.Unity
 
             foreach (var componentBP in presetContainer.ComponentsBluePrints)
             {
-                if (actorContainer.IsHaveComponent(componentBP.GetHECSComponent.TypeID) && componentBP.GetHECSComponent is ISingleComponent)
+                if (actorContainer.IsHaveComponentBlueprint(componentBP))
                     continue;
                 
                 var asset = Instantiate(componentBP);

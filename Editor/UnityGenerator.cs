@@ -27,6 +27,7 @@ namespace HECSFramework.Unity.Generator
             unityGenerator.SaveToFile(MaskProvider, generator.GenerateMaskProvider());
             unityGenerator.SaveToFile(SystemBindings, generator.GetSystemBinds());
             unityGenerator.SaveToFile(ComponentContext, generator.GetComponentContext());
+            unityGenerator.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
         }
 
         private void SaveToFile(string name, string data)

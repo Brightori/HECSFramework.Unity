@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using HECSFramework.Core;
+using Components;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -19,10 +20,20 @@ namespace HECSFramework.Unity
         public List<SystemBaseBluePrint> Systems => holder.systems;
         public List<ComponentBluePrint> Components => holder.components;
 
-        public bool IsHaveComponent(ComponentID componentID)
-            => holder.components.Any(x
-                => TypesMap.MapIndexes.TryGetValue(x.GetHECSComponent.GetTypeHashCode, out var info)
-                   && info.ComponentID == componentID);
+        public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U: ComponentBluePrint
+        {
+            return holder.components.Any(x => x is U);
+        }
+
+        public bool IsHaveComponent<T>()
+        {
+            return holder.components.Any(x => x.GetHECSComponent is T);
+        }
+
+        public bool IsHaveComponent<T>(T component)
+        {
+            return IsHaveComponent<T>();
+        }
 
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
             holder.systems.Any(x => x.GetSystem.GetType().Name == systemBaseBluePrint.GetSystem.GetType().Name);

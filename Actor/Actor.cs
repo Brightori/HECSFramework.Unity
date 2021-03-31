@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core;
+using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,9 @@ namespace HECSFramework.Unity
 {
     public partial class Actor : MonoBehaviour, IActor
     {
+        [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule;
+        [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
+
         private Entity entity;
         public GameObject GameObject => gameObject;
         public ICommandService EntityCommandService => entity.EntityCommandService;
@@ -18,13 +22,13 @@ namespace HECSFramework.Unity
         public List<ISystem> GetAllSystems => entity.GetAllSystems;
         public ComponentContext ComponentContext => entity.ComponentContext;
         public IComponent[] GetAllComponents => entity.GetAllComponents;
-        
-        public string ID { get; }
-        public bool IsInited { get; }
-        public bool IsAlive { get; }
-        public bool IsPaused { get; }
 
-        public void AddHecsComponent(IComponent component, bool silently = false) 
+        public string ID => entity.ID;
+        public bool IsInited => entity.IsInited;
+        public bool IsAlive => entity.IsAlive;
+        public bool IsPaused => entity.IsPaused;
+
+        public void AddHecsComponent(IComponent component, bool silently = false)
             => entity.AddHecsComponent(component, silently);
 
         public void AddHecsSystem<T>(T system) where T : ISystem => entity.AddHecsSystem(system);
@@ -33,17 +37,27 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
-            entity = new Entity(gameObject.name);
+            entity = new Entity(actorInitModule.ID, actorInitModule.WorldIndex);
+            entity.SetGuid(actorInitModule.Guid);
+
+            if (actorContainer != null && !IsInited)
+                actorContainer.Init(this);
+        }
+
+        private void Start()
+        {
+            if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
+                entity.Init();
         }
 
         public void Dispose()
         {
-            entity.Dispose();
+            HecsDestroy();
         }
 
         public bool Equals(IEntity other) => entity.Equals(other);
 
-        public void GenerateID() => entity.GenerateID();
+        public void GenerateGuid() => entity.GenerateGuid();
 
         public void HecsDestroy()
         {
@@ -57,11 +71,7 @@ namespace HECSFramework.Unity
 
         public void InjectEntity(IEntity entity, bool additive = false) => this.entity.InjectEntity(entity, additive);
 
-        public void Pause()
-        {
-            entity.Pause();
-        }
-
+        public void Pause() => entity.Pause();
         public void RemoveHecsComponent(IComponent component) => entity.RemoveHecsComponent(component);
         public void RemoveHecsComponent(HECSMask component) => entity.RemoveHecsComponent(component);
         public void RemoveHecsSystem(ISystem system) => entity.RemoveHecsSystem(system);
@@ -86,8 +96,8 @@ namespace HECSFramework.Unity
 
         protected virtual void Reset()
         {
-            entity.SetID(gameObject.name);
-            GenerateID();
+            actorInitModule.SetID(gameObject.name);
+            actorInitModule.SetGuid(Guid.NewGuid());
         }
 
         public bool TryGetHecsComponent<T>(HECSMask mask, out T component) where T : IComponent =>
@@ -101,5 +111,11 @@ namespace HECSFramework.Unity
         }
 
         T IEntity.GetOrAddComponent<T>() => entity.GetOrAddComponent<T>();
+
+        public void SetGuid(Guid guid)
+        {
+            actorInitModule.SetGuid(guid);
+            entity.SetGuid(guid);
+        }
     }
 }
