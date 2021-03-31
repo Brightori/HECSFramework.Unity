@@ -13,7 +13,7 @@ namespace HECSFramework.Unity
         public virtual bool IsVisible { get; } = true;
     }
     
-    public abstract class ComponentBluePrintContainer<T> : ComponentBluePrint, IEditorInit where T : class, IComponent, new()
+    public class ComponentBluePrintContainer<T> : ComponentBluePrint, IEditorInit where T : class, IComponent, new()
     {
         #region Editor
 #if UNITY_EDITOR

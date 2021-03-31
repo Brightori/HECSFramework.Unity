@@ -18,35 +18,22 @@ namespace HECSFramework.Unity
         public void Init(List<ActorContainer> actorContainers, TypeOfBluePrint typeOfBluePrint)
         {
             bluePrints.Clear();
-            var componentType = typeof(IComponent);
-            var systemType = typeof(ISystem);
-
-            var asses = AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes());
-            var componentTypes = asses.Where(p => componentType.IsAssignableFrom(p) && p.IsClass);
-            var systemTypes = asses.Where(p => systemType.IsAssignableFrom(p) && p.IsClass);
-
-            var bp = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("ComponentBluePrintContainer"));
-            var bp2 = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("SystemBluePrint"));
+            var bluePrintProvider = new BluePrintsProvider();
 
             switch (typeOfBluePrint)
             {
                 case TypeOfBluePrint.Component:
-                    foreach (var t in componentTypes)
-                    {
-                        var neededComponentType = bp.FirstOrDefault(x => x.BaseType.GetGenericArguments().FirstOrDefault() == t);
-
-                        if (neededComponentType != null)
-                            bluePrints.Add(new ComponentBluePrintNode(t.Name, neededComponentType, actorContainers)); 
-                    }
+                    foreach (var t in bluePrintProvider.Components)
+                        bluePrints.Add(new ComponentBluePrintNode(t.Key.Name, t.Value, actorContainers));
                     break;
                 case TypeOfBluePrint.System:
-                    foreach (var t in systemTypes)
-                    {
-                        var neededComponentType = bp2.FirstOrDefault(x => x.BaseType.GetGenericArguments().FirstOrDefault() == t);
+                    //foreach (var t in systemTypes)
+                    //{
+                    //    var neededComponentType = bp2.FirstOrDefault(x => x.BaseType.GetGenericArguments().FirstOrDefault() == t);
                         
-                        if (neededComponentType != null)
-                            bluePrints.Add(new SystemBluePrintNode(t.Name, neededComponentType, actorContainers));
-                    }
+                    //    if (neededComponentType != null)
+                    //        bluePrints.Add(new SystemBluePrintNode(t.Name, neededComponentType, actorContainers));
+                    //}
                     break;
             }
         }
@@ -88,7 +75,6 @@ namespace HECSFramework.Unity
         [Button("Add Component")]
         public override void AddBluePrint()
         {
-            
             foreach (ActorContainer parent in containers)
             {
                 var asset = ScriptableObject.CreateInstance(neededType);
@@ -96,7 +82,6 @@ namespace HECSFramework.Unity
                 asset.name = neededType.Name;
                 parent.AddComponent(asset as ComponentBluePrint);
             }
-
         }
     }
     
