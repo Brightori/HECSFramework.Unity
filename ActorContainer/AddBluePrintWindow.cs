@@ -27,13 +27,8 @@ namespace HECSFramework.Unity
                         bluePrints.Add(new ComponentBluePrintNode(t.Key.Name, t.Value, actorContainers));
                     break;
                 case TypeOfBluePrint.System:
-                    //foreach (var t in systemTypes)
-                    //{
-                    //    var neededComponentType = bp2.FirstOrDefault(x => x.BaseType.GetGenericArguments().FirstOrDefault() == t);
-                        
-                    //    if (neededComponentType != null)
-                    //        bluePrints.Add(new SystemBluePrintNode(t.Name, neededComponentType, actorContainers));
-                    //}
+                    foreach (var t in bluePrintProvider.Systems)
+                        bluePrints.Add(new SystemBluePrintNode(t.Key.Name, t.Value, actorContainers));
                     break;
             }
         }

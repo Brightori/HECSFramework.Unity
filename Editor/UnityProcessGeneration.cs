@@ -11,6 +11,7 @@ namespace HECSFramework.Unity.Generator
 
         private const string DefaultPath = "/Scripts/HECSGenerated/";
         private const string ComponentsBluePrintsPath = "/Scripts/BluePrints/ComponentsBluePrints/";
+        private const string SystemsBluePrintsPath = "/Scripts/BluePrints/SystemsBluePrint/";
         private string dataPath = Application.dataPath;
 
         private const string TypeProvider = "TypeProvider.cs";
@@ -34,11 +35,16 @@ namespace HECSFramework.Unity.Generator
             unityProcessGeneration.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
 
             //generate blue prints
-            var list = generator.GenerateComponentsBluePrints();
-            foreach (var c in list)
-                unityProcessGeneration.SaveToFile(c.name, c.classBody, ComponentsBluePrintsPath);
+            var componetsBPFiles = generator.GenerateComponentsBluePrints();
+            var systemsBPFiles = generator.GenerateSystemsBluePrints();
 
-            unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetComponentsBluePrintsProvider());
+            foreach (var c in componetsBPFiles)
+                unityProcessGeneration.SaveToFile(c.name, c.classBody, ComponentsBluePrintsPath);  
+            
+            foreach (var c in systemsBPFiles)
+                unityProcessGeneration.SaveToFile(c.name, c.classBody, SystemsBluePrintsPath);
+
+            unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetBluePrintsProvider());
         }
 
         private void SaveToFile(string name, string data, string pathToDirectory = DefaultPath)
