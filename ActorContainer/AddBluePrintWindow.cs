@@ -70,7 +70,7 @@ namespace HECSFramework.Unity
         [Button("Add Component")]
         public override void AddBluePrint()
         {
-            foreach (ActorContainer parent in containers)
+            foreach (EntityContainer parent in containers)
             {
                 var asset = ScriptableObject.CreateInstance(neededType);
                 AssetDatabase.AddObjectToAsset(asset, parent);
