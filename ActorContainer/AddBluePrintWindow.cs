@@ -15,7 +15,7 @@ namespace HECSFramework.Unity
         [Searchable, HideReferenceObjectPicker]
         public List<ActorContainerNode> bluePrints = new List<ActorContainerNode>(64);
 
-        public void Init(List<ActorContainer> actorContainers, TypeOfBluePrint typeOfBluePrint)
+        public void Init(List<EntityContainer> actorContainers, TypeOfBluePrint typeOfBluePrint)
         {
             bluePrints.Clear();
             var bluePrintProvider = new BluePrintsProvider();
@@ -48,9 +48,9 @@ namespace HECSFramework.Unity
         public string Name;
 
         protected Type neededType;
-        protected List<ActorContainer> containers;
+        protected List<EntityContainer> containers;
 
-        public ActorContainerNode(string name, Type neededType, List<ActorContainer> containers)
+        public ActorContainerNode(string name, Type neededType, List<EntityContainer> containers)
         {
             Name = name;
             this.neededType = neededType;
@@ -63,7 +63,7 @@ namespace HECSFramework.Unity
     [Serializable]
     public class ComponentBluePrintNode : ActorContainerNode
     {
-        public ComponentBluePrintNode(string name, Type neededComponent, List<ActorContainer> containers) : base(name, neededComponent, containers)
+        public ComponentBluePrintNode(string name, Type neededComponent, List<EntityContainer> containers) : base(name, neededComponent, containers)
         {
         }
 
@@ -83,7 +83,7 @@ namespace HECSFramework.Unity
     [Serializable]
     public class SystemBluePrintNode : ActorContainerNode
     {
-        public SystemBluePrintNode(string name, Type neededComponent, List<ActorContainer> containers) : base(name, neededComponent, containers)
+        public SystemBluePrintNode(string name, Type neededComponent, List<EntityContainer> containers) : base(name, neededComponent, containers)
         {
         }
 
@@ -91,7 +91,7 @@ namespace HECSFramework.Unity
         public override void AddBluePrint()
         {
             var asset = ScriptableObject.CreateInstance(neededType);
-            foreach (ActorContainer parent in containers)
+            foreach (EntityContainer parent in containers)
             {
                 AssetDatabase.AddObjectToAsset(asset, parent);
                 asset.name = neededType.Name;

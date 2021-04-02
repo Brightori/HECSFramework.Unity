@@ -10,9 +10,9 @@ namespace HECSFramework.Unity
         [Searchable, AssetsOnly]
         public PresetContainer presetContainer;
         private bool inAction;
-        private ActorContainer actorContainer;
+        private EntityContainer actorContainer;
 
-        public void Init(ActorContainer actorContainer)
+        public void Init(EntityContainer actorContainer)
         {
             this.actorContainer = actorContainer;
         }

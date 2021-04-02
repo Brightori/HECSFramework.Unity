@@ -51,7 +51,7 @@ namespace HECSFramework.Unity
 
     public static class RequirementChecker
     {
-        public static void CheckRequirements(ActorContainer actorContainer)
+        public static void CheckRequirements(EntityContainer actorContainer)
         {
 #if UNITY_EDITOR
             var componentType = typeof(IComponent);
@@ -88,16 +88,17 @@ namespace HECSFramework.Unity
             //    }
             //}
 
-            if (actorContainer is AbilityBaseBluePrint ability)
+            //todo проверить нужно ли это вообще в текущих условиях
+            if (actorContainer is AbilityContainer ability)
             {
-                var neededBP = RequiredFieldsBPs(ability.GetAbility.GetType(), actorContainer, asses);
-                ProcessBPList(neededBP, actorContainer);
+                //var neededBP = RequiredFieldsBPs(ability.GetAbility.GetType(), actorContainer, asses);
+                //ProcessBPList(neededBP, actorContainer);
 
-                var neededAtContainer = RequiredAtContainerBPs(ability.GetAbility.GetType(), actorContainer, asses);
-                ProcessBPList(neededAtContainer, actorContainer);
+                //var neededAtContainer = RequiredAtContainerBPs(ability.GetAbility.GetType(), actorContainer, asses);
+                //ProcessBPList(neededAtContainer, actorContainer);
 
-                var neededPredicatesBP = RequiredPredicatesBPs(ability, asses);
-                ProcessBPList(neededPredicatesBP, actorContainer);
+                //var neededPredicatesBP = RequiredPredicatesBPs(ability, asses);
+                //ProcessBPList(neededPredicatesBP, actorContainer);
             }
 
             UnityEditor.AssetDatabase.SaveAssets();
@@ -204,7 +205,7 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        private static void ProcessBPList(List<Type> bps, ActorContainer actorContainer)
+        private static void ProcessBPList(List<Type> bps, EntityContainer actorContainer)
         {
             foreach (var bp in bps)
             {
@@ -268,7 +269,7 @@ namespace HECSFramework.Unity
             }
         }
 
-        private static List<Type> RequiredFieldsBPs(Type parent, ActorContainer actorContainer, IEnumerable<Type> asses)
+        private static List<Type> RequiredFieldsBPs(Type parent, EntityContainer actorContainer, IEnumerable<Type> asses)
         {
             var list = new List<Type>(8);
             var MembersInfo = new List<MemberInfo>(128);
@@ -320,7 +321,7 @@ namespace HECSFramework.Unity
             return list;
         }
 
-        private static List<Type> RequiredAtContainerBPs(ActorContainer actorContainer, IEnumerable<Type> asses)
+        private static List<Type> RequiredAtContainerBPs(EntityContainer actorContainer, IEnumerable<Type> asses)
         {
             var list = new List<Type>(8);
             var tempTypes = new List<Type>(128);
@@ -485,7 +486,7 @@ namespace HECSFramework.Unity
             return list;
         }
 
-        private static void AddComponent(ActorContainer container, Type neededType)
+        private static void AddComponent(EntityContainer container, Type neededType)
         {
 #if UNITY_EDITOR
             var asset = ScriptableObject.CreateInstance(neededType);
@@ -499,7 +500,7 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        private static void AddSystem(ActorContainer container, Type neededType)
+        private static void AddSystem(EntityContainer container, Type neededType)
         {
 #if UNITY_EDITOR
             var asset = ScriptableObject.CreateInstance(neededType);
@@ -513,7 +514,7 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        private static void AddPredicate(ActorContainer container, Type neededType, IHavePredicateContainers havePredicateContainers)
+        private static void AddPredicate(EntityContainer container, Type neededType, IHavePredicateContainers havePredicateContainers)
         {
 #if UNITY_EDITOR
             var asset = ScriptableObject.CreateInstance(neededType);

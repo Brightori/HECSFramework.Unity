@@ -112,7 +112,7 @@ namespace HECSFramework.Unity
             }
             
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
-            window.Init(new List<ActorContainer>{this}, TypeOfBluePrint.Component);
+            window.Init(new List<EntityContainer>{this}, TypeOfBluePrint.Component);
         }
 
         [Button(ButtonSizes.Large)]
@@ -125,7 +125,7 @@ namespace HECSFramework.Unity
             }
             
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
-            window.Init(new List<ActorContainer>{this}, TypeOfBluePrint.System);
+            window.Init(new List<EntityContainer> {this}, TypeOfBluePrint.System);
         }
 #endif
         [Button(ButtonSizes.Large)]

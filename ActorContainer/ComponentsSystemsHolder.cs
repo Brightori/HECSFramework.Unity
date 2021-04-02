@@ -44,7 +44,7 @@ namespace HECSFramework.Unity
 #if UNITY_EDITOR
         [HideInInspector]
 #endif
-        public ActorContainer Parent;
+        public EntityContainer Parent;
         
         private void RemoveComponent(ComponentBluePrint element)
         {
@@ -118,7 +118,7 @@ namespace HECSFramework.Unity
             }
         }
 
-        public void OnValidate(ActorContainer parent)
+        public void OnValidate(EntityContainer parent)
         {
             Parent = parent;
             FixNullContainers();
