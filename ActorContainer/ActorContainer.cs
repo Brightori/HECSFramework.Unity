@@ -11,8 +11,13 @@ using UnityEditor;
 
 namespace HECSFramework.Unity
 {
-    [CreateAssetMenu(fileName = "Actor Container", menuName = "Actor Container")]
-    public class ActorContainer : ScriptableObject
+    [CreateAssetMenu(fileName = "ActorContainer", menuName = "Actor Container")]
+    public class ActorContainer : EntityContainer {}   
+    
+    [CreateAssetMenu(fileName = "AbilityContainer", menuName = "Ability Container")]
+    public class AbilityContainer : EntityContainer {}
+    
+    public class EntityContainer : ScriptableObject
     {
         [SerializeField]
         protected ComponentsSystemsHolder holder = new ComponentsSystemsHolder();
