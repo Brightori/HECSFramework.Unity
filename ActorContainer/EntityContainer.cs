@@ -37,7 +37,7 @@ namespace HECSFramework.Unity
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
             holder.systems.Any(x => x.GetSystem.GetType().Name == systemBaseBluePrint.GetSystem.GetType().Name);
 
-        public void Init(IEntity entity)
+        public virtual void Init(IEntity entity)
         {
             entity.AddHecsComponent(new ActorContainerID { ID = name });
             foreach (var component in holder.components)
