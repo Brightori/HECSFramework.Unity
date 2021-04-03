@@ -8,7 +8,7 @@ namespace Systems
 	[Serializable, BluePrint]
     public abstract class AbilitySystem : BaseSystem, IAbilitySystem
     {
-        public abstract void Execute(IEntity owner = null, IEntity target = null);
+        public abstract void Execute(IEntity owner = null, IEntity target = null, bool enabled = true);
     }
 
     public interface IAbilitySystem : ISystem { }
