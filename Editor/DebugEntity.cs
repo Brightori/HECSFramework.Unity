@@ -1,5 +1,4 @@
-﻿using HECSFrameWork.Components;
-using HECSFrameWork.Systems;
+﻿using HECSFramework.Core;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Serialization;
@@ -8,9 +7,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace HECSFrameWork.Editor
+namespace HECSFramework.Unity.Editor
 {
-
     public class ShowComponentsAndSystems : OdinEditorWindow
     {
         [ShowInInspector]

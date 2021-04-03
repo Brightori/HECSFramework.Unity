@@ -1,14 +1,16 @@
+using HECSFramework.Core;
+using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
-using IComponent = HECSFrameWork.Components.IComponent;
 
 public class DebugHECS : OdinEditorWindow
 {
-    [ShowInInspector, Searchable] 
+    [UnityEngine.SerializeField, ShowInInspector] private int worldIndex = 0;
+
+    [ShowInInspector, Searchable]
     [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
     public List<DrawEntity> Entities = new List<DrawEntity>(16);
 
@@ -26,8 +28,11 @@ public class DebugHECS : OdinEditorWindow
 
     private void Update()
     {
-        if (Entities.Count != EntityManager.Entities.Count)
-            RedrawWindow(); 
+        if (!EntityManager.IsAlive)
+            return;
+
+        if (worldIndex < EntityManager.Worlds.Length && Entities.Count != EntityManager.Worlds[worldIndex].EntitiesCount)
+            RedrawWindow();
         Repaint();
     }
 
@@ -36,18 +41,31 @@ public class DebugHECS : OdinEditorWindow
     {
         Entities.Clear();
 
-        foreach (var e in EntityManager.Entities)
+        if (!EntityManager.IsAlive)
+            return;
+
+        if (worldIndex >= EntityManager.Worlds.Length)
+            return;
+
+        foreach (var e in EntityManager.Worlds[worldIndex].Entities)
         {
+            if (e == null)
+                continue;
+
             var drawEntity = new DrawEntity();
 
             drawEntity.ID = e.ID;
-            drawEntity.ViewID = e.ViewID;
-            drawEntity.Guid = e.Guid;
+            drawEntity.Guid = e.GUID.ToString();
+            drawEntity.ContainerID = e.ContainerID;
 
-            foreach (var c in e.GetAllComponents)
-            {
-                drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
-            }
+            if (e.ComponentsMask != HECSMask.Empty)
+                foreach (var c in e.GetAllComponents)
+                {
+                    if (c == null)
+                        continue;
+
+                    drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
+                }
 
             foreach (var s in e.GetAllSystems)
             {
@@ -62,11 +80,11 @@ public class DebugHECS : OdinEditorWindow
 [Serializable, HideLabel]
 public class DrawEntity
 {
-    [FoldoutGroup("$ID",  false), ReadOnly]
+    [FoldoutGroup("$ID", false), ReadOnly]
     public string ID;
 
     [FoldoutGroup("$ID"), ReadOnly]
-    public string ViewID;
+    public string ContainerID;
 
     [FoldoutGroup("$ID"), ReadOnly]
     public string Guid;
@@ -87,7 +105,7 @@ public class DrawSystem
 
 [Serializable]
 public class DrawComponent
-{ 
+{
     [ReadOnly, BoxGroup, HideLabel]
     public string Name;
     [ShowInInspector, HideLabel, HideReferenceObjectPicker, BoxGroup, ReadOnly] public IComponent Component;

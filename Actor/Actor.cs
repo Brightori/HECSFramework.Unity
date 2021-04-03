@@ -28,6 +28,8 @@ namespace HECSFramework.Unity
         public bool IsAlive => entity.IsAlive;
         public bool IsPaused => entity.IsPaused;
 
+        public string ContainerID => entity.ContainerID;
+
         public void AddHecsComponent(IComponent component, bool silently = false)
             => entity.AddHecsComponent(component, silently);
 
@@ -37,6 +39,7 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
+            actorInitModule.InitModule(this);
             entity = new Entity(actorInitModule.ID, actorInitModule.WorldIndex);
             entity.SetGuid(actorInitModule.Guid);
 
