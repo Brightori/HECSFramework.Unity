@@ -11,6 +11,7 @@ namespace HECSFramework.Core.Generator
         public string GetBluePrintsProvider()
         {
             var tree = new TreeSyntaxNode();
+            var constructor = new TreeSyntaxNode();
 
             tree.Add(new UsingSyntax("Components"));
             tree.Add(new UsingSyntax("System"));
@@ -18,12 +19,17 @@ namespace HECSFramework.Core.Generator
             tree.Add(new UsingSyntax("System.Collections.Generic",1));
             tree.Add(new NameSpaceSyntax("HECSFramework.Unity"));
             tree.Add(new LeftScopeSyntax());
-            tree.Add(new TabSimpleSyntax(1, "public class BluePrintsProvider"));
+            tree.Add(new TabSimpleSyntax(1, "public partial class BluePrintsProvider"));
             tree.Add(new LeftScopeSyntax(1));
-            tree.Add(GetComponentsBluePrintsDictionary());
-            tree.Add(GetSystemsBluePrintsDictionary());
+            tree.Add(new TabSimpleSyntax(2, "public BluePrintsProvider()"));
+            tree.Add(new LeftScopeSyntax(2));
+            tree.Add(constructor);
+            tree.Add(new RightScopeSyntax(2));
             tree.Add(new RightScopeSyntax(1));
             tree.Add(new RightScopeSyntax());
+
+            constructor.Add(GetComponentsBluePrintsDictionary());
+            constructor.Add(GetSystemsBluePrintsDictionary());
 
             return tree.ToString();
         }
@@ -33,7 +39,7 @@ namespace HECSFramework.Core.Generator
             var tree = new TreeSyntaxNode();
             var dictionaryBody = new TreeSyntaxNode();
             
-            tree.Add(new TabSimpleSyntax(2, "public Dictionary<Type, Type> Components = new Dictionary<Type, Type>"));
+            tree.Add(new TabSimpleSyntax(2, "Components = new Dictionary<Type, Type>"));
             tree.Add(new LeftScopeSyntax(2));
             tree.Add(dictionaryBody);
             tree.Add(new RightScopeSyntax(2, true));
@@ -52,7 +58,7 @@ namespace HECSFramework.Core.Generator
             var dictionaryBody = new TreeSyntaxNode();
             
             tree.Add(new ParagraphSyntax());
-            tree.Add(new TabSimpleSyntax(2, "public Dictionary<Type, Type> Systems = new Dictionary<Type, Type>"));
+            tree.Add(new TabSimpleSyntax(2, "Systems = new Dictionary<Type, Type>"));
             tree.Add(new LeftScopeSyntax(2));
             tree.Add(dictionaryBody);
             tree.Add(new RightScopeSyntax(2, true));
