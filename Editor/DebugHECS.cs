@@ -1,14 +1,14 @@
 using HECSFramework.Core;
-using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 public class DebugHECS : OdinEditorWindow
 {
-    [UnityEngine.SerializeField, ShowInInspector] private int worldIndex = 0;
+    [UnityEngine.SerializeField, ShowInInspector, Range(0,99)] private int worldIndex = 0;
 
     [ShowInInspector, Searchable]
     [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]

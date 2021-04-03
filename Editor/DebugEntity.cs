@@ -54,23 +54,4 @@ namespace HECSFramework.Unity.Editor
                 systems.Add(s);
         }
     }
-
-    public class DebugEntity
-    {
-        [MenuItem("HECS Options/Debug/Send test command to Actor")]
-        public static void SendTestCommand()
-        {
-            var go = Selection.activeObject as GameObject;
-            var actor = go.GetComponent<IActor>();
-
-            if (actor != null)
-                actor.Command(new TestCommand());
-        }
-    }
-
-    public struct TestCommand : ICommand
-    {
-        public IEntity Owner => throw new NotImplementedException();
-        public IEntity Target => throw new NotImplementedException();
-    }
 }
