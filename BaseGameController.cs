@@ -15,6 +15,7 @@ namespace HECSFramework.Unity
         [SerializeField] private ActorContainer sceneManagerContainer = default;
 
         private EntityManager entityManager;
+        private GlobalUpdateSystem globalUpdateSystem;
 
         private IEntity gameLogic;
         private IEntity player;
@@ -23,6 +24,9 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
+            globalUpdateSystem = new GlobalUpdateSystem();
+            globalUpdateSystem.InitCustomUpdate(this);
+
             entityManager = new EntityManager(worldCount);
 
             gameLogic = new Entity("GameLogic");
@@ -58,6 +62,21 @@ namespace HECSFramework.Unity
 
             if (gameLogic.TryGetSystem(out IStartSystem startSystem))
                 startSystem.StartGame();
+        }
+
+        private void Update()
+        {
+            globalUpdateSystem.Update();
+        }
+
+        private void LateUpdate()
+        {
+            globalUpdateSystem.LateUpdate();
+        }
+
+        private void FixedUpdate()
+        {
+            globalUpdateSystem.FixedUpdate();
         }
 
         private void OnDisable()
