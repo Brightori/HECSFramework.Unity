@@ -5,7 +5,7 @@ using System;
 namespace Components
 {
     [Serializable, BluePrint]
-    public class AbilityTagComponent : BaseComponent, IAbilityTagComponent
+    public  partial class AbilityTagComponent : BaseComponent, IAbilityTagComponent
     {
        
     }

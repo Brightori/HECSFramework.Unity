@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using HECSFramework.Core.Generator;
+using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace HECSFramework.Unity.Editor
         {
             CreateFolders();
             CreateTemplates();
-            //CreateGameController();
+            CreateGameController();
             //CreatePartialRegisterService();
             CreateReserveNamespace();
         }
@@ -356,86 +357,22 @@ namespace HECSFrameWork.Components
             if (File.Exists(path))
                 return;
 
-            string template = @"
-using HECSFrameWork;
-using HECSFrameWork.Components;
-using HECSFrameWork.Systems;
-using Sirenix.OdinInspector;
-using UnityEngine;
-using Components;
-using Systems;
+            var template = new TreeSyntaxNode();
+            template.Add(new UsingSyntax("UnityEngine",1));
+            template.Add(new NameSpaceSyntax("HECSFramework.Unity"));
+            template.Add(new LeftScopeSyntax());
+            template.Add(new TabSimpleSyntax(1, "public partial class GameController : MonoBehaviour"));
+            template.Add(new LeftScopeSyntax(1));
+            template.Add(new TabSimpleSyntax(2, "partial void BaseAwake()"));
+            template.Add(new LeftScopeSyntax(2));
+            template.Add(new RightScopeSyntax(2));    
+            template.Add(new TabSimpleSyntax(2, "partial void BaseStart()"));
+            template.Add(new LeftScopeSyntax(2));
+            template.Add(new RightScopeSyntax(2));
+            template.Add(new RightScopeSyntax(1));
+            template.Add(new RightScopeSyntax());
 
-[DefaultExecutionOrder(-50000)]
-public class GameController : MonoBehaviour
-{
-    [SerializeField] private ActorContainer playerContainer = default;
-    [SerializeField] private ActorContainer gameLogicContainer = default;
-    [SerializeField] private ActorContainer uiManagerContainer = default;
-
-    private EntityManager entityManager;
-    private SaveManager saveManager;
-
-    private IEntity gameLogic;
-    private IEntity player;
-    private IEntity battleSlot;
-    private IEntity uiManager;
-
-    public static bool IsLoad { get; private set; }
-
-    private void Awake()
-    {
-        entityManager = new EntityManager();
-        saveManager = new SaveManager();
-
-        gameLogic = new Entity(""GameLogic"");
-        player = new Entity(""Player"");
-        uiManager = new Entity(""UiManager"");
-    }
-
-
-    private void InitEntities()
-    {
-        playerContainer.Init(player);
-        gameLogicContainer?.Init(gameLogic);
-        uiManagerContainer.Init(uiManager);
-
-        uiManager.Init();
-        gameLogic.Init();
-
-        player.Init();
-        player.GenerateId();
-    }
-
-    private void Start()
-    {
-
-    }
-
-    [Button]
-    private void Save() => GlobalCommander.Commander.Invoke(new SaveGlobalCommand());
-
-    [Button]
-    private void Load()
-    {
-        GlobalCommander.Commander.Invoke(new LoadGlobalCommand());
-        IsLoad = true;
-    }
-
-    public static void LoadComplete()
-    {
-        IsLoad = false;
-    }
-
-    private void OnDisable()
-    {
-        entityManager?.Dispose();
-        gameLogic.Dispose();
-    }
-}
-
-";
-
-            File.WriteAllText(path, template, Encoding.UTF8);
+            File.WriteAllText(path, template.ToString(), Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
             AssetDatabase.ImportAsset(path);
