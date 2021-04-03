@@ -4,6 +4,11 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
+    /// <summary>
+    /// its main part of partial GameController
+    /// DONT CHANGE IT
+    /// use another part to make project dependencies changes
+    /// </summary>
     [DefaultExecutionOrder(-50000)]
     public partial class GameController : MonoBehaviour
     {
