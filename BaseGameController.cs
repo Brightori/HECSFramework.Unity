@@ -5,7 +5,7 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [DefaultExecutionOrder(-50000)]
-    public partial class GameController : MonoBehaviour
+    public abstract class BaseGameController : MonoBehaviour
     {
         [SerializeField, Range(1, 99)] private int worldCount = 1;
 
@@ -48,8 +48,8 @@ namespace HECSFramework.Unity
             player.Init();
         }
 
-        partial void BaseAwake();
-        partial void BaseStart();
+        public abstract void BaseAwake();
+        public abstract void BaseStart();
 
         private void Start()
         {

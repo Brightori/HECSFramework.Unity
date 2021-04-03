@@ -358,15 +358,14 @@ namespace HECSFrameWork.Components
                 return;
 
             var template = new TreeSyntaxNode();
-            template.Add(new UsingSyntax("UnityEngine",1));
             template.Add(new NameSpaceSyntax("HECSFramework.Unity"));
             template.Add(new LeftScopeSyntax());
-            template.Add(new TabSimpleSyntax(1, "public partial class GameController : MonoBehaviour"));
+            template.Add(new TabSimpleSyntax(1, "public class GameController : BaseGameController"));
             template.Add(new LeftScopeSyntax(1));
-            template.Add(new TabSimpleSyntax(2, "partial void BaseAwake()"));
+            template.Add(new TabSimpleSyntax(2, "public override void BaseAwake()"));
             template.Add(new LeftScopeSyntax(2));
             template.Add(new RightScopeSyntax(2));    
-            template.Add(new TabSimpleSyntax(2, "partial void BaseStart()"));
+            template.Add(new TabSimpleSyntax(2, "public override void BaseStart()"));
             template.Add(new LeftScopeSyntax(2));
             template.Add(new RightScopeSyntax(2));
             template.Add(new RightScopeSyntax(1));
