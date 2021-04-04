@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class DebugHECS : OdinEditorWindow
 {
-    [UnityEngine.SerializeField, ShowInInspector, Range(0,99)] private int worldIndex = 0;
+    [UnityEngine.SerializeField, ShowInInspector, Range(0, 99)] private int worldIndex = 0;
 
     [ShowInInspector, Searchable]
     [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
@@ -58,14 +58,13 @@ public class DebugHECS : OdinEditorWindow
             drawEntity.Guid = e.GUID.ToString();
             drawEntity.ContainerID = e.ContainerID;
 
-            if (e.ComponentsMask != HECSMask.Empty)
-                foreach (var c in e.GetAllComponents)
-                {
-                    if (c == null)
-                        continue;
+            foreach (var c in e.GetAllComponents)
+            {
+                if (c == null)
+                    continue;
 
-                    drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
-                }
+                drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
+            }
 
             foreach (var s in e.GetAllSystems)
             {

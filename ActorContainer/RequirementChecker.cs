@@ -59,47 +59,8 @@ namespace HECSFramework.Unity
             string bluePrintName = string.Empty;
             string type = string.Empty;
 
-            var asses = AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes());
-            var componentTypes = asses.Where(p => componentType.IsAssignableFrom(p) && p.IsClass);
-
-            var requiredAtContainer = RequiredAtContainerBPs(actorContainer, asses);
+            var requiredAtContainer = RequiredAtContainerBPs(actorContainer);
             ProcessBPList(requiredAtContainer, actorContainer);
-
-            #region checkSystems
-            foreach (var s in actorContainer.Systems.ToArray())
-            {
-                if (s == null)
-                    continue;
-
-                var neededBP = RequiredFieldsBPs(s.GetSystem.GetType(), actorContainer, asses);
-                ProcessBPList(neededBP, actorContainer);
-            }
-            #endregion
-
-            //foreach (var c in actorContainer.components.ToArray())
-            //{
-            //    if (c.GetHECSComponent is IAbilityContainer abilityContainer)
-            //    {
-            //        foreach (var a in abilityContainer.AbilitiesBP)
-            //        {
-            //            var neededBP = RequiredOwnerComponentsBPs(a.GetAbility.GetType(), actorContainer, asses);
-            //            ProcessBPList(neededBP, actorContainer);
-            //        }
-            //    }
-            //}
-
-            //todo проверить нужно ли это вообще в текущих условиях
-            if (actorContainer is AbilityContainer ability)
-            {
-                //var neededBP = RequiredFieldsBPs(ability.GetAbility.GetType(), actorContainer, asses);
-                //ProcessBPList(neededBP, actorContainer);
-
-                //var neededAtContainer = RequiredAtContainerBPs(ability.GetAbility.GetType(), actorContainer, asses);
-                //ProcessBPList(neededAtContainer, actorContainer);
-
-                //var neededPredicatesBP = RequiredPredicatesBPs(ability, asses);
-                //ProcessBPList(neededPredicatesBP, actorContainer);
-            }
 
             UnityEditor.AssetDatabase.SaveAssets();
 #endif
@@ -269,216 +230,75 @@ namespace HECSFramework.Unity
             }
         }
 
-        private static List<Type> RequiredFieldsBPs(Type parent, EntityContainer actorContainer, IEnumerable<Type> asses)
-        {
-            var list = new List<Type>(8);
-            var MembersInfo = new List<MemberInfo>(128);
 
-            var members = parent.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            MembersInfo.AddRange(members);
-
-            if (parent.BaseType != null)
-            {
-                var members2 = parent.BaseType.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-                MembersInfo.AddRange(members2);
-            }
-
-            if (parent.BaseType.BaseType != null)
-            {
-                var members3 = parent.BaseType.BaseType.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-                MembersInfo.AddRange(members3);
-            }
-
-            foreach (var m in MembersInfo)
-            {
-                var attr = m.GetCustomAttribute<RequiredAttribute>();
-
-                if (attr != null)
-                {
-                    var neededType = GetMemberUnderlyingType(m);
-                    var neededClass = asses.FirstOrDefault(x => x.GetInterface(neededType.Name) != null);
-                    var bp = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("ComponentBluePrintContainer")).ToList();
-                    var bp2 = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("SystemBluePrint")).ToList();
-
-                    foreach (var componentBP in bp)
-                    {
-                        if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
-                        {
-                            list.Add(componentBP);
-                        }
-                    }
-
-                    foreach (var componentBP in bp2)
-                    {
-                        if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
-                        {
-                            list.Add(componentBP);
-                        }
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        private static List<Type> RequiredAtContainerBPs(EntityContainer actorContainer, IEnumerable<Type> asses)
+        private static List<Type> RequiredAtContainerBPs(EntityContainer actorContainer)
         {
             var list = new List<Type>(8);
             var tempTypes = new List<Type>(128);
+            var sysTypes = new List<Type>(8);
 
             foreach (var s in actorContainer.Systems.ToArray())
             {
                 if (s == null)
                     continue;
 
-                var systemAttr = s.GetSystem.GetType().GetCustomAttribute<RequiredAtContainerAttribute>();
+                sysTypes.Add(s.GetSystem.GetType());
+            }
 
-                if (systemAttr == null)
+            foreach (var s in sysTypes)
+            {
+                var systemAttr = s.GetCustomAttribute<RequiredAtContainerAttribute>();
+
+                if (systemAttr != null)
+                {
+                    foreach (var neededType in systemAttr.neededTypes)
+                    {
+                        tempTypes.Add(neededType);
+                    }
+                }
+
+                var members = s.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+
+                foreach (var m in members)
+                {
+                    var required = m.GetCustomAttribute<RequiredAttribute>();
+
+                    if (required != null)
+                        tempTypes.Add(m.FieldType);
+                }
+            }
+
+            var bpProvider = new BluePrintsProvider();
+
+            foreach (var m in tempTypes)
+            {
+                if (bpProvider.Components.TryGetValue(m, out var bpType))
+                {
+                    list.Add(bpType);
                     continue;
-
-                foreach (var neededType in systemAttr.neededTypes)
-                {
-                    tempTypes.Add(neededType);
                 }
-            }
 
-            foreach (var m in tempTypes)
-            {
-                var neededType = m;
-                var neededClass = asses.FirstOrDefault(x => x.GetInterface(neededType.Name) != null);
-                var bp = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("ComponentBluePrintContainer")).ToList();
-                var bp2 = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("SystemBluePrint")).ToList();
-
-                foreach (var componentBP in bp)
+                if (bpProvider.Systems.TryGetValue(m, out var sysbpType))
                 {
-                    if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
+                    list.Add(sysbpType);
+                    continue;
+                }
+
+                foreach (var bpC in bpProvider.Components)
+                {
+                    if (m.IsAssignableFrom(bpC.Key))
                     {
-                        list.Add(componentBP);
+                        list.Add(bpC.Value);
+                        break;
                     }
                 }
 
-                foreach (var componentBP in bp2)
+                foreach (var bpS in bpProvider.Systems)
                 {
-                    if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
+                    if (m.IsAssignableFrom(bpS.Key))
                     {
-                        list.Add(componentBP);
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        private static List<Type> RequiredAtContainerBPs(Type ability, ActorContainer actorContainer, IEnumerable<Type> asses)
-        {
-            var list = new List<Type>(8);
-            var tempTypes = new List<Type>(128);
-
-            var attr = ability.GetCustomAttribute<RequiredAtContainerAttribute>();
-
-            if (attr == null)
-                return list;
-
-            foreach (var neededType in attr.neededTypes)
-            {
-                tempTypes.Add(neededType);
-            }
-
-            foreach (var m in tempTypes)
-            {
-                var neededType = m;
-                var neededClass = asses.FirstOrDefault(x => x.GetInterface(neededType.Name) != null);
-                var bp = asses.Where(x => x.BaseType != null && x.BaseType.GenericTypeArguments.Any(z => z == neededClass)).ToList();
-
-                foreach (var componentBP in bp)
-                {
-                    if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
-                    {
-                        list.Add(componentBP);
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        private static List<Type> RequiredPredicatesBPs(AbilityBaseBluePrint actorContainer, IEnumerable<Type> asses)
-        {
-            var list = new List<Type>(8);
-            var tempTypes = new List<Type>(128);
-
-            var needPredicatesAttr = actorContainer.GetAbility.GetType().GetCustomAttribute<RequiredPredicates>();
-
-            if (needPredicatesAttr == null)
-                return list;
-
-            foreach (var neededType in needPredicatesAttr.neededTypes)
-            {
-                tempTypes.Add(neededType);
-            }
-
-            foreach (var m in tempTypes)
-            {
-                var neededType = m;
-                var bp3 = asses.Where(x => x.BaseType != null && x.BaseType.GetGenericArguments().Any(z => z == m)).ToList();
-
-                foreach (var componentBP in bp3)
-                {
-                    if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededType))
-                    {
-                        list.Add(componentBP);
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        private static List<Type> RequiredOwnerComponentsBPs(Type parent, ActorContainer actorContainer, IEnumerable<Type> asses)
-        {
-            var list = new List<Type>(8);
-            var MembersInfo = new List<MemberInfo>(128);
-
-            var members = parent.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            MembersInfo.AddRange(members);
-
-            if (parent.BaseType != null)
-            {
-                var members2 = parent.BaseType.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-                MembersInfo.AddRange(members2);
-            }
-
-            if (parent.BaseType.BaseType != null)
-            {
-                var members3 = parent.BaseType.BaseType.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-                MembersInfo.AddRange(members3);
-            }
-
-            foreach (var m in MembersInfo)
-            {
-                var attr = m.GetCustomAttribute<RequiredOnOwnerAttribute>();
-
-                if (attr != null)
-                {
-                    var neededType = GetMemberUnderlyingType(m);
-                    var neededClass = asses.FirstOrDefault(x => x.GetInterface(neededType.Name) != null);
-                    var bp = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("ComponentBluePrintContainer")).ToList();
-                    var bp2 = asses.Where(x => x.BaseType != null && x.BaseType.Name.Contains("SystemBluePrint")).ToList();
-
-                    foreach (var componentBP in bp)
-                    {
-                        if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
-                        {
-                            list.Add(componentBP);
-                        }
-                    }
-
-                    foreach (var componentBP in bp2)
-                    {
-                        if (componentBP.BaseType.GenericTypeArguments.Any(x => x == neededClass))
-                        {
-                            list.Add(componentBP);
-                        }
+                        list.Add(bpS.Value);
+                        break;
                     }
                 }
             }
