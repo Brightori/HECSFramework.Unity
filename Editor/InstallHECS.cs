@@ -296,13 +296,9 @@ using System;
 namespace Components
 {
     [Serializable, BluePrint]
-    public class #SCRIPTNAME# : BaseComponent, I#SCRIPTNAME#
+    public class #SCRIPTNAME# : BaseComponent
     {
        
-    }
-
-    public interface I#SCRIPTNAME# : IComponent
-    {
     }
 }";
 
