@@ -188,17 +188,17 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                if (actorContainer is IHavePredicateContainers havePredicateContainers)
-                {
-                    if (bp.BaseType.GenericTypeArguments.Any(x => x.GetInterface(typeof(IPredicate).Name) != null))
-                    {
-                        if (havePredicateContainers.Predicates.Any(x => x.GetType() == bp))
-                            continue;
+                //if (actorContainer is IHavePredicateContainers havePredicateContainers)
+                //{
+                //    if (bp.BaseType.GenericTypeArguments.Any(x => x.GetInterface(typeof(IPredicate).Name) != null))
+                //    {
+                //        if (havePredicateContainers.Predicates.Any(x => x.GetType() == bp))
+                //            continue;
 
-                        AddPredicate(actorContainer, bp, havePredicateContainers);
-                        continue;
-                    }
-                }
+                //        AddPredicate(actorContainer, bp, havePredicateContainers);
+                //        continue;
+                //    }
+                //}
             }
         }
 
@@ -334,19 +334,19 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        private static void AddPredicate(EntityContainer container, Type neededType, IHavePredicateContainers havePredicateContainers)
-        {
-#if UNITY_EDITOR
-            var asset = ScriptableObject.CreateInstance(neededType);
-            var parent = container;
-            UnityEditor.AssetDatabase.AddObjectToAsset(asset, parent);
+//        private static void AddPredicate(EntityContainer container, Type neededType, IHavePredicateContainers havePredicateContainers)
+//        {
+//#if UNITY_EDITOR
+//            var asset = ScriptableObject.CreateInstance(neededType);
+//            var parent = container;
+//            UnityEditor.AssetDatabase.AddObjectToAsset(asset, parent);
 
-            asset.name = neededType.Name;
-            havePredicateContainers.Predicates.Add(asset as PredicateBluePrint);
+//            asset.name = neededType.Name;
+//            havePredicateContainers.Predicates.Add(asset as PredicateBluePrint);
 
-            Debug.LogWarning($"добавили предикаты в контейнер {container.name}" + (asset as PredicateBluePrint).GetPredicate.GetType());
-#endif
-        }
+//            Debug.LogWarning($"добавили предикаты в контейнер {container.name}" + (asset as PredicateBluePrint).GetPredicate.GetType());
+//#endif
+//        }
 
         public static Type GetMemberUnderlyingType(MemberInfo member)
         {
