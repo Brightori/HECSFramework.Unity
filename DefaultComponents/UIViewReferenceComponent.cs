@@ -10,5 +10,7 @@ namespace Components
     public partial class UIViewReferenceComponent : BaseComponent
     {
         [SerializeField] private AssetReferenceT<UIActor> uiReference;
+
+        public AssetReferenceT<UIActor> ViewReference => uiReference;
     }
 }
