@@ -9,7 +9,7 @@ namespace HECSFramework.Unity
 {
     public partial class Actor : MonoBehaviour, IActor
     {
-        [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule;
+        [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
 
         private Entity entity;
@@ -47,7 +47,7 @@ namespace HECSFramework.Unity
                 actorContainer.Init(this);
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
                 entity.Init();

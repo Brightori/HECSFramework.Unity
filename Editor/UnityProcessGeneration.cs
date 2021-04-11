@@ -44,10 +44,10 @@ namespace HECSFramework.Unity.Generator
             foreach (var c in systemsBPFiles)
                 unityProcessGeneration.SaveToFile(c.name, c.classBody, SystemsBluePrintsPath);
 
-            unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetBluePrintsProvider());
+            unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetBluePrintsProvider(), needToImport: true);
         }
 
-        private void SaveToFile(string name, string data, string pathToDirectory = DefaultPath)
+        private void SaveToFile(string name, string data, string pathToDirectory = DefaultPath, bool needToImport = false)
         {
             var path = dataPath + pathToDirectory + name;
 
@@ -57,7 +57,9 @@ namespace HECSFramework.Unity.Generator
             File.WriteAllText(path, data);
 
             var sourceFile2 = path.Replace(Application.dataPath, "Assets");
-            AssetDatabase.ImportAsset(sourceFile2);
+            
+            if (needToImport)
+                AssetDatabase.ImportAsset(sourceFile2);
         }
     }
 }
