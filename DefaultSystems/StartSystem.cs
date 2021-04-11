@@ -1,12 +1,17 @@
 using System;
+using Commands;
 using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using UnityEngine;
 
 namespace Systems
 {
+    /// <summary>
+    /// this is core part, use partial class in ur project and localStart
+    /// </summary>
 	[Serializable, BluePrint]
-    public class StartSystem : BaseSystem, IStartSystem
+    public partial class StartSystem : BaseSystem, IStartSystem
     {
         public override void InitSystem()
         {
@@ -19,7 +24,10 @@ namespace Systems
 
         public void StartGame()
         {
+            LocalStart();
         }
+
+        partial void LocalStart();
     }
 
     public interface IStartSystem : ISystem
