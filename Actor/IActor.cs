@@ -9,4 +9,13 @@ namespace HECSFramework.Unity
         bool TryGetComponents<T>(out T[] components);
         GameObject GameObject { get; }
     }
+
+    public static class ActorExtentions
+    {
+        public static void SetActor(this IActor actor, IEntity owner)
+        {
+            actor = owner as IActor;
+        }
+
+    }
 }
