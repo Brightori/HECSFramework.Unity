@@ -1,4 +1,5 @@
-﻿using HECSFramework.Core;
+﻿using Components;
+using HECSFramework.Core;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,8 @@ namespace HECSFramework.Unity
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
                 entity.Init();
+
+            _ = GetOrAddComponent<TransformComponent>();
         }
 
         public void Dispose()
@@ -113,7 +116,7 @@ namespace HECSFramework.Unity
             entity.UnPause();
         }
 
-        T IEntity.GetOrAddComponent<T>() => entity.GetOrAddComponent<T>();
+        public T GetOrAddComponent<T>() where T: class, IComponent => entity.GetOrAddComponent<T>();
 
         public void SetGuid(Guid guid)
         {

@@ -1,4 +1,8 @@
-﻿namespace HECSFramework.Unity
+﻿using Components;
+
+namespace HECSFramework.Unity
 {
-    public class UIActor : Actor { }
+    public class UIActor : Actor 
+    {
+    }
 }
