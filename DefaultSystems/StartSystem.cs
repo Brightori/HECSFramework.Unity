@@ -10,7 +10,7 @@ namespace Systems
     /// <summary>
     /// this is core part, use partial class in ur project and localStart
     /// </summary>
-	[Serializable, BluePrint]
+	[Serializable, BluePrint] //todo add partial part to codogen
     public partial class StartSystem : BaseSystem, IStartSystem
     {
         public override void InitSystem()
