@@ -31,10 +31,15 @@ namespace HECSFramework.Unity
 
         public string ContainerID => entity.ContainerID;
 
-        public void AddHecsComponent(IComponent component, bool silently = false)
-            => entity.AddHecsComponent(component, silently);
+        public void AddHecsComponent(IComponent component, IEntity owner, bool silently = false)
+        {
+            entity.AddHecsComponent(component, this, silently);
+        }
 
-        public void AddHecsSystem<T>(T system) where T : ISystem => entity.AddHecsSystem(system);
+        public void AddHecsSystem<T>(T system, IEntity entity = null) where T : ISystem 
+        {
+            entity.AddHecsSystem(system, this);
+        } 
         public void Command<T>(T command) where T : ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
 
@@ -51,9 +56,7 @@ namespace HECSFramework.Unity
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
-                entity.Init();
-
-            _ = GetOrAddComponent<TransformComponent>();
+                Init();
         }
 
         public void Dispose()
@@ -68,12 +71,24 @@ namespace HECSFramework.Unity
         public void HecsDestroy()
         {
             entity.HecsDestroy();
+            EntityManager.RegisterEntity(this, false);
             Destroy(gameObject);
         }
 
-        public void Init() => entity.Init();
+        public void Init() 
+        {
+            entity.SetWorld();
+            entity.InitComponentsAndSystems();
+            EntityManager.RegisterEntity(this, true);
+            _ = GetOrAddComponent<TransformComponent>(this);
+            entity.AfterInit();
+        }
 
-        public void Init(int worldIndex) => entity.Init(worldIndex);
+        public void Init(int worldIndex)
+        {
+            (entity as IChangeWorldIndex).SetWorldIndex(worldIndex);
+            Init();
+        }
 
         public void InjectEntity(IEntity entity, bool additive = false) => this.entity.InjectEntity(entity, additive);
 
@@ -116,7 +131,7 @@ namespace HECSFramework.Unity
             entity.UnPause();
         }
 
-        public T GetOrAddComponent<T>() where T: class, IComponent => entity.GetOrAddComponent<T>();
+        public T GetOrAddComponent<T>(IEntity owner = null) where T: class, IComponent => entity.GetOrAddComponent<T>(this);
 
         public void SetGuid(Guid guid)
         {
