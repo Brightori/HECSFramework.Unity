@@ -48,7 +48,7 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                entity.AddHecsComponent(Instantiate(component).GetHECSComponent);
+                entity.AddHecsComponent(Instantiate(component).GetHECSComponent, entity);
             }
 
             foreach (var system in holder.systems)
@@ -59,7 +59,7 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                entity.AddHecsSystem(Instantiate(system).GetSystem);
+                entity.AddHecsSystem(Instantiate(system).GetSystem, entity);
             }
         }
 

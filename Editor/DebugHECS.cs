@@ -31,6 +31,9 @@ public class DebugHECS : OdinEditorWindow
         if (!EntityManager.IsAlive)
             return;
 
+        if (EntityManager.Default == null)
+            return;
+
         if (worldIndex < EntityManager.Worlds.Length && Entities.Count != EntityManager.Worlds[worldIndex].EntitiesCount)
             RedrawWindow();
         Repaint();

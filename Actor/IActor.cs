@@ -10,12 +10,8 @@ namespace HECSFramework.Unity
         GameObject GameObject { get; }
     }
 
-    public static class ActorExtentions
+    public interface IHaveActor
     {
-        public static void SetActor(this IActor actor, IEntity owner)
-        {
-            actor = owner as IActor;
-        }
-
+        IActor Actor { get; set; }
     }
 }

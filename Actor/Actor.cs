@@ -37,9 +37,9 @@ namespace HECSFramework.Unity
             entity.AddHecsComponent(component, this, silently);
         }
 
-        public void AddHecsSystem<T>(T system, IEntity entity = null) where T : ISystem 
+        public void AddHecsSystem<T>(T system, IEntity owner = null) where T : ISystem 
         {
-            entity.AddHecsSystem(system, this);
+            this.entity.AddHecsSystem(system, this);
         } 
         public void Command<T>(T command) where T : ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
