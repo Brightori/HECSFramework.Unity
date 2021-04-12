@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
+    [DefaultExecutionOrder(-100)]
     public partial class Actor : MonoBehaviour, IActor
     {
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();

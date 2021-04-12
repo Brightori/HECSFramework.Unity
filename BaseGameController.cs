@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
-    [DefaultExecutionOrder(-50000)]
+    [DefaultExecutionOrder(-50000), RequireComponent(typeof(LateStartProvider))]
     public abstract class BaseGameController : MonoBehaviour
     {
         [SerializeField, Range(1, 99)] private int worldCount = 1;
@@ -15,7 +15,7 @@ namespace HECSFramework.Unity
         [SerializeField] private ActorContainer sceneManagerContainer = default;
 
         private EntityManager entityManager;
-        private GlobalUpdateSystem globalUpdateSystem;
+        private GlobalUpdateSystem updateSystem;
 
         private IEntity gameLogic;
         private IEntity player;
@@ -24,10 +24,11 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
-            globalUpdateSystem = new GlobalUpdateSystem();
-            globalUpdateSystem.InitCustomUpdate(this);
-
             entityManager = new EntityManager(worldCount);
+            updateSystem = EntityManager.Default.GlobalUpdateSystem;
+
+            foreach (var w in EntityManager.Worlds)
+                w.GlobalUpdateSystem.InitCustomUpdate(this);
 
             gameLogic = new Entity("GameLogic");
             player = new Entity("Player");
@@ -47,9 +48,8 @@ namespace HECSFramework.Unity
             uiManager.Init();
             sceneManager.Init();
             gameLogic.Init();
-
             player.GenerateGuid();
-            player.Init();
+
         }
 
         public abstract void BaseAwake();
@@ -59,24 +59,30 @@ namespace HECSFramework.Unity
         {
             InitEntities();
             BaseStart();
+            updateSystem.Start();
+        }
 
+        public void LateStart()
+        {
             if (gameLogic.TryGetSystem(out IStartSystem startSystem))
                 startSystem.StartGame();
+
+            updateSystem.LateStart();
         }
 
         private void Update()
         {
-            globalUpdateSystem.Update();
+            updateSystem.Update();
         }
 
         private void LateUpdate()
         {
-            globalUpdateSystem.LateUpdate();
+            updateSystem.LateUpdate();
         }
 
         private void FixedUpdate()
         {
-            globalUpdateSystem.FixedUpdate();
+            updateSystem.FixedUpdate();
         }
 
         private void OnDisable()
