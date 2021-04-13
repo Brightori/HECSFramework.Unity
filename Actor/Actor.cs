@@ -91,7 +91,7 @@ namespace HECSFramework.Unity
             Init();
         }
 
-        public void InjectEntity(IEntity entity, bool additive = false) => this.entity.InjectEntity(entity, additive);
+        public void InjectEntity(IEntity entity, IEntity owner = null, bool additive = false) => this.entity.InjectEntity(entity, this, additive);
 
         public void Pause() => entity.Pause();
         public void RemoveHecsComponent(IComponent component) => entity.RemoveHecsComponent(component);
