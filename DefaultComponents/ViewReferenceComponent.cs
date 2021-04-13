@@ -1,14 +1,20 @@
 ﻿using HECSFramework.Core;
 using HECSFramework.Unity;
 using System;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace Components
 {
     [Serializable, BluePrint]
     public partial class ViewReferenceComponent : BaseComponent
     {
-        [SerializeField] private AssetReferenceT<Actor> uiReference;
+        public ActorViewReference ViewReference;
+    }
+
+    [Serializable]
+    public class ActorViewReference : ComponentReference<Actor>
+    {
+        public ActorViewReference(string guid) : base(guid)
+        {
+        }
     }
 }
