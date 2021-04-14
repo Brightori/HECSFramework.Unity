@@ -237,6 +237,9 @@ namespace HECSFramework.Unity
             var tempTypes = new List<Type>(128);
             var sysTypes = new List<Type>(8);
 
+            if (actorContainer.Systems == null)
+                return default;
+
             foreach (var s in actorContainer.Systems.ToArray())
             {
                 if (s == null)
