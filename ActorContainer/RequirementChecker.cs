@@ -27,7 +27,7 @@ namespace HECSFramework.Unity
     /// атрибут для случаев если нам не нужны закэшированные поля в классе, но мы к этим компонентам обращаемся рантайм
     /// и нужно гарантировать что у контейнера есть необходимые компоненты/системы
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class RequiredAtContainerAttribute : Attribute
     {
         public readonly Type[] neededTypes;

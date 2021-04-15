@@ -19,9 +19,14 @@ namespace HECSFramework.Unity
         public List<SystemBaseBluePrint> Systems => holder.systems;
         public List<ComponentBluePrint> Components => holder.components;
 
+        private void OnEnable()
+        {
+            holder.Parent = this;
+        }
+
         public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U: ComponentBluePrint
         {
-            return holder.components.Any(x => x is U);
+            return holder.components.Any(x => x.GetHECSComponent.GetTypeHashCode == componentBluePrint.GetHECSComponent.GetTypeHashCode);
         }
 
         public bool IsHaveComponent<T>()
@@ -35,7 +40,7 @@ namespace HECSFramework.Unity
         }
 
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
-            holder.systems.Any(x => x.GetSystem.GetType().Name == systemBaseBluePrint.GetSystem.GetType().Name);
+            holder.systems.Any(x => x.GetSystem.GetTypeHashCode== systemBaseBluePrint.GetSystem.GetTypeHashCode);
 
         public virtual void Init(IEntity entity)
         {

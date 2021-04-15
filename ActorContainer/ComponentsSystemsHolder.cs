@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Object = UnityEngine.Object;
-using HECSFramework.Unity;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -92,6 +91,8 @@ namespace HECSFramework.Unity
                     Object.DestroyImmediate(go);
                 }
             }
+
+            AssetDatabase.SaveAssets();
         }
         
 #if DeveloperMode
