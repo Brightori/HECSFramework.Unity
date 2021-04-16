@@ -259,6 +259,7 @@ namespace Commands
 using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using UnityEngine;
 
 namespace Systems
 {
@@ -292,6 +293,7 @@ namespace Systems
     @"using HECSFramework.Core;
 using HECSFramework.Unity;
 using System;
+using UnityEngine;
 
 namespace Components
 {
