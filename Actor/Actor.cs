@@ -139,5 +139,10 @@ namespace HECSFramework.Unity
             actorInitModule.SetGuid(guid);
             entity.SetGuid(guid);
         }
+
+        public void AddOrReplaceComponent(IComponent component, IEntity owner = null, bool silently = false)
+        {
+            entity.AddOrReplaceComponent(component, this, silently);
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using HECSFramework.Core;
-using Sirenix.OdinInspector;
+﻿using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
 
@@ -69,12 +68,13 @@ namespace HECSFramework.Unity
     public enum InitActorMode
     {
         Default = 0,
-        InitOnStart = 1
+        InitOnStart = 1,
+        TryToLoadOrInitOnStart = 2,
     }
 
     public enum GuidGenerationRule
     {
         Default = 0,
-        PersistentUnique = 1
+        PersistentUnique = 1, 
     }
 }
