@@ -37,6 +37,16 @@ namespace HECSFramework.Unity
         public bool IsHaveComponent<T>(T component)
         {
             return IsHaveComponent<T>();
+        }     
+        
+        /// <summary>
+        /// looking for blueprints typeHashCode not for components itself
+        /// </summary>
+        /// <param name="bluePrintTypeHashCode"></param>
+        /// <returns></returns>
+        public bool IsHaveComponent(int bluePrintTypeHashCode)
+        {
+            return Components.Any(x => IndexGenerator.GetIndexForType(x.GetType()) == bluePrintTypeHashCode);
         }
 
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>

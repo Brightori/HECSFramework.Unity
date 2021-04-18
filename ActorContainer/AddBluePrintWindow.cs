@@ -70,8 +70,13 @@ namespace HECSFramework.Unity
         [Button("Add Component")]
         public override void AddBluePrint()
         {
+            var typeIndex = IndexGenerator.GetIndexForType(neededType);
+
             foreach (EntityContainer parent in containers)
             {
+                if (parent.IsHaveComponent(typeIndex))
+                    continue;
+
                 var asset = ScriptableObject.CreateInstance(neededType);
                 AssetDatabase.AddObjectToAsset(asset, parent);
                 asset.name = neededType.Name;
