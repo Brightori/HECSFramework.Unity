@@ -20,6 +20,7 @@ namespace HECSFramework.Unity.Generator
         private const string SystemBindings = "SystemBindings.cs";
         private const string ComponentContext = "ComponentContext.cs";
         private const string BluePrintsProvider = "BluePrintsProvider.cs";
+        private const string Documentation = "Documentation.cs";
 
 
         [MenuItem("HECS Options/HECS Codogen")]
@@ -33,6 +34,7 @@ namespace HECSFramework.Unity.Generator
             unityProcessGeneration.SaveToFile(SystemBindings, generator.GetSystemBinds());
             unityProcessGeneration.SaveToFile(ComponentContext, generator.GetComponentContext());
             unityProcessGeneration.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
+            unityProcessGeneration.SaveToFile(Documentation, generator.GetDocumentation());
 
             //generate blue prints
             var componetsBPFiles = generator.GenerateComponentsBluePrints();
