@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using HECSFramework.Core.Helpers;
 
 public class DocumentationWindow : OdinEditorWindow
 {
     private Vector2 scrollPosButtons;
-
 
     private HECSDocumentation documentation = new HECSDocumentation();
 
@@ -17,13 +17,30 @@ public class DocumentationWindow : OdinEditorWindow
 
     private Color defaultColor;
 
-    [BoxGroup("TagInfos")]
+    [ShowInInspector, Space(10)]
+    [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
     private List<DocumentationView> systems = new List<DocumentationView>();
+
+    [ShowInInspector, Space(10)]
+    [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
+    private List<DocumentationView> components = new List<DocumentationView>();
+    
+    [ShowInInspector, Space(10)]
+    [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
+    private List<DocumentationView> common = new List<DocumentationView>();
 
     [MenuItem("HECS Options/Debug/Project Documentation")]
     public static void ShowDocumentationWindow()
     {
         GetWindow<DocumentationWindow>();
+    }
+
+    private Vector3 Gavno(Vector3 another)
+    {
+        return default;
     }
 
     protected override void OnEnable()
@@ -61,6 +78,7 @@ public class DocumentationWindow : OdinEditorWindow
                 var data = buttons[i];
                 data.IsActve = false;
                 buttons[i] = data;
+                RedrawData();
             }        
         }
 
@@ -69,7 +87,58 @@ public class DocumentationWindow : OdinEditorWindow
 
     private void RedrawData()
     {
+        foreach (var view in systems)
+            DestroyImmediate(view);        
+        
+        foreach (var view in components)
+            DestroyImmediate(view);
 
+        foreach (var view in common)
+            DestroyImmediate(view);
+
+        systems.Clear();
+        components.Clear();
+        common.Clear();
+
+
+        var tags = buttons.Where(x => x.IsActve).ToArray();
+
+        var neededDocs = new List<DocumentationRepresentation>(16);
+
+        foreach (var d in documentation.Documentations)
+        {
+            foreach (var tag in tags)
+            {
+                if (d.SegmentTypes.Contains(tag.Name))
+                {
+                    neededDocs.AddOrRemoveElement(d, true);
+                    continue;
+                }
+                else
+                {
+                    neededDocs.AddOrRemoveElement(d, false);
+                    break;
+                }
+            }
+        }
+
+        foreach (var needed in neededDocs)
+        {
+            var view = CreateInstance<DocumentationView>().Init(needed);
+
+            switch (needed.DocumentationType)
+            {
+                case DocumentationType.Common:
+                    common.Add(view);
+                    break;
+                case DocumentationType.Component:
+                    components.Add(view);
+                    break;
+                case DocumentationType.System:
+                    systems.Add(view);
+                    break;
+            }
+        }
     }
 
     private void DrawButtons()
@@ -86,13 +155,36 @@ public class DocumentationWindow : OdinEditorWindow
                 var data = buttons[i];
                 data.IsActve = !buttons[i].IsActve;
                 buttons[i] = data;
+                RedrawData();
             }
         }
     }
 
-    public class DocumentationView
+    [HideLabel]
+    public class DocumentationView : ScriptableObject
     {
+        [CustomValueDrawer(nameof(DrawLabelAsBox))]
+        public string Name;
 
+        [ListDrawerSettings(Expanded = true), ReadOnly]
+        public string[] Comments;
+
+        private string GroupName => Name.Replace("Component", "").Replace("BluePrint", "");
+
+        public DocumentationView Init(DocumentationRepresentation documentationRepresentation)
+        {
+            Name = documentationRepresentation.DataType;
+            Comments = documentationRepresentation.Comments;
+
+            return this;
+        }
+
+        private string DrawLabelAsBox()
+        {
+            Sirenix.Utilities.Editor.SirenixEditorGUI.BeginBox(GroupName);
+            Sirenix.Utilities.Editor.SirenixEditorGUI.EndBox();
+            return GroupName;
+        }
     }
 
     public struct TagButton
