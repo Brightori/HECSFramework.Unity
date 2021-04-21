@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using HECSFramework.Core.Helpers;
+using HECSFramework.Core.Generator;
 
 public class DocumentationWindow : OdinEditorWindow
 {
@@ -166,16 +167,18 @@ public class DocumentationWindow : OdinEditorWindow
         [CustomValueDrawer(nameof(DrawLabelAsBox))]
         public string Name;
 
-        [ListDrawerSettings(Expanded = true), ReadOnly]
-        public string[] Comments;
+        [TextArea(3, 5), ReadOnly]
+        public string Comments;
 
         private string GroupName => Name.Replace("Component", "").Replace("BluePrint", "");
 
         public DocumentationView Init(DocumentationRepresentation documentationRepresentation)
         {
             Name = documentationRepresentation.DataType;
-            Comments = documentationRepresentation.Comments;
-
+            
+            foreach (var c in documentationRepresentation.Comments)
+                Comments += c + CParse.Dot+"\n";
+            
             return this;
         }
 
