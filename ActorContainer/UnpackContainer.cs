@@ -1,6 +1,7 @@
 ﻿using HECSFramework.Core;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace HECSFramework.Unity
 {
@@ -17,11 +18,11 @@ namespace HECSFramework.Unity
             foreach (var c in entityContainer.Components)
             {
                 if (c != null)
-                    Components.Add(c.GetHECSComponent);
+                    Components.Add(MonoBehaviour.Instantiate(c).GetHECSComponent);
             }
 
             foreach (var s in entityContainer.Systems)
-                Systems.Add(s.GetSystem);
+                Systems.Add(MonoBehaviour.Instantiate(s).GetSystem);
         }
 
         public void InitEntity(IEntity entity)
