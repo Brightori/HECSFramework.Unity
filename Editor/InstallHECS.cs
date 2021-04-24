@@ -234,8 +234,7 @@ namespace Abilities
         private static void CreateCommandTemplate()
         {
             var template =
-    @"using HECSFrameWork.Components;
-using HECSFrameWork;
+    @"using HECSFramework.Core;
 
 namespace Commands
 {
