@@ -144,5 +144,8 @@ namespace HECSFramework.Unity
         {
             entity.AddOrReplaceComponent(component, this, silently);
         }
+
+        public bool ContainsMask<T>() where T : IComponent => entity.ContainsMask<T>();
+        public void RemoveHecsComponent<T>() where T : IComponent => entity.RemoveHecsComponent<T>();
     }
 }
