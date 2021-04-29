@@ -1,5 +1,6 @@
 ﻿using HECSFramework.Core;
 using HECSFramework.Unity;
+using HECSFramework.Unity.Helpers;
 using System;
 
 namespace Components
