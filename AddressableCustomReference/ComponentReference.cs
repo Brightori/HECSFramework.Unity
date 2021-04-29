@@ -1,66 +1,67 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class ComponentReference<TComponent> : AssetReference
+namespace HECSFramework.Unity.Helpers
 {
-    public ComponentReference(string guid) : base(guid)
+    public class ComponentReference<TComponent> : AssetReference
     {
-    }
-    
-    public new AsyncOperationHandle<TComponent> InstantiateAsync(Vector3 position, Quaternion rotation, Transform parent = null)
-    {
-        return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.InstantiateAsync(position, Quaternion.identity, parent), GameObjectReady);
-    }
-   
-    public new AsyncOperationHandle<TComponent> InstantiateAsync(Transform parent = null, bool instantiateInWorldSpace = false)
-    {
-        return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.InstantiateAsync(parent, instantiateInWorldSpace), GameObjectReady);
-    }
-    public AsyncOperationHandle<TComponent> LoadAssetAsync()
-    {
-        return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.LoadAssetAsync<GameObject>(), GameObjectReady);
-    }
+        public ComponentReference(string guid) : base(guid)
+        {
+        }
 
-    AsyncOperationHandle<TComponent> GameObjectReady(AsyncOperationHandle<GameObject> arg)
-    {
-        var comp = arg.Result.GetComponent<TComponent>();
-        return Addressables.ResourceManager.CreateCompletedOperation<TComponent>(comp, string.Empty);
-    }
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(Vector3 position, Quaternion rotation, Transform parent = null)
+        {
+            return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.InstantiateAsync(position, Quaternion.identity, parent), GameObjectReady);
+        }
 
-    public override bool ValidateAsset(Object obj)
-    {
-        var go = obj as GameObject;
-        return go != null && go.GetComponent<TComponent>() != null;
-    }
-    
-    public override bool ValidateAsset(string path)
-    {
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(Transform parent = null, bool instantiateInWorldSpace = false)
+        {
+            return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.InstantiateAsync(parent, instantiateInWorldSpace), GameObjectReady);
+        }
+        public AsyncOperationHandle<TComponent> LoadAssetAsync()
+        {
+            return Addressables.ResourceManager.CreateChainOperation<TComponent, GameObject>(base.LoadAssetAsync<GameObject>(), GameObjectReady);
+        }
+
+        AsyncOperationHandle<TComponent> GameObjectReady(AsyncOperationHandle<GameObject> arg)
+        {
+            var comp = arg.Result.GetComponent<TComponent>();
+            return Addressables.ResourceManager.CreateCompletedOperation<TComponent>(comp, string.Empty);
+        }
+
+        public override bool ValidateAsset(Object obj)
+        {
+            var go = obj as GameObject;
+            return go != null && go.GetComponent<TComponent>() != null;
+        }
+
+        public override bool ValidateAsset(string path)
+        {
 #if UNITY_EDITOR
-        //this load can be expensive...
-        var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        return go != null && go.GetComponent<TComponent>() != null;
+            //this load can be expensive...
+            var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            return go != null && go.GetComponent<TComponent>() != null;
 #else
             return false;
 #endif
-    }
-
-    public void ReleaseInstance(AsyncOperationHandle<TComponent> op)
-    {
-        // Release the instance
-        var component = op.Result as Component;
-        if (component != null)
-        {
-            Addressables.ReleaseInstance(component.gameObject);
         }
 
-        // Release the handle
-        Addressables.Release(op);
+        public void ReleaseInstance(AsyncOperationHandle<TComponent> op)
+        {
+            // Release the instance
+            var component = op.Result as Component;
+            if (component != null)
+            {
+                Addressables.ReleaseInstance(component.gameObject);
+            }
+
+            // Release the handle
+            Addressables.Release(op);
+        }
+
     }
-
 }
-
