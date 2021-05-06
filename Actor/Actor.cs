@@ -20,7 +20,7 @@ namespace HECSFramework.Unity
         public int WorldId => entity.WorldId;
         public World World => entity.World;
         public Guid GUID => entity.GUID;
-        public HECSMask ComponentsMask => entity.ComponentsMask;
+        public ref HECSMask ComponentsMask => ref entity.ComponentsMask;
         public List<ISystem> GetAllSystems => entity.GetAllSystems;
         public ComponentContext ComponentContext => entity.ComponentContext;
         public IComponent[] GetAllComponents => entity.GetAllComponents;
@@ -41,6 +41,7 @@ namespace HECSFramework.Unity
         {
             this.entity.AddHecsSystem(system, this);
         } 
+
         public void Command<T>(T command) where T : ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
 
