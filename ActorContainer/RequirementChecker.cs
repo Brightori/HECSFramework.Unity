@@ -246,6 +246,14 @@ namespace HECSFramework.Unity
                     continue;
 
                 sysTypes.Add(s.GetSystem.GetType());
+            }     
+            
+            foreach (var c in actorContainer.Components.ToArray())
+            {
+                if (c == null)
+                    continue;
+
+                sysTypes.Add(c.GetHECSComponent.GetType());
             }
 
             foreach (var s in sysTypes)
