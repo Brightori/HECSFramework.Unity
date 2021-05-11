@@ -1,11 +1,10 @@
-﻿using HECSFramework.Core;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using HECSFramework.Unity;
 
-namespace HECSFramework.Unity
+namespace HECSFramework.Core
 {
-    public static class DataToEntitiesHelper
+    public static partial class DataToEntitiesHelper
     {
         public static void FillEntitiesList<T>(T[] containers, ref List<IEntity> entities, IEntity owner, int worldIndex = 0) where T: EntityContainer 
         {
