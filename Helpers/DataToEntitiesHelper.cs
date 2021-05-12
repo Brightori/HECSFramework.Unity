@@ -4,7 +4,7 @@ using HECSFramework.Unity;
 
 namespace HECSFramework.Core
 {
-    public static partial class DataToEntitiesHelper
+    public static partial class DataHelper
     {
         public static void FillEntitiesList<T>(T[] containers, ref List<IEntity> entities, IEntity owner, int worldIndex = 0) where T: EntityContainer 
         {
