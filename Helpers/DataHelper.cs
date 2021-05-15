@@ -1,5 +1,4 @@
-﻿using HECSFramework.Serialize;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HECSFramework.Core
 {
@@ -14,18 +13,18 @@ namespace HECSFramework.Core
                 if (c == null)
                     continue;
                 
-                if (TryGetComponentResolver(c.GetTypeHashCode, c, out HECSResolver hECSResolver))
-                {
-                    var newComp = TypesMap.GetComponentFromFactory(c.GetTypeHashCode);
-                    newEntity.AddHecsComponent(newComp);
-                    hECSResolver.To(newEntity);
-                }
-                else
-                {
-                    var data = UnityEngine.JsonUtility.ToJson(c);
-                    var newCompFromJSON = JsonUtility.FromJson(data, TypesMap.GetTypeByComponentHECSHash(c.GetTypeHashCode));
-                    newEntity.AddHecsComponent(newCompFromJSON as IComponent);
-                }
+                //if (TryGetComponentResolver(c.GetTypeHashCode, c, out HECSResolver hECSResolver))
+                //{
+                //    var newComp = TypesMap.GetComponentFromFactory(c.GetTypeHashCode);
+                //    newEntity.AddHecsComponent(newComp);
+                //    hECSResolver.To(newEntity);
+                //}
+                //else
+                //{
+                //    var data = UnityEngine.JsonUtility.ToJson(c);
+                //    var newCompFromJSON = JsonUtility.FromJson(data, TypesMap.GetTypeByComponentHECSHash(c.GetTypeHashCode));
+                //    newEntity.AddHecsComponent(newCompFromJSON as IComponent);
+                //}
             }
 
             foreach (var s in entity.GetAllSystems)
