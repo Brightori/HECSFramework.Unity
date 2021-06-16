@@ -10,10 +10,6 @@ namespace HECSFramework.Unity
         GameObject GameObject { get; }
     }
 
-    public interface IActorDependency
-    {
-    }
-
     public interface IHaveActor
     {
         IActor Actor { get; set; }
