@@ -11,12 +11,14 @@ namespace Components
     ///if u need new functionality like add InetworkComponent interface - add them to part class
 
     [Serializable, BluePrint]
-    public partial class TransformComponent : BaseComponent, ITransformComponent, IInitable  
+    public partial class TransformComponent : BaseComponent, ITransformComponent, IInitable, IHaveActor
     {
         private LazyMonoBehComponent<Transform> lazyComponent;
         public Vector3 GetPosition => Transform.position;
         public Transform Transform => lazyComponent.GetComponent();
-        
+
+        public IActor Actor { get; set; }
+
         public void Init()
         {
             lazyComponent = new LazyMonoBehComponent<Transform>(Owner);

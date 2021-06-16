@@ -63,10 +63,12 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                if (component is IHaveActor && !(entity is IActor actor))
+                var unpackComponent = Instantiate(component).GetHECSComponent;
+
+                if (unpackComponent is IHaveActor && !(entity is IActor actor))
                     continue;
 
-                entity.AddHecsComponent(Instantiate(component).GetHECSComponent, entity);
+                entity.AddHecsComponent(unpackComponent, entity);
             }
 
             foreach (var system in holder.systems)
@@ -77,10 +79,12 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                if (system is IHaveActor && !(entity is IActor actor))
+                var unpackSys = Instantiate(system).GetSystem;
+
+                if (unpackSys is IHaveActor && !(entity is IActor actor))
                     continue;
 
-                entity.AddHecsSystem(Instantiate(system).GetSystem, entity);
+                entity.AddHecsSystem(unpackSys, entity);
             }
         }
 
