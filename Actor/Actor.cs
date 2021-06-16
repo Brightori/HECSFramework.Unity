@@ -77,19 +77,22 @@ namespace HECSFramework.Unity
             Destroy(gameObject);
         }
 
-        public void Init() 
+        public void Init(bool needRegister = true) 
         {
             entity.SetWorld();
-            entity.InitComponentsAndSystems();
-            EntityManager.RegisterEntity(this, true);
+            entity.InitComponentsAndSystems(needRegister);
+            
+            if (needRegister)
+                EntityManager.RegisterEntity(this, true);
+
             _ = GetOrAddComponent<TransformComponent>(this);
             entity.AfterInit();
         }
 
-        public void Init(int worldIndex)
+        public void Init(int worldIndex, bool needRegister = true)
         {
             (entity as IChangeWorldIndex).SetWorldIndex(worldIndex);
-            Init();
+            Init(needRegister);
         }
 
         public void InjectEntity(IEntity entity, IEntity owner = null, bool additive = false) => this.entity.InjectEntity(entity, this, additive);

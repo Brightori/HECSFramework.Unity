@@ -63,6 +63,9 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
+                if (component is IActorDependency && !(entity is IActor actor))
+                    continue;
+
                 entity.AddHecsComponent(Instantiate(component).GetHECSComponent, entity);
             }
 
@@ -73,6 +76,9 @@ namespace HECSFramework.Unity
                     Debug.LogAssertion("null system у " + name, this);
                     continue;
                 }
+
+                if (system is IActorDependency && !(entity is IActor actor))
+                    continue;
 
                 entity.AddHecsSystem(Instantiate(system).GetSystem, entity);
             }
