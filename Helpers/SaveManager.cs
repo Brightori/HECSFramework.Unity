@@ -8,7 +8,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
-namespace HECSFrameWork.Systems
+namespace HECSFramework.Unity
 {
     [Documentation("Player", "Хелпер который отвечает за сохранение и чтение файлов")]
     [Documentation("GameLogic")]
