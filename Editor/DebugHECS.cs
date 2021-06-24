@@ -14,7 +14,7 @@ public class DebugHECS : OdinEditorWindow
     [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
     public List<DrawEntity> Entities = new List<DrawEntity>(16);
 
-    [MenuItem("HECS Options/Debug HECS", priority = 0)]
+    [MenuItem("HECS Options/Debug HECS", priority = 2)]
     public static void ShowDebugHECSWindow()
     {
         GetWindow<DebugHECS>();

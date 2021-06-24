@@ -19,7 +19,6 @@ namespace HECSFramework.Unity.Editor
 
         [OdinSerialize, SerializeField, InlineEditor]
         private List<ISystem> systems = new List<ISystem>(16);
-
         
         [MenuItem("HECS Options/Debug/Show components and systems from actor")]
         public static void ShowWindow()

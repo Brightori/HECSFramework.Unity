@@ -45,7 +45,7 @@ namespace HECSFramework.Unity.Editor
         private static string ReserveNamspaces = "ReserveNamespaces.cs";
         #endregion
 
-        [MenuItem("HECS Options/Install HECS", priority = 10)]
+        [MenuItem("HECS Options/Install HECS", priority = 1)]
         public static void InstallHECSFunc()
         {
             CreateFolders();
