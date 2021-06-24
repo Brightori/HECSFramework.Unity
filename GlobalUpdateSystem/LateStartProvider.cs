@@ -7,7 +7,7 @@ namespace HECSFramework.Unity
     {
         void Start()
         {
-            GetComponent<GameController>().LateStart();
+            GetComponent<BaseGameController>().LateStart();
         }
     }
 }
