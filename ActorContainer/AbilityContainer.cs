@@ -13,7 +13,7 @@ namespace HECSFramework.Unity
         public override void Init(IEntity entity)
         {
             base.Init(entity);
-            entity.AddHecsComponent(new AbilityTagComponent());
+            entity.GetOrAddComponent<AbilityTagComponent>();
         }
     }
 }

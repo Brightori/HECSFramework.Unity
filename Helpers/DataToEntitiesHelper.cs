@@ -21,6 +21,7 @@ namespace HECSFramework.Core
 
                 var container = containers[i];
                 var entity = new Entity(container.name, worldIndex);
+                entity.GenerateGuid();
                 container.Init(entity);
                 entities.Add(entity);
             }
@@ -40,6 +41,7 @@ namespace HECSFramework.Core
 
                 var container = containers[i];
                 var entity = new Entity(container.name, worldIndex);
+                entity.GenerateGuid();
                 container.Init(entity);
                 entities[i] = entity;
             }

@@ -6,9 +6,10 @@ using Systems;
 namespace Components
 {
     [Serializable, BluePrint]
+    [Documentation("Ability", "Это абилити тег, мы его добавляем в абилити контейнере")]
+    [Documentation("Tag")]
     public  class AbilityTagComponent : BaseComponent, IAbilityTagComponent
     {
-        public IAbility Ability;
     }
 
     public interface IAbilityTagComponent : IComponent
