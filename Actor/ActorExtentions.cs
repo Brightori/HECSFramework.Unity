@@ -23,7 +23,7 @@ namespace HECSFramework.Unity
                 var data = entity.GetHECSComponent<ViewReferenceComponent>().ViewReference.InstantiateAsync();
                 var actorPrfb = await data.Task;
                 (actorContainer as EntityContainer).Init(actorPrfb);
-                actorPrfb.LoadEntityFromResolver(save);
+                await actorPrfb.LoadEntityFromResolver(save);
                 Addressables.Release(data);
                 callBack?.Invoke(actorPrfb);
                 return actorPrfb;
