@@ -152,6 +152,8 @@ namespace HECSFramework.Unity
         public bool ContainsMask<T>() where T : IComponent => entity.ContainsMask<T>();
         public void RemoveHecsComponent<T>() where T : IComponent => entity.RemoveHecsComponent<T>();
 
-        public bool TryGetHecsComponent<T>(out T component) where T : IComponent => entity.TryGetHecsComponent<T>(out component);  
+        public bool TryGetHecsComponent<T>(out T component) where T : IComponent => entity.TryGetHecsComponent<T>(out component);
+
+        public IEnumerable<T> GetComponentsByType<T>() where T : IComponent => entity.GetComponentsByType<T>();
     }
 }
