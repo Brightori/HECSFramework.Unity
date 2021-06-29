@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity.Generator
 {
-    public class UnityProcessGeneration
+    public partial class UnityProcessGeneration
     {
         public const string BluePrint = "BluePrint";
 
@@ -25,7 +25,7 @@ namespace HECSFramework.Unity.Generator
 
 
         [MenuItem("HECS Options/HECS Codogen")]
-        public static void Test()
+        public static void UnityCodogen()
         {
             var generator = new CodeGenerator();
             var unityProcessGeneration = new UnityProcessGeneration();
@@ -54,7 +54,10 @@ namespace HECSFramework.Unity.Generator
                 unityProcessGeneration.SaveToFile(c.name, c.content, DefaultPath + "Resolvers/");
 
             unityProcessGeneration.SaveToFile(BluePrintsProvider, generator.GetBluePrintsProvider(), needToImport: true);
+            unityProcessGeneration.GenerateNetworkStaff();
         }
+
+        partial void GenerateNetworkStaff();
 
         private void SaveToFile(string name, string data, string pathToDirectory = DefaultPath, bool needToImport = false)
         {
