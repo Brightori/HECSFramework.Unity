@@ -172,22 +172,17 @@ namespace HECSFrameWork
         private static void CreatePredicateTemplate()
         {
             var template =
-    @"using HECSFrameWork;
-using HECSFrameWork.Components;
-using Components;
-using UnityEngine;
+    @"using Components;
+using HECSFramework.Core;
+using HECSFramework.Unity;
+using System;
 
 namespace Predicates
 {
-    [System.Serializable, BluePrint]
-    public class #SCRIPTNAME# : BasePredicate
+    [Serializable, BluePrint]
+    public class #SCRIPTNAME# : IPredicate
     {
-        public override bool IsReady(IEntity target)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override void LocalInit(IEntity owner)
+        public bool IsReady(IEntity target)
         {
         }
     }

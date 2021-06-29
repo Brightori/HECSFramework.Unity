@@ -127,9 +127,18 @@ namespace HECSFramework.Core.Generator
 
             return tree.ToString();
         }
+        #endregion
 
-        
+        #region
+        public List<(string name, string data)> GetPredicates()
+        {
+            var list = new List<(string name, string data)>();
+            var predicate = typeof(IPredicate);
+            //var neededClasses = assembly.
 
+
+            return list;
+        }
         #endregion
     }
 }
