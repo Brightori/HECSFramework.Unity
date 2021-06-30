@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Predicates;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HECSFramework.Core.Generator
 {
@@ -129,16 +131,40 @@ namespace HECSFramework.Core.Generator
         }
         #endregion
 
-        #region
-        public List<(string name, string data)> GetPredicates()
+        #region Predicates
+        public List<(string name, string data)> GetPredicatesBluePrints()
         {
             var list = new List<(string name, string data)>();
             var predicate = typeof(IPredicate);
-            //var neededClasses = assembly.
+            var neededClasses = Assembly.Where(p => predicate.IsAssignableFrom(p) && !p.IsGenericType && !p.IsAbstract && !p.IsInterface).ToList();
 
+            foreach (var p in neededClasses)
+            {
+                list.Add(GetPredicatesBluePrint(p));
+            }
 
             return list;
         }
+
+        private (string name, string data) GetPredicatesBluePrint(Type type)
+        {
+            var name = type.Name;
+
+            var tree = new TreeSyntaxNode();
+            tree.Add(new UsingSyntax("HECSFramework.Unity"));
+            tree.Add(new UsingSyntax("Predicates"));
+            tree.Add(new UsingSyntax("UnityEngine",1));
+
+            tree.Add(new SimpleSyntax($"[CreateAssetMenu(fileName = "+
+                $"{CParse.Quote}{name}BluePrint{CParse.Quote}, " +
+                $"menuName = {CParse.Quote}BluePrints/Predicates/{type.Name}{CParse.Quote})]"));
+
+            tree.Add(new SimpleSyntax($"public class {name}BluePrint : PredicateBluePrintContainer<{name}>"));
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(new RightScopeSyntax());
+            return (type.Name, tree.ToString());
+        }
+
         #endregion
     }
 }
