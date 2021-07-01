@@ -5,7 +5,7 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [DefaultExecutionOrder(-50000), RequireComponent(typeof(LateStartProvider))]
-    public abstract class BaseGameController : MonoBehaviour
+    public abstract partial class BaseGameController : MonoBehaviour
     {
         [SerializeField, Range(1, 99)] private int worldCount = 1;
 
@@ -35,7 +35,11 @@ namespace HECSFramework.Unity
             uiManager = new Entity("UiManager");
             sceneManager = new Entity("SceneManager");
             BaseAwake();
+            NetworkAwake();
         }
+
+        partial void NetworkAwake();
+        partial void InitNetWorkEntities();
 
         private void InitEntities()
         {
@@ -58,6 +62,7 @@ namespace HECSFramework.Unity
         private void Start()
         {
             InitEntities();
+            InitNetWorkEntities();
             BaseStart();
             updateSystem.Start();
         }
