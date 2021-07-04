@@ -18,19 +18,20 @@ public class DocumentationWindow : OdinEditorWindow
 
     private Color defaultColor;
 
-    [ShowInInspector, Space(10)]
+    [ShowInInspector, Space(10)][GUIColor(1f, 0.96f, 0.85f, 1)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
     private List<DocumentationView> systems = new List<DocumentationView>();
 
     [ShowInInspector, Space(10)]
+    [GUIColor(0.85f, 1f, 0.97f, 1)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
     private List<DocumentationView> components = new List<DocumentationView>();
     
     [ShowInInspector, Space(10)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
     private List<DocumentationView> common = new List<DocumentationView>();
 
     [MenuItem("HECS Options/Debug/Project Documentation")]
@@ -56,7 +57,7 @@ public class DocumentationWindow : OdinEditorWindow
                 buttons.Add(new TagButton { Name = TagName });
         }
 
-        buttons = buttons.Distinct().ToList();
+        buttons = buttons.OrderBy(x=> x.Name).Distinct().ToList();
     }
 
     protected override void OnGUI()
@@ -71,6 +72,7 @@ public class DocumentationWindow : OdinEditorWindow
 
         GUILayout.BeginHorizontal();
 
+        GUILayout.BeginVertical();
         GUI.backgroundColor = defaultColor;
         if (GUILayout.Button("Reset", GUILayout.Height(30f)))
         {
@@ -82,6 +84,12 @@ public class DocumentationWindow : OdinEditorWindow
                 RedrawData();
             }        
         }
+
+        if (GUILayout.Button("Search", GUILayout.Height(30f)))
+        {
+            GetWindow<DocumentationSearchWinow>();
+        }
+        GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
     }
