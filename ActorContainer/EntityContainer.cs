@@ -197,7 +197,14 @@ namespace HECSFramework.Unity
         }
 
         private void OnValidate()
-            => holder.OnValidate(this);
+        {
+#if UNITY_EDITOR
+            if (Application.isPlaying)
+                return;
+            holder.OnValidate(this);
+#endif
+        }
+            
 #endif
         #endregion
     }
