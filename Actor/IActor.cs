@@ -10,7 +10,7 @@ namespace HECSFramework.Unity
         GameObject GameObject { get; }
     }
 
-    public interface IHaveActor
+    public interface IHaveActor : INotCore
     {
         IActor Actor { get; set; }
     }
