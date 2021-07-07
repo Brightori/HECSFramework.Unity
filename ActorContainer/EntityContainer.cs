@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using HECSFramework.Core;
 using Components;
+using HECSFramework.Unity.Editor;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -146,13 +147,21 @@ namespace HECSFramework.Unity
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
             window.Init(new List<EntityContainer> {this}, TypeOfBluePrint.System);
         }
-#endif
+
         [Button(ButtonSizes.Large)]
         private void LoadPreset()
         {
             var window = EditorWindow.GetWindow<ChoosePresetActorWindow>();
             window.Init(this);
         }
+
+        [Button(ButtonSizes.Large)]
+        public void ShowDependencies()
+        {
+            var window = EditorWindow.GetWindow<ShowDependenciesWindow>();
+            window.Init(this);
+        }
+#endif
 
         private void SortComponents()
         {
