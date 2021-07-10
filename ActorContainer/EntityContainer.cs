@@ -1,13 +1,13 @@
-﻿using Sirenix.OdinInspector;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using HECSFramework.Core;
 using Components;
-using HECSFramework.Unity.Editor;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using HECSFramework.Unity.Editor;
+using Sirenix.OdinInspector;
 #endif
 
 namespace HECSFramework.Unity

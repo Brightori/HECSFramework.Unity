@@ -1,5 +1,7 @@
-﻿using HECSFramework.Unity.Editor;
+﻿#if UNITY_EDITOR
 using Sirenix.OdinInspector;
+using HECSFramework.Unity.Editor;
+#endif
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,12 +14,14 @@ namespace HECSFramework.Unity
         public List<ComponentBluePrint> ComponentsBluePrints => holder.components;
         public List<SystemBaseBluePrint> SystemsBluePrints => holder.systems;
 
+#if UNITY_EDITOR
         [Button(ButtonSizes.Large)]
         public void MakePresetFromEntityContainer()
         {
             var window = UnityEditor.EditorWindow.GetWindow<MakePresetFromEntityContainer>();
             window.Init(this);
         }
+#endif
     }
 }
 
