@@ -27,12 +27,16 @@ namespace Components
         public void SetPosition(Vector3 position)
         {
             Transform.position = position;
+            InfoUpdated();
         }
 
         public void SetRotation(Quaternion rotation)
         {
             Transform.rotation = rotation;
+            InfoUpdated();
         }
+
+        partial void InfoUpdated();
     }
 
     public partial interface ITransformComponent : IComponent
