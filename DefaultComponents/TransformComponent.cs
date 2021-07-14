@@ -35,8 +35,6 @@ namespace Components
             Transform.rotation = rotation;
             InfoUpdated();
         }
-
-        partial void InfoUpdated();
     }
 
     public partial interface ITransformComponent : IComponent
