@@ -1,6 +1,7 @@
 ﻿using HECSFramework.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -31,10 +32,23 @@ namespace HECSFramework.Unity
                 throw new Exception("entity was alrdy inited " + entity.ID);
 
             foreach (var c in Components)
-                entity.AddHecsComponent(c);
+            {
+                if (TypesMap.GetComponentInfo(c.GetTypeHashCode, out var mask))
+                {
+                    if (entity.GetAllComponents[mask.ComponentsMask.Index] == null)
+                    {
+                        entity.AddHecsComponent(c);
+                    }
+                }
+            }
 
             foreach (var s in Systems)
+            {
+                if (entity.GetAllSystems.Any(x=> x.GetTypeHashCode == s.GetTypeHashCode))
+                    continue;
+
                 entity.AddHecsSystem(s);
+            }
         }
     }
 }
