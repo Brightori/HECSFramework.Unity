@@ -121,6 +121,9 @@ namespace HECSFramework.Unity
 
         public void OnValidate(EntityContainer parent)
         {
+            if (Application.isPlaying)
+                return;
+
             Parent = parent;
             FixNullContainers();
             ClearDeletedBluePrints();
