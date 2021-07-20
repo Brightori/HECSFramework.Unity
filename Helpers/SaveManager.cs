@@ -64,6 +64,26 @@ namespace HECSFramework.Unity
             {
                 fs.Close();
             }
+        }        
+        
+        public static void SaveToFile(string path, byte[] data)
+        {
+            FileStream fs = new FileStream(path, FileMode.Create);
+
+            // Construct a BinaryFormatter and use it to serialize the data to the stream.
+            try
+            {
+                fs.Write(data, 0, data.Length);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                fs.Close();
+            }
         }
 
 #if UNITY_EDITOR

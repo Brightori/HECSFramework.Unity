@@ -37,10 +37,10 @@ namespace HECSFramework.Unity
             entity.AddHecsComponent(component, this, silently);
         }
 
-        public void AddHecsSystem<T>(T system, IEntity owner = null) where T : ISystem 
+        public void AddHecsSystem<T>(T system, IEntity owner = null) where T : ISystem
         {
             this.entity.AddHecsSystem(system, this);
-        } 
+        }
 
         public void Command<T>(T command) where T : ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
@@ -53,6 +53,12 @@ namespace HECSFramework.Unity
 
             if (actorContainer != null && !IsInited)
                 actorContainer.Init(this);
+        }
+
+        public void InitWithContainer()
+        {
+            Awake();
+            Init();
         }
 
         protected virtual void Start()
@@ -77,11 +83,11 @@ namespace HECSFramework.Unity
             Destroy(gameObject);
         }
 
-        public void Init(bool needRegister = true) 
+        public void Init(bool needRegister = true)
         {
             entity.SetWorld();
             entity.InitComponentsAndSystems(needRegister);
-            
+
             if (needRegister)
                 EntityManager.RegisterEntity(this, true);
 
@@ -136,7 +142,7 @@ namespace HECSFramework.Unity
             entity.UnPause();
         }
 
-        public T GetOrAddComponent<T>(IEntity owner = null) where T: class, IComponent => entity.GetOrAddComponent<T>(this);
+        public T GetOrAddComponent<T>(IEntity owner = null) where T : class, IComponent => entity.GetOrAddComponent<T>(this);
 
         public void SetGuid(Guid guid)
         {
