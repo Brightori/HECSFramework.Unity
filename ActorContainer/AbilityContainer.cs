@@ -14,6 +14,7 @@ namespace HECSFramework.Unity
         {
             base.Init(entity);
             entity.GetOrAddComponent<AbilityTagComponent>();
+            entity.GetOrAddComponent<AbilityOwnerComponent>();
         }
     }
 }
