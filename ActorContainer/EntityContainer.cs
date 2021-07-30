@@ -53,7 +53,7 @@ namespace HECSFramework.Unity
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
             holder.systems.Any(x => x.GetSystem.GetTypeHashCode== systemBaseBluePrint.GetSystem.GetTypeHashCode);
 
-        public virtual void Init(IEntity entity)
+        public virtual void Init(IEntity entity, bool pure = false)
         {
             entity.AddHecsComponent(new ActorContainerID { ID = name });
             foreach (var component in holder.components)
@@ -66,7 +66,7 @@ namespace HECSFramework.Unity
 
                 var unpackComponent = Instantiate(component).GetHECSComponent;
 
-                if (unpackComponent is IHaveActor && !(entity is IActor actor))
+                if (!pure && unpackComponent is IHaveActor && !(entity is IActor actor))
                     continue;
 
                 entity.AddHecsComponent(unpackComponent, entity);
@@ -82,7 +82,7 @@ namespace HECSFramework.Unity
 
                 var unpackSys = Instantiate(system).GetSystem;
 
-                if (unpackSys is IHaveActor && !(entity is IActor actor))
+                if (!pure && unpackSys is IHaveActor && !(entity is IActor actor))
                     continue;
 
                 entity.AddHecsSystem(unpackSys, entity);
