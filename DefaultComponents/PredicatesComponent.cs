@@ -1,6 +1,6 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 using HECSFramework.Unity;
-using System;
 using UnityEngine;
 
 namespace Components
@@ -12,10 +12,19 @@ namespace Components
 
         public void Init()
         {
+            Predicates.Clear();
             foreach (var p in predicatesBP)
             {
-                predicates.Add(p.GetPredicate);
+                if (p.GetPredicate is IInitable inited)
+                    inited.Init();
+
+                Predicates.Add(p.GetPredicate);
             }
+        }
+
+        partial void InitBeforeSync()
+        {
+            Init();
         }
     }
 }

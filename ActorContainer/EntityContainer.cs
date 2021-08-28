@@ -3,6 +3,9 @@ using UnityEngine;
 using System.Linq;
 using HECSFramework.Core;
 using Components;
+using System;
+using UnityEngine.Windows;
+using System.Xml.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -25,7 +28,7 @@ namespace HECSFramework.Unity
             holder.Parent = this;
         }
 
-        public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U: ComponentBluePrint
+        public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U : ComponentBluePrint
         {
             return holder.components.Any(x => x.GetHECSComponent.GetTypeHashCode == componentBluePrint.GetHECSComponent.GetTypeHashCode);
         }
@@ -38,8 +41,8 @@ namespace HECSFramework.Unity
         public bool IsHaveComponent<T>(T component)
         {
             return IsHaveComponent<T>();
-        }     
-        
+        }
+
         /// <summary>
         /// looking for blueprints typeHashCode not for components itself
         /// </summary>
@@ -51,7 +54,7 @@ namespace HECSFramework.Unity
         }
 
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
-            holder.systems.Any(x => x.GetSystem.GetTypeHashCode== systemBaseBluePrint.GetSystem.GetTypeHashCode);
+            holder.systems.Any(x => x.GetSystem.GetTypeHashCode == systemBaseBluePrint.GetSystem.GetTypeHashCode);
 
         public virtual void Init(IEntity entity, bool pure = false)
         {
@@ -130,9 +133,9 @@ namespace HECSFramework.Unity
                 Debug.Log("Следует выбрать только один контейнер для добавления компонента.");
                 return;
             }
-            
+
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
-            window.Init(new List<EntityContainer>{this}, TypeOfBluePrint.Component);
+            window.Init(new List<EntityContainer> { this }, TypeOfBluePrint.Component);
         }
 
         [Button(ButtonSizes.Large)]
@@ -143,9 +146,9 @@ namespace HECSFramework.Unity
                 Debug.Log("Следует выбрать только один контейнер для добавления системы.");
                 return;
             }
-            
+
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
-            window.Init(new List<EntityContainer> {this}, TypeOfBluePrint.System);
+            window.Init(new List<EntityContainer> { this }, TypeOfBluePrint.System);
         }
 
         [Button(ButtonSizes.Large)]
@@ -161,6 +164,23 @@ namespace HECSFramework.Unity
             var window = EditorWindow.GetWindow<ShowDependenciesWindow>();
             window.Init(this);
         }
+
+        [Button(ButtonSizes.Large)]
+        public void AddToHistory()
+        {
+            var path = Application.dataPath + "/BluePrints/History/" + "___" + this.name + "___" + $"{DateTime.Now.ToString().Replace(" ", "_").Replace(":", "-")}" + ".history";
+            var json = JsonUtility.ToJson(new History(this), true);
+            System.IO.File.WriteAllText(path, json);
+        }
+
+        [Button(ButtonSizes.Large)]
+        public void LoadFromHistory()
+        {
+            var getWindow = EditorWindow.GetWindow<LoadHistoriesWindow>();
+            getWindow.Init(this);
+        }
+
+       
 #endif
 
         private void SortComponents()
@@ -213,7 +233,7 @@ namespace HECSFramework.Unity
             holder.OnValidate(this);
 #endif
         }
-            
+
 #endif
         #endregion
     }

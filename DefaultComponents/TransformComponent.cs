@@ -35,6 +35,9 @@ namespace Components
             Transform.rotation = rotation;
             InfoUpdated();
         }
+
+        public void Translate(Vector3 direction)
+            => Transform.position = Transform.position + direction;
     }
 
     public partial interface ITransformComponent : IComponent
@@ -43,5 +46,6 @@ namespace Components
         Vector3 GetPosition { get; }
         void SetPosition(Vector3 position);
         void SetRotation(Quaternion rotation);
+        void Translate(Vector3 direction);
     }
 }

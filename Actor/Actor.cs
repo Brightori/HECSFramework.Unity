@@ -31,6 +31,7 @@ namespace HECSFramework.Unity
         public bool IsPaused => entity.IsPaused;
 
         public string ContainerID => entity.ContainerID;
+        public ActorContainer ActorContainer => actorContainer;
 
         public void AddHecsComponent(IComponent component, IEntity owner, bool silently = false)
         {
@@ -74,12 +75,15 @@ namespace HECSFramework.Unity
 
         public bool Equals(IEntity other) => entity.Equals(other);
 
-        public void GenerateGuid() => entity.GenerateGuid();
+        public void GenerateGuid() 
+        {
+            entity.GenerateGuid();
+            actorInitModule.SetGuid(entity.GUID);
+        }
 
         public void HecsDestroy()
         {
             entity.HecsDestroy();
-            EntityManager.RegisterEntity(this, false);
             Destroy(gameObject);
         }
 
@@ -147,7 +151,7 @@ namespace HECSFramework.Unity
         public void SetGuid(Guid guid)
         {
             actorInitModule.SetGuid(guid);
-            entity.SetGuid(guid);
+            entity?.SetGuid(guid);
         }
 
         public void AddOrReplaceComponent(IComponent component, IEntity owner = null, bool silently = false)
@@ -160,6 +164,6 @@ namespace HECSFramework.Unity
 
         public bool TryGetHecsComponent<T>(out T component) where T : IComponent => entity.TryGetHecsComponent<T>(out component);
 
-        public IEnumerable<T> GetComponentsByType<T>() where T : IComponent => entity.GetComponentsByType<T>();
+        public IEnumerable<T> GetComponentsByType<T>() => entity.GetComponentsByType<T>();
     }
 }

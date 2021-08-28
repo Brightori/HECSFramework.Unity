@@ -18,10 +18,13 @@ namespace Components
             actor.Command(new CollisionCommand { Collision = collision });
         }
 
+        private void OnCollisionExit(Collision collision)
+        {
+            actor.Command(new CollisionExitCommand { Collision = collision });
+        }
+
         private void OnTriggerEnter(Collider other)
         {
-            //if (other.isTrigger) return;
-
             actor.Command(new TriggerEnterCommand { Collider = other });
         }
 

@@ -59,7 +59,7 @@ namespace HECSFramework.Unity
         public abstract void BaseAwake();
         public abstract void BaseStart();
 
-        private void Start()
+        protected virtual void Start()
         {
             InitEntities();
             InitNetWorkEntities();

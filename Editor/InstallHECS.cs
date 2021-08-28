@@ -18,6 +18,7 @@ namespace HECSFramework.Unity.Editor
         private static string Helpers = "/Helpers/";
         private static string Systems = "/Systems/";
         private static string Strategies = "/Strategies/";
+        private static string HECSGenerated = "/HECSGenerated/";
 
         //BluePrintsFolders
         private static string AbilitiesBlueprints = "/AbilitiesBlueprints/";
@@ -122,6 +123,7 @@ namespace HECSFrameWork
             CheckFolder(scriptPath + Systems);
             CheckFolder(scriptPath + Predicates);
             CheckFolder(scriptPath + Strategies);
+            CheckFolder(scriptPath + HECSGenerated);
 
             //ScriptBluePrintsFolders
             CheckFolder(scriptPath + BluePrints + AbilitiesBlueprints);
@@ -257,7 +259,7 @@ using UnityEngine;
 
 namespace Systems
 {
-	[Serializable, BluePrint]
+	[Serializable]
     public class #SCRIPTNAME# : BaseSystem, I#SCRIPTNAME#
     {
         public override void InitSystem()
@@ -291,7 +293,7 @@ using UnityEngine;
 
 namespace Components
 {
-    [Serializable, BluePrint]
+    [Serializable]
     public class #SCRIPTNAME# : BaseComponent
     {
        
