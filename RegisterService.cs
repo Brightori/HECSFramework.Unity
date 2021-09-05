@@ -6,14 +6,12 @@ namespace HECSFramework.Core
     {
         partial void RegisterAdditionalSystems(ISystem system)
         {
-            if (system is ICustomUpdatable customUpdatable)
-                system.Owner.World.RegisterUpdatable(customUpdatable, true);
+            // функционал подписки/отписки дополнительных систем реализован в GlobalUpdateSystem
         }
 
         partial void UnRegisterAdditionalSystems(ISystem system)
         {
-            if (system is ICustomUpdatable customUpdatable)
-                system.Owner.World.RegisterUpdatable(customUpdatable, false);
+            // функционал подписки/отписки дополнительных систем реализован в GlobalUpdateSystem
         }
     }
 }

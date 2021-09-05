@@ -2,7 +2,7 @@
 using HECSFramework.Core;
 using UnityEngine;
 
-namespace HECSFramework.Unity.Helpers
+namespace Helpers
 {
     public static class UnityExtensions
     {

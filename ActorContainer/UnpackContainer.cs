@@ -1,4 +1,5 @@
-﻿using HECSFramework.Core;
+﻿using Components;
+using HECSFramework.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,9 @@ namespace HECSFramework.Unity
 
             foreach (var s in entityContainer.Systems)
                 Systems.Add(MonoBehaviour.Instantiate(s).GetSystem);
+
+            if (!Components.Any(x => x is ActorContainerID))
+                Components.Add(new ActorContainerID { ID = entityContainer.name });
         }
 
         public void InitEntity(IEntity entity)
@@ -49,6 +53,16 @@ namespace HECSFramework.Unity
 
                 entity.AddHecsSystem(s);
             }
+        }
+
+        public T GetComponent<T>() where T : IComponent
+        {
+            return (T)Components.FirstOrDefault(x=> x is T);
+        }  
+        
+        public T GetSystem<T>() where T : ISystem
+        {
+            return (T)Systems.FirstOrDefault(x=> x is T);
         }
     }
 }

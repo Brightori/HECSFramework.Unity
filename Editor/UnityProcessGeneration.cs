@@ -23,8 +23,16 @@ namespace HECSFramework.Unity.Generator
         private const string Documentation = "Documentation.cs";
         private const string MapResolver = "MapResolver.cs";
 
+        [MenuItem("HECS Options/Generate Documentation")]
+        public static void CodogenDocumentation()
+        {
+            var generator = new CodeGenerator();
+            var unityProcessGeneration = new UnityProcessGeneration();
+            generator.GatherAssembly();
+            unityProcessGeneration.SaveToFile(Documentation, generator.GetDocumentation(), needToImport: true);
+        }
 
-        [MenuItem("HECS Options/HECS Codogen")]
+        //[MenuItem("HECS Options/HECS Codogen")]
         public static void UnityCodogen()
         {
             var generator = new CodeGenerator();
@@ -35,7 +43,7 @@ namespace HECSFramework.Unity.Generator
             unityProcessGeneration.SaveToFile(SystemBindings, generator.GetSystemBinds());
             unityProcessGeneration.SaveToFile(ComponentContext, generator.GetComponentContext());
             unityProcessGeneration.SaveToFile(HecsMasks, generator.GenerateHecsMasks());
-            unityProcessGeneration.SaveToFile(Documentation, generator.GetDocumentation());
+          
 
 
             //generate blue prints

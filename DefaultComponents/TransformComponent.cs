@@ -15,6 +15,7 @@ namespace Components
     {
         private LazyMonoBehComponent<Transform> lazyComponent;
         public Vector3 GetPosition => Transform.position;
+        public Quaternion Rotation => Transform.rotation;
         public Transform Transform => lazyComponent.GetComponent();
 
         public IActor Actor { get; set; }
