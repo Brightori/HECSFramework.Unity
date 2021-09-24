@@ -23,6 +23,12 @@ namespace Components
         public void Init()
         {
             lazyComponent = new LazyMonoBehComponent<Transform>(Owner);
+
+            if (PositionSave.AsVector != Vector3.zero || RotationSave.AsVector != Vector3.zero)
+            {
+                SetPosition(PositionSave.AsVector);
+                SetRotation(Quaternion.Euler(RotationSave.AsVector));
+            }
         }
 
         public void SetPosition(Vector3 position)

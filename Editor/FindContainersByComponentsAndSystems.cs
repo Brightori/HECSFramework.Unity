@@ -61,6 +61,9 @@ namespace HECSFramework.Unity.Editor
                 if (components.Count != 0)
                     foreach (var c in components)
                     {
+                        if (c == null)
+                            continue;
+
                         if (e.Components.Any(x => x.GetType() == c))
                             continue;
 

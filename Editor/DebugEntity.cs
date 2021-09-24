@@ -14,11 +14,8 @@ namespace HECSFramework.Unity.Editor
         [ShowInInspector]
         private IActor select;
 
-        [OdinSerialize, SerializeField, InlineEditor]
-        private List<IComponent> components = new List<IComponent>(16);
-
-        [OdinSerialize, SerializeField, InlineEditor]
-        private List<ISystem> systems = new List<ISystem>(16);
+        [OdinSerialize]
+        private ActorPresentation ActorPresentation;
         
         [MenuItem("HECS Options/Debug/Show components and systems from actor")]
         public static void ShowWindow()
@@ -32,12 +29,14 @@ namespace HECSFramework.Unity.Editor
             PickUpActor();
         }
 
+        private void Update()
+        {
+            Repaint();
+        }
+
         [Button("Pick up from selected actor")]
         private void PickUpActor()
         {
-            components.Clear();
-            systems.Clear();
-
             select = Selection.activeGameObject.GetComponent<IActor>();
 
             if (select == null)
@@ -46,11 +45,49 @@ namespace HECSFramework.Unity.Editor
                 return;
             }
 
-            foreach (var c in select.GetAllComponents)
-                components.Add(c);
+             ActorPresentation = new ActorPresentation(select);
+        }
+    }
 
-            foreach (var s in select.GetAllSystems)
-                systems.Add(s);
+    [Serializable]
+    public struct ActorPresentation
+    {
+        public Guid Guid;
+        public string ContainerID;
+
+        [ListDrawerSettings(Expanded = true, ShowPaging =false)]
+        public List<IComponent> Components;
+
+        [ListDrawerSettings(Expanded = true, ShowPaging = false)]
+        public List<ISystem> Systems;
+
+        public bool IsAlive;
+        public bool IsInited;
+        public bool IsPaused;
+
+        public ActorPresentation (IEntity entity)
+        {
+            Guid = entity.GUID;
+            ContainerID = entity.ContainerID;
+            
+            IsAlive = entity.IsAlive;
+            IsInited = entity.IsInited;
+            IsPaused = entity.IsPaused;
+
+            Components = new List<IComponent>(16);
+            Systems = new List<ISystem>(16);
+
+            foreach (var c in entity.GetAllComponents)
+            {
+                if (c != null)
+                    Components.Add(c);
+            }
+
+            foreach (var s in entity.GetAllSystems)
+            {
+                if (s != null)
+                    Systems.Add(s);
+            }
         }
     }
 }

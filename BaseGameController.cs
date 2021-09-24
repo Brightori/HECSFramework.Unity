@@ -24,6 +24,8 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
+            HECSDebug.Init(new HECSDebugUnitySide());
+
             entityManager = new EntityManager(worldCount);
             updateSystem = EntityManager.Default.GlobalUpdateSystem;
 

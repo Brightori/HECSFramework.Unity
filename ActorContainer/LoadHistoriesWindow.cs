@@ -18,9 +18,7 @@ public class LoadHistoriesWindow : OdinEditorWindow
     public DateTime? history = null;
 
     private List<History> histories = new List<History>();
-
-    public const string History = "/BluePrints/History/";
-    public string HistoryPath => Application.dataPath + History;
+    public string HistoryPath => Path.Combine(Application.dataPath, "BluePrints", "History");
     private EntityContainer currentContainer;
 
 
@@ -32,9 +30,10 @@ public class LoadHistoriesWindow : OdinEditorWindow
 
         foreach (var file in files)
         {
-            var nameNeeded = file.Split('_', '_', '_');
+            var split = file.Split('_', '_', '_');
+            var nameNeeded = split[split.Length - 5];
 
-            if (nameNeeded[3] == entityContainer.name)
+            if (nameNeeded == entityContainer.name)
             {
                 var json = File.ReadAllText(file);
                 histories.Add(JsonUtility.FromJson<History>(json));

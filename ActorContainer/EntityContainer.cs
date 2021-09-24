@@ -4,10 +4,11 @@ using System.Linq;
 using HECSFramework.Core;
 using Components;
 using System;
-using UnityEngine.Windows;
-using System.Xml.Linq;
+
 
 #if UNITY_EDITOR
+using UnityEngine.Windows;
+using System.Xml.Linq;
 using UnityEditor;
 using HECSFramework.Unity.Editor;
 using Sirenix.OdinInspector;
@@ -168,7 +169,7 @@ namespace HECSFramework.Unity
         [Button(ButtonSizes.Large)]
         public void AddToHistory()
         {
-            var path = Application.dataPath + "/BluePrints/History/" + "___" + this.name + "___" + $"{DateTime.Now.ToString().Replace(" ", "_").Replace(":", "-")}" + ".history";
+            var path = Application.dataPath + "/BluePrints/History/" + "___" + this.name + "___" + $"{DateTime.Now.ToString("u").Replace(" ", "_").Replace(":", "-")}" + ".history";
             var json = JsonUtility.ToJson(new History(this), true);
             System.IO.File.WriteAllText(path, json);
         }

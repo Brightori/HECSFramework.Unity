@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Object = UnityEngine.Object;
 
 namespace HECSFramework.Unity
 {
@@ -25,15 +26,53 @@ namespace HECSFramework.Unity
         {
             var unpack = new UnpackContainer(entityContainer);
             var viewReferenceComponent = (unpack.Components.FirstOrDefault(x => x is ViewReferenceComponent)) as ViewReferenceComponent;
-            var asynData = viewReferenceComponent.ViewReference.InstantiateAsync();
-            var actorPrfb = await asynData.Task;
-            Addressables.Release(asynData);
+            var actorID = unpack.GetComponent<ActorContainerID>();
+
+            if (viewReferenceComponent == null)
+                throw new Exception("нет вью рефа у " + actorID.ID);
+
+            var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
+            var prefab = await asynData.Task;
+            var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
 
             if (needLoadContainer)
                 unpack.InitEntity(actorPrfb);
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
+        }
+
+#if UNITY_EDITOR
+        public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
+        {
+            var unpack = new UnpackContainer(entityContainer);
+            var viewReferenceComponent = unpack.Components.FirstOrDefault(x => x is ViewReferenceComponent) as ViewReferenceComponent;
+            var actorID = unpack.GetComponent<ActorContainerID>();
+
+            if (viewReferenceComponent == null)
+                throw new Exception("нет вью рефа у " + actorID.ID);
+
+            var prefab = (GameObject)viewReferenceComponent.ViewReference.editorAsset;
+            var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
+
+            if (needLoadContainer)
+                unpack.InitEntity(actorPrfb);
+
+            callBack?.Invoke(actorPrfb);
+            return actorPrfb;
+        }
+#endif
+        
+        public static T GetComponentInstance<T>(this EntityContainer entityContainer) where T : class, IComponent, new()
+        {
+            foreach (var componentBluePrint in entityContainer.Components)
+            {
+                if (!(componentBluePrint is ComponentBluePrintContainer<T>)) continue;
+
+                return (T)componentBluePrint.GetHECSComponent;
+            }
+
+            throw new ArgumentOutOfRangeException();
         }
     }
 }
