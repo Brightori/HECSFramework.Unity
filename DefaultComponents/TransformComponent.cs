@@ -23,13 +23,13 @@ namespace Components
         public void Init()
         {
             lazyComponent = new LazyMonoBehComponent<Transform>(Owner);
-
-            if (PositionSave.AsVector != Vector3.zero || RotationSave.AsVector != Vector3.zero)
-            {
-                SetPosition(PositionSave.AsVector);
-                SetRotation(Quaternion.Euler(RotationSave.AsVector));
-            }
+            OnInitCheckData();
         }
+
+        /// <summary>
+        /// это для сериализации если она нужна
+        /// </summary>
+        partial void OnInitCheckData();
 
         public void SetPosition(Vector3 position)
         {
@@ -42,6 +42,8 @@ namespace Components
             Transform.rotation = rotation;
             InfoUpdated();
         }
+
+        partial void InfoUpdated();
 
         public void Translate(Vector3 direction)
             => Transform.position = Transform.position + direction;

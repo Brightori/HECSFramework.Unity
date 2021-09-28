@@ -12,6 +12,9 @@ namespace Components
 
         public void Init()
         {
+            if (Predicates.Count > 0)
+                return;
+
             Predicates.Clear();
             foreach (var p in predicatesBP)
             {
@@ -20,11 +23,6 @@ namespace Components
 
                 Predicates.Add(p.GetPredicate);
             }
-        }
-
-        partial void InitBeforeSync()
-        {
-            Init();
         }
     }
 }
