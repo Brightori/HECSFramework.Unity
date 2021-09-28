@@ -1,15 +1,12 @@
+using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using DG.DemiEditor;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
 using UnityEditor;
-using UnityEditor.Compilation;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 using Debug = UnityEngine.Debug;
 
 [InitializeOnLoad]
