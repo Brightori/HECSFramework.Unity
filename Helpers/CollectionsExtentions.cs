@@ -14,12 +14,6 @@ namespace HECSFramework.Unity.Helpers
         public static T GetRandomElement<T>(this IEnumerable<T> items)
             => items.ElementAt(UnityEngine.Random.Range(0, items.Count()));
 
-        public static void AddUniqueElement<T>(this List<T> list, T element)
-        {
-            if (list.Contains(element)) return;
-
-            list.Add(element);
-        }
 
         public static void RemoveNullValues<TKey, TValue>(this Dictionary<TKey, TValue> dictionary) where TValue : class
         {
