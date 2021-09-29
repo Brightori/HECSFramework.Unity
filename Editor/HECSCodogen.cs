@@ -39,7 +39,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         }
         catch (Exception e)
         {
-            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть юнити");
+            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть окно или юнити");
         }
     }
 
@@ -87,6 +87,9 @@ public class HECSRoslynCodegen : OdinEditorWindow
         set => EditorPrefs.SetString(nameof(MspFilePath), value);
     }
 
+    [BoxGroup("Settings")]
+    [HorizontalGroup("Settings/Split", Width = 200, LabelWidth = 120)]
+    [LabelText("MSP Generation")]
     [OnInspectorInit("@MspGenerationEnabled")]
     public bool MspGenerationEnabled
     {
@@ -94,13 +97,32 @@ public class HECSRoslynCodegen : OdinEditorWindow
         set => EditorPrefs.SetBool(nameof(MspGenerationEnabled), value);
     }
 
+    [LabelText("| Serialization")]
+    [HorizontalGroup("Settings/Split/Next", Width = 200, LabelWidth = 120)]
+    [OnInspectorInit("@Serialization")]
+    public bool Serialization
+    {
+        get => EditorPrefs.GetBool(nameof(Serialization), false);
+        set => EditorPrefs.SetBool(nameof(Serialization), value);
+    }
+
+    [HorizontalGroup("Settings/Split/Next/Next", Width = 200, LabelWidth = 150)]
+    [LabelText("| Network Command Map")]
+    [OnInspectorInit("@NetworkCommandMap")]
+    public bool NetworkCommandMap
+    {
+        get => EditorPrefs.GetBool(nameof(NetworkCommandMap), false);
+        set => EditorPrefs.SetBool(nameof(NetworkCommandMap), value);
+    }
+
+
     [MenuItem("HECS Options/Roslyn Codegen", priority = 0)]
     public static void RoslynCodegenMenu()
         => GetWindow<HECSRoslynCodegen>();
 
     [Button]
     public async void CodegenClient()
-        => await Generate($"path:{ClientScriptDirectory}", false);
+        => await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
 
     [Button]
     public async void CodegenServer()
@@ -116,7 +138,20 @@ public class HECSRoslynCodegen : OdinEditorWindow
     public async Task CodegenAsync()
     {
         await Generate($"path:{ServerScriptDirectory} server no_blueprints", true);
-        await Generate($"path:{ClientScriptDirectory}", false);
+        await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
+    }
+
+    private string ClientArguments()
+    {
+        string args = string.Empty;
+
+        if (!NetworkCommandMap)
+            args += " no_commands";
+
+        if (!Serialization)
+            args += " no_resolvers";
+
+        return args;
     }
 
     private async Task Generate(string args, bool isServer)
