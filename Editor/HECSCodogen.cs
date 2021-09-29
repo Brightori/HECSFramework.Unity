@@ -17,16 +17,16 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         try
         {
-            if (EditorPrefs.HasKey(nameof(ClientScriptDirectory)))
+            if (PlayerPrefs.HasKey(nameof(ClientScriptDirectory)))
             {
                 if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(ClientScriptDirectory))))
                     return;
             }
 
-            EditorPrefs.SetString(nameof(ClientScriptDirectory), Application.dataPath);
+            PlayerPrefs.SetString(nameof(ClientScriptDirectory), Application.dataPath);
 
 
-            if (EditorPrefs.HasKey(nameof(CodegenExePath)))
+            if (PlayerPrefs.HasKey(nameof(CodegenExePath)))
             {
                 if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(CodegenExePath))))
                     return;
@@ -35,7 +35,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
             var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
 
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
-                EditorPrefs.SetString(nameof(CodegenExePath), find[0]);
+                PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
         }
         catch (Exception e)
         {
@@ -47,24 +47,24 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [OnInspectorInit("@CodegenExePath")]
     public string CodegenExePath
     {
-        get => EditorPrefs.GetString(nameof(CodegenExePath), "");
-        set => EditorPrefs.SetString(nameof(CodegenExePath), value);
+        get => PlayerPrefs.GetString(nameof(CodegenExePath), "");
+        set => PlayerPrefs.SetString(nameof(CodegenExePath), value);
     }
 
     [FolderPath(AbsolutePath = true)]
     [OnInspectorInit("@ClientScriptDirectory")]
     public string ClientScriptDirectory
     {
-        get => EditorPrefs.GetString(nameof(ClientScriptDirectory), "");
-        set => EditorPrefs.SetString(nameof(ClientScriptDirectory), value);
+        get => PlayerPrefs.GetString(nameof(ClientScriptDirectory), "");
+        set => PlayerPrefs.SetString(nameof(ClientScriptDirectory), value);
     }
 
     [FolderPath(AbsolutePath = true)]
     [OnInspectorInit("@ServerScriptDirectory")]
     public string ServerScriptDirectory
     {
-        get => EditorPrefs.GetString(nameof(ServerScriptDirectory), "");
-        set => EditorPrefs.SetString(nameof(ServerScriptDirectory), value);
+        get => PlayerPrefs.GetString(nameof(ServerScriptDirectory), "");
+        set => PlayerPrefs.SetString(nameof(ServerScriptDirectory), value);
     }
 
     [PropertySpace]
@@ -74,8 +74,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [DisableIf("@!MspGenerationEnabled")]
     public string MspScanDirectory
     {
-        get => EditorPrefs.GetString(nameof(MspScanDirectory), "");
-        set => EditorPrefs.SetString(nameof(MspScanDirectory), value);
+        get => PlayerPrefs.GetString(nameof(MspScanDirectory), "");
+        set => PlayerPrefs.SetString(nameof(MspScanDirectory), value);
     }
 
     [FolderPath(AbsolutePath = true)]
@@ -83,8 +83,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [DisableIf("@!MspGenerationEnabled")]
     public string MspFilePath
     {
-        get => EditorPrefs.GetString(nameof(MspFilePath), "");
-        set => EditorPrefs.SetString(nameof(MspFilePath), value);
+        get => PlayerPrefs.GetString(nameof(MspFilePath), "");
+        set => PlayerPrefs.SetString(nameof(MspFilePath), value);
     }
 
     [BoxGroup("Settings")]
@@ -93,8 +93,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [OnInspectorInit("@MspGenerationEnabled")]
     public bool MspGenerationEnabled
     {
-        get => EditorPrefs.GetBool(nameof(MspGenerationEnabled), false);
-        set => EditorPrefs.SetBool(nameof(MspGenerationEnabled), value);
+        get => PlayerPrefs.GetInt(nameof(MspGenerationEnabled), 0) == 1;
+        set => PlayerPrefs.SetInt(nameof(MspGenerationEnabled), value ? 1 : 0);
     }
 
     [LabelText("| Serialization")]
@@ -102,8 +102,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [OnInspectorInit("@Serialization")]
     public bool Serialization
     {
-        get => EditorPrefs.GetBool(nameof(Serialization), false);
-        set => EditorPrefs.SetBool(nameof(Serialization), value);
+        get => PlayerPrefs.GetInt(nameof(Serialization), 0) == 1;
+        set => PlayerPrefs.SetInt(nameof(Serialization), value ? 1 : 0);
     }
 
     [HorizontalGroup("Settings/Split/Next/Next", Width = 200, LabelWidth = 150)]
@@ -111,8 +111,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [OnInspectorInit("@NetworkCommandMap")]
     public bool NetworkCommandMap
     {
-        get => EditorPrefs.GetBool(nameof(NetworkCommandMap), false);
-        set => EditorPrefs.SetBool(nameof(NetworkCommandMap), value);
+        get => PlayerPrefs.GetInt(nameof(NetworkCommandMap), 0) == 1;
+        set => PlayerPrefs.SetInt(nameof(NetworkCommandMap), value ? 1 : 0);
     }
 
 
@@ -188,7 +188,6 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
         EditorApplication.UnlockReloadAssemblies();
     }
-
 
     private static Task<string> MspGeneration(string input, string output, string dataPath)
     {
