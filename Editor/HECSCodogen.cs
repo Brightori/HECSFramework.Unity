@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+#pragma warning disable
 
 [InitializeOnLoad]
 public class HECSRoslynCodegen : OdinEditorWindow

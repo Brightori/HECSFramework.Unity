@@ -20,7 +20,6 @@ namespace HECSFramework.Unity
         public int WorldId => entity.WorldId;
         public World World => entity.World;
         public Guid GUID => entity.GUID;
-        public ref HECSMask ComponentsMask => ref entity.ComponentsMask;
         public List<ISystem> GetAllSystems => entity.GetAllSystems;
         public ComponentContext ComponentContext => entity.ComponentContext;
         public IComponent[] GetAllComponents => entity.GetAllComponents;
@@ -32,6 +31,8 @@ namespace HECSFramework.Unity
 
         public string ContainerID => entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
+
+        public HECSMultiMask ComponentsMask => entity.ComponentsMask;
 
         public void AddHecsComponent(IComponent component, IEntity owner, bool silently = false)
         {
@@ -165,5 +166,7 @@ namespace HECSFramework.Unity
         public bool TryGetHecsComponent<T>(out T component) where T : IComponent => entity.TryGetHecsComponent<T>(out component);
 
         public IEnumerable<T> GetComponentsByType<T>() => entity.GetComponentsByType<T>();
+
+        public bool ContainsMask(HECSMultiMask mask) => entity.ContainsMask(mask);
     }
 }
