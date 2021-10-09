@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Components
 {
     [Serializable]
-    public partial class PredicatesComponent : BaseComponent, IInitable, IIgnoreLoadInit
+    public partial class PredicatesComponent : BaseComponent, IInitable 
     {
         [SerializeField] private PredicateBluePrint[] predicatesBP = new PredicateBluePrint[0];
 
@@ -28,11 +28,6 @@ namespace Components
                     if (p is IInitable initable)
                         initable.Init();
             }
-        }
-
-        partial void InitBeforeSync()
-        {
-            Init();
         }
     }
 }

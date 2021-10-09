@@ -34,19 +34,16 @@ namespace Components
         public void SetPosition(Vector3 position)
         {
             Transform.position = position;
-            InfoUpdated();
         }
 
         public void SetRotation(Quaternion rotation)
         {
             Transform.rotation = rotation;
-            InfoUpdated();
         }
 
         public void Translate(Vector3 direction)
         {
             Transform.position = Transform.position + direction;
-            InfoUpdated();
         }
     }
 
