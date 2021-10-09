@@ -2,8 +2,9 @@
 
 namespace HECSFramework.Unity
 {
-    public class AbstractBluePrint<T> : ScriptableObject
+    public abstract class AbstractBluePrint<T> : ScriptableObject
     {
-        [SerializeField] T GetData = default;
+        [SerializeField] protected T data = default;
+        public abstract T GetData { get; }
     }
 }
