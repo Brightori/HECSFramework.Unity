@@ -17,16 +17,16 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         try
         {
-            if (PlayerPrefs.HasKey(nameof(ClientScriptDirectory)))
+            if (EditorPrefs.HasKey(nameof(ClientScriptDirectory)))
             {
                 if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(ClientScriptDirectory))))
                     return;
             }
 
-            PlayerPrefs.SetString(nameof(ClientScriptDirectory), Application.dataPath);
+            EditorPrefs.SetString(nameof(ClientScriptDirectory), Application.dataPath);
 
 
-            if (PlayerPrefs.HasKey(nameof(CodegenExePath)))
+            if (EditorPrefs.HasKey(nameof(CodegenExePath)))
             {
                 if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(CodegenExePath))))
                     return;
@@ -35,11 +35,11 @@ public class HECSRoslynCodegen : OdinEditorWindow
             var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
 
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
-                PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
+                EditorPrefs.SetString(nameof(CodegenExePath), find[0]);
         }
         catch (Exception e)
         {
-            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть окно или юнити");
+            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть юнити");
         }
     }
 
@@ -47,24 +47,24 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [OnInspectorInit("@CodegenExePath")]
     public string CodegenExePath
     {
-        get => PlayerPrefs.GetString(nameof(CodegenExePath), "");
-        set => PlayerPrefs.SetString(nameof(CodegenExePath), value);
+        get => EditorPrefs.GetString(nameof(CodegenExePath), "");
+        set => EditorPrefs.SetString(nameof(CodegenExePath), value);
     }
 
     [FolderPath(AbsolutePath = true)]
     [OnInspectorInit("@ClientScriptDirectory")]
     public string ClientScriptDirectory
     {
-        get => PlayerPrefs.GetString(nameof(ClientScriptDirectory), "");
-        set => PlayerPrefs.SetString(nameof(ClientScriptDirectory), value);
+        get => EditorPrefs.GetString(nameof(ClientScriptDirectory), "");
+        set => EditorPrefs.SetString(nameof(ClientScriptDirectory), value);
     }
 
     [FolderPath(AbsolutePath = true)]
     [OnInspectorInit("@ServerScriptDirectory")]
     public string ServerScriptDirectory
     {
-        get => PlayerPrefs.GetString(nameof(ServerScriptDirectory), "");
-        set => PlayerPrefs.SetString(nameof(ServerScriptDirectory), value);
+        get => EditorPrefs.GetString(nameof(ServerScriptDirectory), "");
+        set => EditorPrefs.SetString(nameof(ServerScriptDirectory), value);
     }
 
     [PropertySpace]
@@ -74,8 +74,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [DisableIf("@!MspGenerationEnabled")]
     public string MspScanDirectory
     {
-        get => PlayerPrefs.GetString(nameof(MspScanDirectory), "");
-        set => PlayerPrefs.SetString(nameof(MspScanDirectory), value);
+        get => EditorPrefs.GetString(nameof(MspScanDirectory), "");
+        set => EditorPrefs.SetString(nameof(MspScanDirectory), value);
     }
 
     [FolderPath(AbsolutePath = true)]
@@ -83,38 +83,16 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [DisableIf("@!MspGenerationEnabled")]
     public string MspFilePath
     {
-        get => PlayerPrefs.GetString(nameof(MspFilePath), "");
-        set => PlayerPrefs.SetString(nameof(MspFilePath), value);
+        get => EditorPrefs.GetString(nameof(MspFilePath), "");
+        set => EditorPrefs.SetString(nameof(MspFilePath), value);
     }
 
-    [BoxGroup("Settings")]
-    [HorizontalGroup("Settings/Split", Width = 200, LabelWidth = 120)]
-    [LabelText("MSP Generation")]
     [OnInspectorInit("@MspGenerationEnabled")]
     public bool MspGenerationEnabled
     {
-        get => PlayerPrefs.GetInt(nameof(MspGenerationEnabled), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(MspGenerationEnabled), value ? 1 : 0);
+        get => EditorPrefs.GetBool(nameof(MspGenerationEnabled), false);
+        set => EditorPrefs.SetBool(nameof(MspGenerationEnabled), value);
     }
-
-    [LabelText("| Serialization")]
-    [HorizontalGroup("Settings/Split/Next", Width = 200, LabelWidth = 120)]
-    [OnInspectorInit("@Serialization")]
-    public bool Serialization
-    {
-        get => PlayerPrefs.GetInt(nameof(Serialization), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(Serialization), value ? 1 : 0);
-    }
-
-    [HorizontalGroup("Settings/Split/Next/Next", Width = 200, LabelWidth = 150)]
-    [LabelText("| Network Command Map")]
-    [OnInspectorInit("@NetworkCommandMap")]
-    public bool NetworkCommandMap
-    {
-        get => PlayerPrefs.GetInt(nameof(NetworkCommandMap), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(NetworkCommandMap), value ? 1 : 0);
-    }
-
 
     [MenuItem("HECS Options/Roslyn Codegen", priority = 0)]
     public static void RoslynCodegenMenu()
@@ -122,7 +100,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
     [Button]
     public async void CodegenClient()
-        => await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
+        => await Generate($"path:{ClientScriptDirectory}", false);
 
     [Button]
     public async void CodegenServer()
@@ -138,20 +116,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
     public async Task CodegenAsync()
     {
         await Generate($"path:{ServerScriptDirectory} server no_blueprints", true);
-        await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
-    }
-
-    private string ClientArguments()
-    {
-        string args = string.Empty;
-
-        if (!NetworkCommandMap)
-            args += " no_commands";
-
-        if (!Serialization)
-            args += " no_resolvers";
-
-        return args;
+        await Generate($"path:{ClientScriptDirectory}", false);
     }
 
     private async Task Generate(string args, bool isServer)
@@ -188,6 +153,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
         EditorApplication.UnlockReloadAssemblies();
     }
+
 
     private static Task<string> MspGeneration(string input, string output, string dataPath)
     {

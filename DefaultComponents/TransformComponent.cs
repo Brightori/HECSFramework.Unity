@@ -23,13 +23,13 @@ namespace Components
         public void Init()
         {
             lazyComponent = new LazyMonoBehComponent<Transform>(Owner);
-            OnInitCheckData();
-        }
 
-        /// <summary>
-        /// это для сериализации если она нужна
-        /// </summary>
-        partial void OnInitCheckData();
+            if (PositionSave.AsVector != Vector3.zero || RotationSave.AsVector != Vector3.zero)
+            {
+                SetPosition(PositionSave.AsVector);
+                SetRotation(Quaternion.Euler(RotationSave.AsVector));
+            }
+        }
 
         public void SetPosition(Vector3 position)
         {
@@ -43,10 +43,11 @@ namespace Components
             InfoUpdated();
         }
 
-        partial void InfoUpdated();
-
         public void Translate(Vector3 direction)
-            => Transform.position = Transform.position + direction;
+        {
+            Transform.position = Transform.position + direction;
+            InfoUpdated();
+        }
     }
 
     public partial interface ITransformComponent : IComponent
