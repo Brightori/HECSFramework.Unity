@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Object = UnityEngine.Object;
+using HECSFramework.Core;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -204,7 +205,7 @@ namespace HECSFramework.Unity
 
         public void OnValidate(EntityContainer parent)
         {
-            if (Application.isPlaying)
+            if (Application.isPlaying || EntityManager.IsAlive)
                 return;
 
             Parent = parent;
