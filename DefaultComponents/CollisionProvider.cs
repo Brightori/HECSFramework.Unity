@@ -4,35 +4,35 @@ using UnityEngine;
 
 namespace Components
 {
-    public class CollisionProvider : MonoBehaviour
+    public class CollisionProvider : MonoBehaviour, IHaveActor
     {
-        private IActor actor;
-
         private void Awake()
         {
-            actor = GetComponent<IActor>();
+            Actor ??= GetComponent<IActor>();
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            actor.Command(new CollisionCommand { Collision = collision });
+            Actor.Command(new CollisionCommand { Collision = collision });
         }
 
         private void OnCollisionExit(Collision collision)
         {
-            actor.Command(new CollisionExitCommand { Collision = collision });
+            Actor.Command(new CollisionExitCommand { Collision = collision });
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            actor.Command(new TriggerEnterCommand { Collider = other });
+            Actor.Command(new TriggerEnterCommand { Collider = other });
         }
 
         private void OnTriggerExit(Collider other)
         {
             if (other.isTrigger) return;
 
-            actor.Command(new TriggerExitCommand { Collider = other });
+            Actor.Command(new TriggerExitCommand { Collider = other });
         }
+
+        public IActor Actor { get; set; }
     }
 }
