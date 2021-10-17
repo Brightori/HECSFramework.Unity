@@ -24,6 +24,8 @@ namespace HECSFramework.Unity
         public List<SystemBaseBluePrint> Systems => holder.systems;
         public List<ComponentBluePrint> Components => holder.components;
 
+        public int ContainerIndex => IndexGenerator.GenerateIndex(name);
+
         private void OnEnable()
         {
             holder.Parent = this;
