@@ -181,7 +181,7 @@ using System;
 
 namespace Predicates
 {
-    [Serializable, BluePrint]
+    [Serializable]
     public class #SCRIPTNAME# : IPredicate
     {
         public bool IsReady(IEntity target)
@@ -208,14 +208,10 @@ using System;
 
 namespace Abilities
 {
-    [Serializable, BluePrint]
+    [Serializable]
     public class #SCRIPTNAME# : AbilityBase
     {
         public override void Execute<T>(T owner, T target = default, bool enable = true)
-        {
-        }
-
-        protected override void LocalInit(IEntity actor)
         {
         }
     }
@@ -260,14 +256,12 @@ using UnityEngine;
 namespace Systems
 {
 	[Serializable]
-    public class #SCRIPTNAME# : BaseSystem, I#SCRIPTNAME#
+    public class #SCRIPTNAME# : BaseSystem 
     {
         public override void InitSystem()
         {
         }
     }
-
-    public interface I#SCRIPTNAME# : ISystem { }
 }";
 
 

@@ -10,7 +10,7 @@ namespace Components
     ///add partial part of this class to ur project, dont change this class
     ///if u need new functionality like add InetworkComponent interface - add them to part class
 
-    [Serializable, BluePrint]
+    [Serializable]
     public partial class TransformComponent : BaseComponent, ITransformComponent, IInitable, IHaveActor
     {
         private LazyMonoBehComponent<Transform> lazyComponent;
