@@ -1,6 +1,6 @@
-﻿using System;
-using HECSFramework.Core;
-using Helpers;
+﻿using HECSFramework.Core;
+using HECSFramework.Documentation;
+using System;
 
 namespace Components
 {
