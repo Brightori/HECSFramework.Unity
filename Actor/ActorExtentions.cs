@@ -11,8 +11,6 @@ namespace HECSFramework.Unity
 {
     public static partial class ActorExtentions
     {
-        
-
         public static async Task<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<IActor> callBack = null)
         {
             var asynData = viewReferenceComponent.ViewReference.InstantiateAsync();
@@ -22,6 +20,15 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
         
+        public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0)
+        {
+            var entity = new Entity(entityContainer.name, worldIndex);
+            entityContainer.Init(entity);
+            entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.name;
+            entity.GenerateGuid();
+            return entity;
+        }
+
         public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
             var unpack = new UnpackContainer(entityContainer);
