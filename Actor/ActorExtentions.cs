@@ -11,6 +11,11 @@ namespace HECSFramework.Unity
 {
     public static partial class ActorExtentions
     {
+        public static IActor AsActor(this IEntity entity)
+        {
+            return entity as IActor;
+        }
+
         public static async Task<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<IActor> callBack = null)
         {
             var asynData = viewReferenceComponent.ViewReference.InstantiateAsync();
