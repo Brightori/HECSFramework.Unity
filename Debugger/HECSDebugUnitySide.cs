@@ -25,5 +25,12 @@ namespace HECSFramework.Unity
         {
             UnityEngine.Debug.LogWarning($"[{Time.frameCount}] {info}");
         }
+
+        public void LogDebug(string info, object context)
+        {
+#if DEBUG_LOG
+            UnityEngine.Debug.Log($"[{Time.frameCount}] {info}");
+#endif
+        }
     }
 }

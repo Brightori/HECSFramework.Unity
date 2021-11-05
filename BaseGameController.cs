@@ -22,6 +22,8 @@ namespace HECSFramework.Unity
         private IEntity uiManager;
         private IEntity sceneManager;
 
+        private World[] worlds;
+
         private void Awake()
         {
             HECSDebug.Init(new HECSDebugUnitySide());
@@ -31,6 +33,8 @@ namespace HECSFramework.Unity
 
             foreach (var w in EntityManager.Worlds)
                 w.GlobalUpdateSystem.InitCustomUpdate(this);
+
+            worlds = EntityManager.Worlds;
 
             gameLogic = new Entity("GameLogic");
             player = new Entity("Player");
@@ -55,7 +59,6 @@ namespace HECSFramework.Unity
             sceneManager.Init();
             gameLogic.Init();
             player.GenerateGuid();
-
         }
 
         public abstract void BaseAwake();
@@ -79,17 +82,30 @@ namespace HECSFramework.Unity
 
         private void Update()
         {
-            updateSystem.Update();
+            var worldsCount = worlds.Length;
+            for (int i = 0; i < worldsCount; i++)
+            {
+                worlds[i].GlobalUpdateSystem.Update();
+            }
         }
 
         private void LateUpdate()
         {
-            updateSystem.LateUpdate();
+            var worldsCount = worlds.Length;
+            for (int i = 0; i < worldsCount; i++)
+            {
+                updateSystem.LateUpdate();
+                updateSystem.FinishUpdate?.Invoke();
+            }
         }
 
         private void FixedUpdate()
         {
-            updateSystem.FixedUpdate();
+            var worldsCount = worlds.Length;
+            for (int i = 0; i < worldsCount; i++)
+            {
+                updateSystem.FixedUpdate();
+            }
         }
 
         private void OnDisable()
