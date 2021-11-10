@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Systems;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -84,8 +85,24 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
-            entity.HecsDestroy();
-            Destroy(gameObject);
+            var pooled = HMasks.GetMask<PoolableTagComponent>();
+
+            if (ContainsMask(ref pooled))
+            {
+                World.GetSingleSystem<PoolingSystem>().Release(this);
+                entity.HecsDestroy();
+            }
+            else
+            {
+                entity.HecsDestroy();
+                Destroy(gameObject);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (IsAlive)
+                entity.HecsDestroy();
         }
 
         public void Init(bool needRegister = true)
