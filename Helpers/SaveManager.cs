@@ -40,7 +40,7 @@ namespace HECSFramework.Unity
                 }
             }
 
-            Debug.LogAssertion("нет файла сохранения");
+            Debug.LogWarning("нет файла сохранения");
             data = null;
             return false;
         }
