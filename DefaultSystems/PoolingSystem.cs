@@ -11,10 +11,11 @@ namespace Systems
 {
     public partial class PoolingSystem : BaseSystem
     {
-        public const int minPoolSize = 10;
+        public const int minPoolSize = 5;
         public const int maxPoolSize = 50;
 
         private Dictionary<string, ObjectPool<Actor>> pooledActors = new Dictionary<string, ObjectPool<Actor>>(16);
+        private Dictionary<string, EntityContainer> pooledContainers = new Dictionary<string, EntityContainer>(16);
 
         private HECSMask viewRefMask = HMasks.GetMask<ViewReferenceComponent>();
 
@@ -29,10 +30,24 @@ namespace Systems
             else
             {
                 var actor = await Addressables.LoadAssetAsync<Actor>(viewReferenceComponent.ViewReference).Task;
-                var newpool = new ObjectPool<Actor>(() => GetNewInstance(actor), defaultCapacity: minPoolSize,  maxSize: maxPoolSize);
+                var newpool = new ObjectPool<Actor>(() => GetNewInstance(actor), defaultCapacity: minPoolSize, maxSize: maxPoolSize);
                 var newActor = GetNewInstance(actor);
                 pooledActors.Add(viewReferenceComponent.ViewReference.AssetGUID, newpool);
                 return newActor;
+            }
+        }
+
+        public async Task<EntityContainer> GetEntityContainerFromPool(string key)
+        {
+            if (pooledContainers.TryGetValue(key, out var container))
+            {
+                return container;
+            }
+            else
+            {
+                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(key).Task;
+                pooledContainers.Add(key, loaded);
+                return loaded;
             }
         }
 
