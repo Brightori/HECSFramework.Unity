@@ -28,8 +28,6 @@ namespace Components
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.isTrigger) return;
-
             Actor.Command(new TriggerExitCommand { Collider = other });
         }
 

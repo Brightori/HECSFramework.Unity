@@ -1,9 +1,10 @@
 ﻿using HECSFramework.Core;
+using System;
 using UnityEngine;
 
 namespace HECSFramework.Unity.Helpers
 {
-    public struct LazyMonoBehComponent<UnityComponent> where UnityComponent : Component
+    public struct LazyMonoBehComponent<UnityComponent> : IDisposable where UnityComponent : Component
     {
         private UnityComponent unityComponent;
         private bool isInited;
@@ -15,6 +16,13 @@ namespace HECSFramework.Unity.Helpers
                 this.actor = actor;
             else
                 throw new System.Exception("this entity not actor " + owner.ID + " " + owner.GUID);
+        }
+
+        public void Dispose()
+        {
+            actor = null;
+            isInited = false;
+            unityComponent = null;
         }
 
         public UnityComponent GetComponent()

@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Systems;
 using UnityEngine;
 
@@ -45,6 +46,12 @@ namespace HECSFramework.Unity
             this.entity.AddHecsSystem(system, this);
         }
 
+        public void ResetActor()
+        {
+            entity = new Entity(gameObject.name);
+            entity.SetGuid(Guid.NewGuid());
+        }
+
         public void Command<T>(T command) where T : ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
 
@@ -64,6 +71,12 @@ namespace HECSFramework.Unity
             Init();
         }
 
+        public void InitWithContainer(ActorContainer entityContainer)
+        {
+            actorContainer = entityContainer;
+            InitWithContainer();
+        }
+
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
@@ -72,12 +85,13 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            HecsDestroy();
+            entity.HecsDestroy();
+            MonoBehaviour.Destroy(gameObject);
         }
 
         public bool Equals(IEntity other) => entity.Equals(other);
 
-        public void GenerateGuid() 
+        public void GenerateGuid()
         {
             entity.GenerateGuid();
             actorInitModule.SetGuid(entity.GUID);
@@ -85,18 +99,7 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
-            var pooled = HMasks.GetMask<PoolableTagComponent>();
-
-            if (ContainsMask(ref pooled))
-            {
-                World.GetSingleSystem<PoolingSystem>().Release(this);
-                entity.HecsDestroy();
-            }
-            else
-            {
-                entity.HecsDestroy();
-                Destroy(gameObject);
-            }
+            World.GetSingleSystem<DestroyEntityWorldSystem>().ProcessDeathOfActor(this);
         }
 
         private void OnDestroy()
@@ -105,8 +108,13 @@ namespace HECSFramework.Unity
                 entity.HecsDestroy();
         }
 
+        public void EntityDestroy() => entity.HecsDestroy();
+
         public void Init(bool needRegister = true)
         {
+            if (entity == null)
+                entity = new Entity(gameObject.name);
+
             entity.SetWorld();
             entity.InitComponentsAndSystems(needRegister);
 
@@ -132,6 +140,12 @@ namespace HECSFramework.Unity
 
         public bool TryGetComponent<T>(out T component, bool lookInChildsToo = false)
         {
+            if (!IsAlive)
+            {
+                component = default;
+                return false;
+            }
+
             if (lookInChildsToo)
             {
                 component = GetComponentsInChildren<T>(true).FirstOrDefault();
@@ -184,6 +198,17 @@ namespace HECSFramework.Unity
 
         public IEnumerable<T> GetComponentsByType<T>() => entity.GetComponentsByType<T>();
 
+        public void SetWorldIndex(int index)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool ContainsMask(HECSMultiMask mask) => entity.ContainsMask(mask);
+
+        public bool ContainsAnyFromMask(FilterMask mask) => entity.ContainsAnyFromMask(mask);
+
+        public bool ContainsAnyFromMask(HECSMultiMask mask) => entity.ContainsAnyFromMask(mask);
+
+        public bool ContainsMask(FilterMask mask) => entity.ContainsMask(mask);
     }
 }
