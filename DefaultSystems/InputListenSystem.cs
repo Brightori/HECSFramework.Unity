@@ -1,30 +1,31 @@
-using System;
-using System.Collections.Generic;
 using Commands;
 using Components;
 using HECSFramework.Core;
-using HECSFramework.Network;
+using HECSFramework.Documentation;
 using HECSFramework.Unity;
+using System;
+using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
 namespace Systems
 {
     [Documentation(Doc.Input, "Система прослушивает юнити инпут и передаёт данные в хекс системы и компоненты.")]
     [Serializable, BluePrint]
-    public class InputListenSystem : BaseSystem, INotReplicable, IUpdatable
+    public class InputListenSystem : BaseSystem, IUpdatable
     {
         private List<UpdateableAction> actions = new List<UpdateableAction>();
         private ConcurrencyList<IEntity> inputListeners;
+        private HECSMask InputListenerTagComponentMask = HMasks.GetMask<InputListenerTagComponent>();
 
         public override void InitSystem()
         {
-            inputListeners = EntityManager.Filter(HMasks.InputListenerTagComponent);
+            inputListeners = EntityManager.Filter(InputListenerTagComponentMask);
             LinkActions();
         }
 
         private void LinkActions()
         {
-            var actionsComponent = Owner.GetInputActionsComponent();
+            var actionsComponent = Owner.GetHECSComponent<InputActionsComponent>();
 
             foreach (var action in actionsComponent.Actions)
             {

@@ -29,10 +29,5 @@ namespace Components
                         initable.Init();
             }
         }
-
-        partial void InitBeforeSync()
-        {
-            Init();
-        }
     }
 }

@@ -1,5 +1,6 @@
 using Components;
 using HECSFramework.Core;
+using HECSFramework.Documentation;
 using UnityEngine.InputSystem;
 
 namespace Commands
