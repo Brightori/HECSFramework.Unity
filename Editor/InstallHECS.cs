@@ -177,11 +177,12 @@ namespace HECSFrameWork
     @"using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using HECSFramework.Documentation;
 using System;
 
 namespace Predicates
 {
-    [Serializable]
+    [Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : IPredicate
     {
         public bool IsReady(IEntity target)
@@ -202,13 +203,14 @@ namespace Predicates
             var template =
     @"using HECSFrameWork;
 using HECSFrameWork.Components;
+using HECSFramework.Documentation;
 using Commands;
 using Components;
 using System;
 
 namespace Abilities
 {
-    [Serializable]
+    [Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : AbilityBase
     {
         public override void Execute<T>(T owner, T target = default, bool enable = true)
@@ -228,9 +230,11 @@ namespace Abilities
         {
             var template =
     @"using HECSFramework.Core;
+using HECSFramework.Documentation;
 
 namespace Commands
 {
+    [Documentation(Doc.NONE, """")]
 	public struct #SCRIPTNAME# : ICommand
 	{
 	}
@@ -248,14 +252,15 @@ namespace Commands
         {
             var template =
     @"using System;
-using Components;
-using HECSFramework.Core;
+using HECSFramework.Documentation;
 using HECSFramework.Unity;
+using HECSFramework.Core;
 using UnityEngine;
+using Components;
 
 namespace Systems
 {
-	[Serializable]
+	[Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : BaseSystem 
     {
         public override void InitSystem()
@@ -281,13 +286,14 @@ namespace Systems
 
             var template =
     @"using HECSFramework.Core;
+using HECSFramework.Documentation;
 using HECSFramework.Unity;
 using System;
 using UnityEngine;
 
 namespace Components
 {
-    [Serializable]
+    [Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : BaseComponent
     {
        

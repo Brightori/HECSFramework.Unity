@@ -1,5 +1,6 @@
 ﻿using Components;
 using HECSFramework.Core;
+using HECSFramework.Documentation;
 using System;
 using System.IO;
 using System.Runtime.Serialization;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
-    [Documentation("Gamelogic", "Player", "Хелпер который отвечает за сохранение и чтение файлов")]
+    [Documentation(Doc.GameLogic, Doc.Player, "Хелпер который отвечает за сохранение и чтение файлов")]
     public class SaveManager
     {
         public static string DefaultSaveDataPath => Application.persistentDataPath + "/saveData.dat";

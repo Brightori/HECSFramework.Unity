@@ -1,15 +1,16 @@
 ﻿using Components;
 using HECSFramework.Core;
+using HECSFramework.Documentation;
 using HECSFramework.Unity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using static UnityEngine.ProBuilder.AutoUnwrapSettings;
 
 namespace Systems
 {
+    [Documentation(Doc.GameLogic, "Глобальная система пулинга")]
     public partial class PoolingSystem : BaseSystem
     {
         public const int minPoolSize = 5;
@@ -22,6 +23,7 @@ namespace Systems
         private Dictionary<string, EntityContainer> pooledContainers = new Dictionary<string, EntityContainer>(16);
 
         private HECSMask viewRefMask = HMasks.GetMask<ViewReferenceComponent>();
+        private HECSMask ActorContainerIDMask = HMasks.GetMask<ActorContainerID>();
 
         public async Task<IActor> GetActorFromPool(ViewReferenceComponent viewReferenceComponent, bool setFromContainer = false)
         {
@@ -61,7 +63,7 @@ namespace Systems
                 {
                     if (setFromContainer)
                     {
-                        if (viewReferenceComponent.Owner.TryGetHecsComponent(HMasks.ActorContainerID, out ActorContainerID container))
+                        if (viewReferenceComponent.Owner.TryGetHecsComponent(ActorContainerIDMask, out ActorContainerID container))
 {
                             var loadedContainer = await GetEntityContainerFromPool(container.ID);
                             loadedContainer.Init(newActor);
@@ -76,7 +78,7 @@ namespace Systems
                 pooledActorsType.Add(key, newActor.GetType());
                 pooledActors.Add(viewReferenceComponent.ViewReference.AssetGUID, newpool);
 
-                if (viewReferenceComponent.Owner.TryGetHecsComponent(HMasks.ActorContainerID, out ActorContainerID actorContainerID))
+                if (viewReferenceComponent.Owner.TryGetHecsComponent(ActorContainerIDMask, out ActorContainerID actorContainerID))
                 {
                     var awaitContainer = await GetEntityContainerFromPool(actorContainerID.ID);
 
