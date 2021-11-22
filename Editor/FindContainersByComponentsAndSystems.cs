@@ -27,6 +27,7 @@ namespace HECSFramework.Unity.Editor
             systems.Clear();
             containers.Clear();
         }
+
         override protected void OnEnable()
         {
             base.OnEnable();

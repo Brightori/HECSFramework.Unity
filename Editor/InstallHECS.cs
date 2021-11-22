@@ -18,7 +18,7 @@ namespace HECSFramework.Unity.Editor
         private static string Helpers = "/Helpers/";
         private static string Systems = "/Systems/";
         private static string Strategies = "/Strategies/";
-        private static string HECSGenerated = "/HECSGenerated/";
+        public readonly static string HECSGenerated = "/HECSGenerated/";
 
         //BluePrintsFolders
         private static string AbilitiesBlueprints = "/AbilitiesBlueprints/";
@@ -37,8 +37,8 @@ namespace HECSFramework.Unity.Editor
         private static string AbilityTemplate = "/84a-HECS__HECSAbility-Ability.cs.txt";
         private static string PredicateTemplate = "/85a-HECS__HECSPredicate-Predicate.cs.txt";
 
-        private static string dataPath => Application.dataPath;
-        private static string scriptPath => Application.dataPath + "/Scripts/";
+        public static string dataPath => Application.dataPath;
+        public static string scriptPath => Application.dataPath + "/Scripts/";
 
         private static string ComponentID = "ComponentID.cs";
         private static string GameController = "GameController.cs";
