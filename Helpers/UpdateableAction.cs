@@ -8,51 +8,54 @@ namespace Components
     /// </summary>
     public class UpdateableAction : IDisposable
     {
-        private readonly InputAction move;
+        private readonly InputAction action;
 
         private InputAction.CallbackContext cachedForUpdate;
         private bool isPressed;
+        private int index;
 
-        public event Action<InputAction.CallbackContext> OnStart;
-        public event Action<InputAction.CallbackContext> OnEnd;
-        public event Action<InputAction.CallbackContext> OnUpdate;
+        public event Action<int, InputAction.CallbackContext> OnStart;
+        public event Action<int, InputAction.CallbackContext> OnEnd;
+        public event Action<int, InputAction.CallbackContext> OnUpdate;
         
         public void UpdateAction()
         {
             if (!isPressed) return;
-            OnUpdate?.Invoke(cachedForUpdate);
+            OnUpdate?.Invoke(index, cachedForUpdate);
         }
 
-        public UpdateableAction(InputAction move)
+        public UpdateableAction(int index, InputAction action)
         {
-            this.move = move;
-            move.started += Started;
-            move.performed += Updated;
-            move.canceled += Ended;
+            this.action = action;
+            action.started += Started;
+            action.performed += Updated;
+            action.canceled += Ended;
+            this.index = index;
         }
-
 
         private void Ended(InputAction.CallbackContext obj)
         {
             isPressed = false;
-            OnEnd?.Invoke(obj);
+            OnEnd?.Invoke(index,obj);
         }
 
         private void Updated(InputAction.CallbackContext obj)
-            => cachedForUpdate = obj;
+        {
+            cachedForUpdate = obj;
+        }
 
         private void Started(InputAction.CallbackContext obj)
         {
-            OnStart?.Invoke(obj);
+            OnStart?.Invoke(index, obj);
             isPressed = true;
         }
 
 
         public void Dispose()
         {
-            move.started -= Started;
-            move.performed -= Updated;
-            move.canceled -= Ended;
+            action.started -= Started;
+            action.performed -= Updated;
+            action.canceled -= Ended;
             OnStart = null;
             OnEnd = null;
             OnUpdate = null;

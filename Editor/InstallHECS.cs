@@ -21,6 +21,11 @@ namespace HECSFramework.Unity.Editor
         public readonly static string HECSGenerated = "/HECSGenerated/";
 
         //BluePrintsFolders
+        private static string Identifiers = "/Identifiers/";
+        private static string GlobalEntities = "/GlobalEntities/";
+        private static string Presets = "/Presets/";
+
+        //ScriptBluePrintsFolders
         private static string AbilitiesBlueprints = "/AbilitiesBlueprints/";
         private static string PredicatesBlueprints = "/PredicatesBlueprints/";
         private static string ComponentsBluePrints = "/ComponentsBluePrints/";
@@ -133,6 +138,11 @@ namespace HECSFrameWork
 
             //BluePrintsFolders
             CheckFolder(dataPath + BluePrints);
+            CheckFolder(dataPath + BluePrints + Identifiers);
+            CheckFolder(dataPath + BluePrints + Abilities);
+            CheckFolder(dataPath + BluePrints + GlobalEntities);
+            CheckFolder(dataPath + BluePrints + Strategies);
+            CheckFolder(dataPath + BluePrints + Presets);
 
             //MonoBehaviourComponents
             CheckFolder(scriptPath + Components + MonoBehaviourComponents);

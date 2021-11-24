@@ -5,6 +5,7 @@ using HECSFramework.Documentation;
 using HECSFramework.Unity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.InputSystem;
 
 namespace Systems
@@ -26,11 +27,18 @@ namespace Systems
         private void LinkActions()
         {
             var actionsComponent = Owner.GetHECSComponent<InputActionsComponent>();
+            //var test = Owner.GetHECSComponent<InputActionsComponent>().Actions.ToJson();
+            //var inputFromJson = InputActionAsset.FromJson(test);
 
-            foreach (var action in actionsComponent.Actions)
+            //var defaultActionMap = inputFromJson.actionMaps[0];
+            var defaultActionMap = actionsComponent.Actions.actionMaps[0];
+            defaultActionMap.Enable();
+
+            foreach (var action in defaultActionMap.actions)
             {
+                var neededIndex = actionsComponent.InputActionSettings.FirstOrDefault(x => x.ActionName == action.name);
                 action.Enable();
-                var updateableAction = new UpdateableAction(action);
+                var updateableAction = new UpdateableAction(neededIndex.Identifier.Id, action);
                 updateableAction.OnStart += OnActionStart;
                 updateableAction.OnEnd += OnActionEnd;
                 updateableAction.OnUpdate += OnActionUpdate;
@@ -38,36 +46,45 @@ namespace Systems
             }
         }
 
-        private void OnActionStart(InputAction.CallbackContext context)
+        private void OnActionStart(int index, InputAction.CallbackContext context)
         {
-            var command = new InputStartedCommand {Context = context};
-            foreach (var listener in inputListeners) listener.Command(command);
-            EntityManager.GlobalCommand(command);
+            var command = new InputStartedCommand { Index = index, Context = context };
+            SendCommandToAllListeners(command);
         }
 
-        private void OnActionUpdate(InputAction.CallbackContext context)
+        private void OnActionUpdate(int index, InputAction.CallbackContext context)
         {
-             var command = new InputCommand {Context = context};
-             foreach (var listener in inputListeners) listener.Command(command);
-             EntityManager.GlobalCommand(command);
+            var command = new InputCommand { Index = index, Context = context };
+            SendCommandToAllListeners(command);
         }
 
-        public void OnActionEnd(InputAction.CallbackContext context)
+        public void OnActionEnd(int index, InputAction.CallbackContext context)
         {
-            var command = new InputEndedCommand {Context = context};
-            foreach (var listener in inputListeners) listener.Command(command);
+            var command = new InputEndedCommand { Index = index,  Context = context };
+            SendCommandToAllListeners(command);
+        }
+
+        private void SendCommandToAllListeners<T>(T command) where T : IGlobalCommand
+        {
+            IEntity[] array = inputListeners.DirectAccess();
+            var lenght = inputListeners.Count;
+            for (int i = 0; i < lenght; i++)
+            {
+                IEntity listener = array[i];
+                listener.Command(command);
+            }
             EntityManager.GlobalCommand(command);
         }
 
         public override void Dispose()
         {
-            foreach (var action in actions) 
+            foreach (var action in actions)
                 action.Dispose();
         }
 
         public void UpdateLocal()
         {
-            foreach (var action in actions) 
+            foreach (var action in actions)
                 action.UpdateAction();
         }
     }
