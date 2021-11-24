@@ -48,7 +48,7 @@ namespace Systems
 
         private void OnActionStart(int index, InputAction.CallbackContext context)
         {
-            var command = new InputStartedCommand { Context = context };
+            var command = new InputStartedCommand { Index = index, Context = context };
             SendCommandToAllListeners(command);
         }
 
@@ -60,7 +60,7 @@ namespace Systems
 
         public void OnActionEnd(int index, InputAction.CallbackContext context)
         {
-            var command = new InputEndedCommand { Context = context };
+            var command = new InputEndedCommand { Index = index,  Context = context };
             SendCommandToAllListeners(command);
         }
 
