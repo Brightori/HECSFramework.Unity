@@ -210,5 +210,15 @@ namespace HECSFramework.Unity
         public bool ContainsAnyFromMask(HECSMultiMask mask) => entity.ContainsAnyFromMask(mask);
 
         public bool ContainsMask(FilterMask mask) => entity.ContainsMask(mask);
+
+        public override int GetHashCode()
+        {
+            return entity.GetHashCode();
+        }
+
+        public override bool Equals(object other)
+        {
+            return entity.Equals(other);
+        }
     }
 }
