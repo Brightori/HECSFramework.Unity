@@ -27,10 +27,6 @@ namespace Systems
         private void LinkActions()
         {
             var actionsComponent = Owner.GetHECSComponent<InputActionsComponent>();
-            //var test = Owner.GetHECSComponent<InputActionsComponent>().Actions.ToJson();
-            //var inputFromJson = InputActionAsset.FromJson(test);
-
-            //var defaultActionMap = inputFromJson.actionMaps[0];
             var defaultActionMap = actionsComponent.Actions.actionMaps[0];
             defaultActionMap.Enable();
 
