@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core;
+using System;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -6,7 +7,7 @@ namespace HECSFramework.Unity
     [CreateAssetMenu(fileName = "identifier", menuName = "Identifiers/Identifier")]
     public class IdentifierContainer : ScriptableObject, IIdentifier
     {
-        private int id; 
+        [NonSerialized] private int id; 
 
         public int Id 
         {
