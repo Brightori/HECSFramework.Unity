@@ -46,6 +46,7 @@ namespace HECSFramework.Unity
 
         partial void NetworkAwake();
         partial void InitNetWorkEntities();
+        partial void StrategiesInit();
 
         private void InitEntities()
         {
