@@ -42,6 +42,7 @@ namespace HECSFramework.Unity
             sceneManager = new Entity("SceneManager");
             BaseAwake();
             NetworkAwake();
+            StrategiesInit();
         }
 
         partial void NetworkAwake();
