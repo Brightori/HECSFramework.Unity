@@ -195,7 +195,7 @@ namespace Predicates
     [Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : IPredicate
     {
-        public bool IsReady(IEntity target)
+        public bool IsReady(IEntity target, IEntity owner = null)
         {
         }
     }

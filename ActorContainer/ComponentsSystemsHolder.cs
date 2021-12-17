@@ -68,7 +68,7 @@ namespace HECSFramework.Unity
 #endif
         public void ClearDeletedBluePrints()
         {
-            if (Parent == null) return;
+            if (EntityManager.IsAlive || Parent == null) return;
             
             var path = AssetDatabase.GetAssetPath(Parent);
             var allSo = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
