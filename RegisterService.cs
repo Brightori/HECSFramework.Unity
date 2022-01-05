@@ -1,6 +1,4 @@
-﻿using HECSFramework.Unity;
-
-namespace HECSFramework.Core
+﻿namespace HECSFramework.Core
 {
     public partial class RegisterService
     {

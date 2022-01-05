@@ -1,5 +1,4 @@
 ﻿using HECSFramework.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace HECSFramework.Unity
