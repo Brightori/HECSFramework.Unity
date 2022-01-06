@@ -67,9 +67,16 @@ namespace HECSFramework.Unity
 
         private static void SaveToFile(string data)
         {
+            var find = Directory.GetFiles(Application.dataPath, "IdentifiersMaps.cs", SearchOption.AllDirectories);
+
             var pathToDirectory = InstallHECS.scriptPath + InstallHECS.HECSGenerated;
             var path = pathToDirectory + "IdentifiersMaps.cs";
 
+            if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
+            {
+                path = find[0];
+            }
+            
             try
             {
                 if (!Directory.Exists(pathToDirectory))

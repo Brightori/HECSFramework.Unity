@@ -7,6 +7,8 @@ using UnityEditor;
 using UnityEngine;
 using HECSFramework.Core.Helpers;
 using HECSFramework.Core.Generator;
+using System.IO;
+using System;
 
 public class DocumentationWindow : OdinEditorWindow
 {
@@ -172,7 +174,7 @@ public class DocumentationWindow : OdinEditorWindow
     [HideLabel]
     public class DocumentationView : ScriptableObject
     {
-        [CustomValueDrawer(nameof(DrawLabelAsBox))]
+        [CustomValueDrawer(nameof(DrawLabelAsBox))][InlineButton(nameof(Open))]
         public string Name;
 
         [TextArea(3, 5), ReadOnly]
@@ -180,10 +182,13 @@ public class DocumentationWindow : OdinEditorWindow
 
         private string GroupName => Name.Replace("Component", "").Replace("BluePrint", "");
 
+        [NonSerialized] private string fullName;
+
         public DocumentationView Init(DocumentationRepresentation documentationRepresentation)
         {
             Name = documentationRepresentation.DataType;
-            
+            fullName = documentationRepresentation.DataType;
+
             foreach (var c in documentationRepresentation.Comments)
                 Comments += c + CParse.Dot+"\n";
             
@@ -195,6 +200,15 @@ public class DocumentationWindow : OdinEditorWindow
             Sirenix.Utilities.Editor.SirenixEditorGUI.BeginBox(GroupName);
             Sirenix.Utilities.Editor.SirenixEditorGUI.EndBox();
             return GroupName;
+        }
+
+        private void Open()
+        {
+            DirectoryInfo lookingFor = new DirectoryInfo(Application.dataPath);
+            var find = lookingFor.GetFiles(fullName + ".cs", SearchOption.AllDirectories);
+
+            if (find != null && find.Length > 0)
+                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(find[0].FullName, 0, 0);
         }
     }
 

@@ -24,7 +24,7 @@ namespace HECSFramework.Unity
 
         public int ContainerIndex => IndexGenerator.GenerateIndex(name);
 
-        private void OnEnable()
+        public virtual void OnEnable()
         {
             holder.Parent = this;
         }
@@ -34,7 +34,7 @@ namespace HECSFramework.Unity
             return holder.components.Any(x => x.GetHECSComponent.GetTypeHashCode == componentBluePrint.GetHECSComponent.GetTypeHashCode);
         }
 
-        public bool IsHaveComponent<T>()
+        public virtual bool IsHaveComponent<T>()
         {
             return holder.components.Any(x => x.GetHECSComponent is T);
         }
@@ -42,6 +42,17 @@ namespace HECSFramework.Unity
         public bool IsHaveComponent<T>(T component)
         {
             return IsHaveComponent<T>();
+        }
+
+        public virtual T GetComponent<T>() where T: IComponent
+        {
+            foreach (var c in holder.components)
+            {
+                if (c.GetHECSComponent is T needed)
+                    return needed;
+            }
+
+            return default;
         }
 
         /// <summary>
@@ -137,6 +148,7 @@ namespace HECSFramework.Unity
 
             var window = EditorWindow.GetWindow<AddBluePrintWindow>();
             window.Init(new List<EntityContainer> { this }, TypeOfBluePrint.Component);
+            OnEnable();
         }
 
         [Button(ButtonSizes.Large)]

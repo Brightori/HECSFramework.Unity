@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Object = UnityEngine.Object;
 using HECSFramework.Core;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine;
-
 #endif
 
 namespace HECSFramework.Unity
@@ -17,31 +16,47 @@ namespace HECSFramework.Unity
     {
 #if DeveloperMode
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveComponent))]
+        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), CustomRemoveElementFunction = nameof(RemoveComponent), NumberOfItemsPerPage = 99)]
 #elif ModifyMode
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveComponent))]
+        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), CustomRemoveElementFunction = nameof(RemoveComponent), NumberOfItemsPerPage = 99)]
 #else
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false)]
+        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), HideRemoveButton = true, DraggableItems = false, NumberOfItemsPerPage = 99)]
 #endif
         [Searchable, HideIf("@this.components.Count == 0")]
         public List<ComponentBluePrint> components = new List<ComponentBluePrint>();
 
 #if DeveloperMode
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem))]
+        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), NumberOfItemsPerPage = 99)]
 #elif ModifyMode
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), Expanded = false)]
+        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), Expanded = false, NumberOfItemsPerPage = 99)]
 #else
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, Expanded = false)]
+        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, Expanded = false, NumberOfItemsPerPage = 99)]
 #endif
         [Searchable, HideIf("@this.systems.Count == 0")]
         public List<SystemBaseBluePrint> systems = new List<SystemBaseBluePrint>();
+        
+        public Color GetColor(int index, Color defaultColor, List<ComponentBluePrint> list)
+        {
+#if UNITY_EDITOR
+	        var baseColor =  EditorGUIUtility.isProSkin
+		        ? new Color32(56, 56, 56, 255)
+		        : new Color32(194, 194, 194, 255);
+#else
+	        var baseColor =  new Color();
+#endif
+	        
+	        if (!list[index].IsColorNeeded) return defaultColor;
+	        if (list[index].IsOverride) return baseColor + new Color(.0375f, .0375f, 0);
+	        return baseColor + new Color(0, .0375f, 0);
+        }
 
 #if UNITY_EDITOR
+
         [HideInInspector]
 #endif
         public EntityContainer Parent;
@@ -68,7 +83,7 @@ namespace HECSFramework.Unity
 #endif
         public void ClearDeletedBluePrints()
         {
-            if (EntityManager.IsAlive || Parent == null) return;
+            if (Parent == null) return;
             
             var path = AssetDatabase.GetAssetPath(Parent);
             var allSo = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);

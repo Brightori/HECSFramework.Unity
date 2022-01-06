@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using static DocumentationWindow;
 
 public class DocumentationSearchWinow : OdinEditorWindow

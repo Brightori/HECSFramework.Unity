@@ -11,6 +11,8 @@ namespace HECSFramework.Unity
     {
         public abstract IComponent GetHECSComponent { get; }
         public virtual bool IsVisible { get; } = true;
+        public virtual bool IsOverride { get; set; }
+        public virtual bool IsColorNeeded { get; set; }
     }
     
     public class ComponentBluePrintContainer<T> : ComponentBluePrint, IEditorInit where T : class, IComponent, new()

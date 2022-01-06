@@ -33,6 +33,15 @@ namespace HECSFramework.Unity
             entity.GenerateGuid();
             return entity;
         }
+        
+        public static EntityModel GetEntityModel(this EntityContainer entityContainer, int worldIndex = 0)
+        {
+            var entity = new EntityModel(worldIndex);
+            entityContainer.Init(entity);
+            entity.GetOrAddComponent<ActorContainerID>(HMasks.ActorContainerID) .ID = entityContainer.name;
+            entity.GenerateGuid();
+            return entity;
+        }
 
         public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
@@ -57,9 +66,11 @@ namespace HECSFramework.Unity
 #if UNITY_EDITOR
         public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
+            var entityModel = new EntityModel(0);
+            entityContainer.Init(entityModel);
             var unpack = new UnpackContainer(entityContainer);
-            var viewReferenceComponent = unpack.Components.FirstOrDefault(x => x is ViewReferenceComponent) as ViewReferenceComponent;
-            var actorID = unpack.GetComponent<ActorContainerID>();
+            var viewReferenceComponent = entityModel.GetViewReferenceComponent();
+            var actorID = entityModel.GetActorContainerID();
 
             if (viewReferenceComponent == null)
                 throw new Exception("нет вью рефа у " + actorID.ID);
@@ -68,7 +79,7 @@ namespace HECSFramework.Unity
             var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
 
             if (needLoadContainer)
-                unpack.InitEntity(actorPrfb);
+                entityContainer.Init(actorPrfb);
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;

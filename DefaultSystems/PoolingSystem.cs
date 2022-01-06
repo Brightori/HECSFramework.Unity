@@ -63,7 +63,7 @@ namespace Systems
                     if (setFromContainer)
                     {
                         if (viewReferenceComponent.Owner.TryGetHecsComponent(ActorContainerIDMask, out ActorContainerID container))
-{
+                        {
                             var loadedContainer = await GetEntityContainerFromPool(container.ID);
                             loadedContainer.Init(newActor);
                         }
@@ -109,7 +109,7 @@ namespace Systems
             else
             {
                 var task = Addressables.LoadAssetAsync<GameObject>(assetReference).Task;
-                var objFromRef = await  task;
+                var objFromRef = await task;
                 var newView = MonoBehaviour.Instantiate(objFromRef);
 
                 if (pooledGOs.ContainsKey(key))
@@ -182,14 +182,16 @@ namespace Systems
             if (gameObject.TryGetComponent(out IPoolableView poolableView))
             {
                 poolableView.Stop();
-                pooledGOs[poolableView.AddressableKey].Release(gameObject);
-                poolableView.View.transform.SetParent(null);
-                poolableView.View.SetActive(false);
+
+                if (pooledGOs.ContainsKey(poolableView.AddressableKey))
+                {
+                    pooledGOs[poolableView.AddressableKey].Release(gameObject);
+                    poolableView.View.transform.SetParent(null);
+                    poolableView.View.SetActive(false);
+                    return;
+                }
             }
-            else
-            {
-                MonoBehaviour.Destroy(gameObject);
-            }
+            MonoBehaviour.Destroy(gameObject);
         }
 
         public GameObject GetNewInstance(GameObject actor)

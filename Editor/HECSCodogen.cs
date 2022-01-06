@@ -39,7 +39,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         }
         catch (Exception e)
         {
-            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть окно или юнити");
+            Debug.LogWarning("Р®РЅРёС‚Рё С€Р°Р»РёС‚, РїРѕРїСЂРѕР±СѓР№С‚Рµ РїРµСЂРµРѕС‚РєСЂС‹С‚СЊ РѕРєРЅРѕ РёР»Рё СЋРЅРёС‚Рё");
         }
     }
 

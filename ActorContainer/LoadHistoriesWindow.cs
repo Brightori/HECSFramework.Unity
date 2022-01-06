@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using static HECSFramework.Unity.EntityContainer;
 
 public class LoadHistoriesWindow : OdinEditorWindow
 {

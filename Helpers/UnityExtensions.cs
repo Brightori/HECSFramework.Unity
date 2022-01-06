@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HECSFramework.Core;
 using UnityEngine;
 
 namespace Helpers

@@ -187,7 +187,6 @@ namespace HECSFrameWork
     @"using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
-using HECSFramework.Documentation;
 using System;
 
 namespace Predicates
@@ -195,7 +194,7 @@ namespace Predicates
     [Serializable][Documentation(Doc.NONE, """")]
     public class #SCRIPTNAME# : IPredicate
     {
-        public bool IsReady(IEntity target, IEntity owner = null)
+        public bool IsReady(IEntity target)
         {
         }
     }
@@ -213,7 +212,6 @@ namespace Predicates
             var template =
     @"using HECSFrameWork;
 using HECSFrameWork.Components;
-using HECSFramework.Documentation;
 using Commands;
 using Components;
 using System;
@@ -240,7 +238,6 @@ namespace Abilities
         {
             var template =
     @"using HECSFramework.Core;
-using HECSFramework.Documentation;
 
 namespace Commands
 {
@@ -262,7 +259,6 @@ namespace Commands
         {
             var template =
     @"using System;
-using HECSFramework.Documentation;
 using HECSFramework.Unity;
 using HECSFramework.Core;
 using UnityEngine;
@@ -296,7 +292,6 @@ namespace Systems
 
             var template =
     @"using HECSFramework.Core;
-using HECSFramework.Documentation;
 using HECSFramework.Unity;
 using System;
 using UnityEngine;
