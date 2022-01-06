@@ -36,7 +36,7 @@ namespace HECSFramework.Unity
         
         public static EntityModel GetEntityModel(this EntityContainer entityContainer, int worldIndex = 0)
         {
-            var entity = new EntityModel(worldIndex);
+            var entity = new EntityModel(worldIndex, entityContainer.name);
             entityContainer.Init(entity);
             entity.GetOrAddComponent<ActorContainerID>(HMasks.ActorContainerID) .ID = entityContainer.name;
             entity.GenerateGuid();
@@ -66,7 +66,7 @@ namespace HECSFramework.Unity
 #if UNITY_EDITOR
         public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
-            var entityModel = new EntityModel(0);
+            var entityModel = new EntityModel(0, entityContainer.name);
             entityContainer.Init(entityModel);
             var unpack = new UnpackContainer(entityContainer);
             var viewReferenceComponent = entityModel.GetViewReferenceComponent();
