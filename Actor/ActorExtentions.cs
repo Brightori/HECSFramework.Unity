@@ -45,19 +45,18 @@ namespace HECSFramework.Unity
 
         public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
-            var unpack = new UnpackContainer(entityContainer);
-            var viewReferenceComponent = (unpack.Components.FirstOrDefault(x => x is ViewReferenceComponent)) as ViewReferenceComponent;
-            var actorID = unpack.GetComponent<ActorContainerID>();
+            var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
+            var actorID = entityContainer.name;
 
             if (viewReferenceComponent == null)
-                throw new Exception("нет вью рефа у " + actorID.ID);
+                throw new Exception("нет вью рефа у " + actorID);
 
             var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
             var prefab = await asynData.Task;
             var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
 
             if (needLoadContainer)
-                unpack.InitEntity(actorPrfb);
+                entityContainer.Init(actorPrfb);
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
