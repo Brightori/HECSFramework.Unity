@@ -21,7 +21,8 @@ namespace Systems
                 return;
             }
 
-            if (!actor.ContainsMask(ref AfterLifeTagComponentMask) && actor.TryGetHecsComponent(ViewDestructionDelayedComponentMask, out ViewDestructionDelayedComponent delayedComponent))
+            if (!actor.ContainsMask(ref AfterLifeTagComponentMask) && !actor.ContainsMask(ref PoolableTagComponentMask)
+                && actor.TryGetHecsComponent(ViewDestructionDelayedComponentMask, out ViewDestructionDelayedComponent delayedComponent))
             {
                 var delay = delayedComponent.Delay;
 
