@@ -61,6 +61,8 @@ namespace Systems
 
         private void SendCommandToAllListeners<T>(T command) where T : IGlobalCommand
         {
+            if (!EntityManager.IsAlive) return;
+
             IEntity[] array = inputListeners.DirectAccess();
             var lenght = inputListeners.Count;
             for (int i = 0; i < lenght; i++)
