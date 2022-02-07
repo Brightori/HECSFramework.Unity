@@ -11,6 +11,9 @@ namespace HECSFramework.Unity
 {
     public static partial class ActorExtentions
     {
+        private static HECSMask containerMask = HMasks.GetMask<ActorContainerID>();
+        private static HECSMask viewReferenceMask = HMasks.GetMask<ActorContainerID>();
+
         public static IActor AsActor(this IEntity entity)
         {
             return entity as IActor;
@@ -38,7 +41,7 @@ namespace HECSFramework.Unity
         {
             var entity = new EntityModel(worldIndex, entityContainer.name);
             entityContainer.Init(entity);
-            entity.GetOrAddComponent<ActorContainerID>(HMasks.ActorContainerID) .ID = entityContainer.name;
+            entity.GetOrAddComponent<ActorContainerID>(containerMask) .ID = entityContainer.name;
             entity.GenerateGuid();
             return entity;
         }
@@ -68,8 +71,8 @@ namespace HECSFramework.Unity
             var entityModel = new EntityModel(0, entityContainer.name);
             entityContainer.Init(entityModel);
             var unpack = new UnpackContainer(entityContainer);
-            var viewReferenceComponent = entityModel.GetViewReferenceComponent();
-            var actorID = entityModel.GetActorContainerID();
+            var viewReferenceComponent = entityModel.GetHECSComponent<ViewReferenceComponent>(ref viewReferenceMask);
+            var actorID = entityModel.GetHECSComponent<ActorContainerID>(ref containerMask);
 
             if (viewReferenceComponent == null)
                 throw new Exception("нет вью рефа у " + actorID.ID);
