@@ -17,7 +17,7 @@ namespace HECSFramework.Unity
 
         private Entity entity;
         public GameObject GameObject => gameObject;
-        public ICommandService EntityCommandService => entity.EntityCommandService;
+        public EntityLocalCommandService EntityCommandService => entity.EntityCommandService;
         public int WorldId => entity.WorldId;
         public World World => entity.World;
         public Guid GUID => entity.GUID;
@@ -35,6 +35,8 @@ namespace HECSFramework.Unity
 
         public HECSMultiMask ComponentsMask => entity.ComponentsMask;
 
+        public LocalComponentListenersService RegisterComponentListenersService => entity.RegisterComponentListenersService;
+
         public void AddHecsComponent(IComponent component, IEntity owner, bool silently = false)
         {
             entity.AddHecsComponent(component, this, silently);
@@ -51,7 +53,7 @@ namespace HECSFramework.Unity
             entity.SetGuid(Guid.NewGuid());
         }
 
-        public void Command<T>(T command) where T : ICommand => entity.Command(command);
+        public void Command<T>(T command) where T : struct, ICommand => entity.Command(command);
         public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
 
         private void Awake()

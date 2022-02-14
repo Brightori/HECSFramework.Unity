@@ -59,7 +59,7 @@ namespace Systems
             SendCommandToAllListeners(command);
         }
 
-        private void SendCommandToAllListeners<T>(T command) where T : IGlobalCommand
+        private void SendCommandToAllListeners<T>(T command) where T : struct, IGlobalCommand
         {
             if (!EntityManager.IsAlive) return;
 
