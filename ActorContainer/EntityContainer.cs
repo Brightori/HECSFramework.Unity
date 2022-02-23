@@ -241,7 +241,7 @@ namespace HECSFramework.Unity
         private void OnValidate()
         {
 #if UNITY_EDITOR
-            if (Application.isPlaying)
+            if (Application.isPlaying || EntityManager.IsAlive)
                 return;
             holder.OnValidate(this);
 #endif
