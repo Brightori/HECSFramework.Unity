@@ -69,7 +69,7 @@ namespace HECSFramework.Unity
         {
             var find = Directory.GetFiles(Application.dataPath, "IdentifiersMaps.cs", SearchOption.AllDirectories);
 
-            var pathToDirectory = InstallHECS.scriptPath + InstallHECS.HECSGenerated;
+            var pathToDirectory = InstallHECS.ScriptPath + InstallHECS.HECSGenerated;
             var path = pathToDirectory + "IdentifiersMaps.cs";
 
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))

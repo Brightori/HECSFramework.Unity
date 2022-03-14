@@ -11,7 +11,7 @@ namespace HECSFramework.Unity.Editor
         #region fields
         private static string Abilities = "/Abilities/";
         private static string Actors = "/Actors/";
-        private static string BluePrints = "/BluePrints/";
+        public static string BluePrints = "/BluePrints/";
         private static string Predicates = "/Predicates/";
         private static string Commands = "/Commands/";
         private static string Components = "/Components/";
@@ -21,7 +21,7 @@ namespace HECSFramework.Unity.Editor
         public readonly static string HECSGenerated = "/HECSGenerated/";
 
         //BluePrintsFolders
-        private static string Identifiers = "/Identifiers/";
+        public static string Identifiers = "/Identifiers/";
         private static string GlobalEntities = "/GlobalEntities/";
         private static string Presets = "/Presets/";
 
@@ -42,8 +42,8 @@ namespace HECSFramework.Unity.Editor
         private static string AbilityTemplate = "/84a-HECS__HECSAbility-Ability.cs.txt";
         private static string PredicateTemplate = "/85a-HECS__HECSPredicate-Predicate.cs.txt";
 
-        public static string dataPath => Application.dataPath;
-        public static string scriptPath => Application.dataPath + "/Scripts/";
+        public static string DataPath => Application.dataPath;
+        public static string ScriptPath => Application.dataPath + "/Scripts/";
 
         private static string ComponentID = "ComponentID.cs";
         private static string GameController = "GameController.cs";
@@ -64,7 +64,7 @@ namespace HECSFramework.Unity.Editor
         #region ReservedNameSpaces
         private static void CreateReserveNamespace()
         {
-            var path = (scriptPath + Helpers + ReserveNamspaces).Replace("//", "/");
+            var path = (ScriptPath + Helpers + ReserveNamspaces).Replace("//", "/");
 
             if (File.Exists(path))
                 return;
@@ -88,7 +88,7 @@ namespace Actors { }
         #region RegisterService
         private static void CreatePartialRegisterService()
         {
-            var path = (scriptPath + Helpers + RegisterService).Replace("//", "/");
+            var path = (ScriptPath + Helpers + RegisterService).Replace("//", "/");
 
             if (File.Exists(path))
                 return;
@@ -118,40 +118,40 @@ namespace HECSFrameWork
         #region CreateFolders
         private static void CreateFolders()
         {
-            CheckFolder(scriptPath);
-            CheckFolder(scriptPath + Abilities);
-            CheckFolder(scriptPath + Actors);
-            CheckFolder(scriptPath + BluePrints);
-            CheckFolder(scriptPath + Commands);
-            CheckFolder(scriptPath + Components);
-            CheckFolder(scriptPath + Helpers);
-            CheckFolder(scriptPath + Systems);
-            CheckFolder(scriptPath + Predicates);
-            CheckFolder(scriptPath + Strategies);
-            CheckFolder(scriptPath + HECSGenerated);
+            CheckFolder(ScriptPath);
+            CheckFolder(ScriptPath + Abilities);
+            CheckFolder(ScriptPath + Actors);
+            CheckFolder(ScriptPath + BluePrints);
+            CheckFolder(ScriptPath + Commands);
+            CheckFolder(ScriptPath + Components);
+            CheckFolder(ScriptPath + Helpers);
+            CheckFolder(ScriptPath + Systems);
+            CheckFolder(ScriptPath + Predicates);
+            CheckFolder(ScriptPath + Strategies);
+            CheckFolder(ScriptPath + HECSGenerated);
 
             //ScriptBluePrintsFolders
-            CheckFolder(scriptPath + BluePrints + AbilitiesBlueprints);
-            CheckFolder(scriptPath + BluePrints + PredicatesBlueprints);
-            CheckFolder(scriptPath + BluePrints + ComponentsBluePrints);
-            CheckFolder(scriptPath + BluePrints + SystemsBluePrint);
+            CheckFolder(ScriptPath + BluePrints + AbilitiesBlueprints);
+            CheckFolder(ScriptPath + BluePrints + PredicatesBlueprints);
+            CheckFolder(ScriptPath + BluePrints + ComponentsBluePrints);
+            CheckFolder(ScriptPath + BluePrints + SystemsBluePrint);
 
             //BluePrintsFolders
-            CheckFolder(dataPath + BluePrints);
-            CheckFolder(dataPath + BluePrints + Identifiers);
-            CheckFolder(dataPath + BluePrints + Abilities);
-            CheckFolder(dataPath + BluePrints + GlobalEntities);
-            CheckFolder(dataPath + BluePrints + Strategies);
-            CheckFolder(dataPath + BluePrints + Presets);
+            CheckFolder(DataPath + BluePrints);
+            CheckFolder(DataPath + BluePrints + Identifiers);
+            CheckFolder(DataPath + BluePrints + Abilities);
+            CheckFolder(DataPath + BluePrints + GlobalEntities);
+            CheckFolder(DataPath + BluePrints + Strategies);
+            CheckFolder(DataPath + BluePrints + Presets);
 
             //MonoBehaviourComponents
-            CheckFolder(scriptPath + Components + MonoBehaviourComponents);
+            CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
 
             //ScriptTemplates
-            CheckFolder(scriptPath + Components + MonoBehaviourComponents);
+            CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
         }
 
-        private static void CheckFolder(string path)
+        public static void CheckFolder(string path)
         {
             var folder = new DirectoryInfo(path);
 
@@ -163,21 +163,21 @@ namespace HECSFrameWork
         #region Templates
         private static void CreateTemplates()
         {
-            CheckFolder(dataPath + ScriptTemplates);
+            CheckFolder(DataPath + ScriptTemplates);
 
-            if (!File.Exists(dataPath + ScriptTemplates + ComponentsTemplate))
+            if (!File.Exists(DataPath + ScriptTemplates + ComponentsTemplate))
                 CreateComponentsTemplate();
 
-            if (!File.Exists(dataPath + ScriptTemplates + SystemTemplate))
+            if (!File.Exists(DataPath + ScriptTemplates + SystemTemplate))
                 CreateSystemTemplate();
 
-            if (!File.Exists(dataPath + ScriptTemplates + CommandTemplate))
+            if (!File.Exists(DataPath + ScriptTemplates + CommandTemplate))
                 CreateCommandTemplate();
 
-            if (!File.Exists(dataPath + ScriptTemplates + AbilityTemplate))
+            if (!File.Exists(DataPath + ScriptTemplates + AbilityTemplate))
                 CreateAbilityTemplate();
 
-            if (!File.Exists(dataPath + ScriptTemplates + PredicateTemplate))
+            if (!File.Exists(DataPath + ScriptTemplates + PredicateTemplate))
                 CreatePredicateTemplate();
         }
 
@@ -200,7 +200,7 @@ namespace Predicates
     }
 }";
 
-            var path = (dataPath + ScriptTemplates + PredicateTemplate).Replace("//", "/");
+            var path = (DataPath + ScriptTemplates + PredicateTemplate).Replace("//", "/");
             File.WriteAllText(path, template, Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
@@ -227,7 +227,7 @@ namespace Abilities
     }
 }";
 
-            var path = (dataPath + ScriptTemplates + AbilityTemplate).Replace("//", "/");
+            var path = (DataPath + ScriptTemplates + AbilityTemplate).Replace("//", "/");
             File.WriteAllText(path, template, Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
@@ -248,7 +248,7 @@ namespace Commands
 }";
 
 
-            var path = (dataPath + ScriptTemplates + CommandTemplate).Replace("//", "/");
+            var path = (DataPath + ScriptTemplates + CommandTemplate).Replace("//", "/");
             File.WriteAllText(path, template, Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
@@ -276,7 +276,7 @@ namespace Systems
 }";
 
 
-            var path = (dataPath + ScriptTemplates + SystemTemplate).Replace("//", "/");
+            var path = (DataPath + ScriptTemplates + SystemTemplate).Replace("//", "/");
             File.WriteAllText(path, template, Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
@@ -285,7 +285,7 @@ namespace Systems
 
         private static void CreateComponentsTemplate()
         {
-            var path = (dataPath + ScriptTemplates + ComponentsTemplate).Replace("//", "/");
+            var path = (DataPath + ScriptTemplates + ComponentsTemplate).Replace("//", "/");
 
             if (File.Exists(path))
                 return;
@@ -317,7 +317,7 @@ namespace Components
         #region CreateComponentID
         private static void CreateComponentsID()
         {
-            var path = (scriptPath + Components + ComponentID).Replace("//", "/");
+            var path = (ScriptPath + Components + ComponentID).Replace("//", "/");
 
             if (File.Exists(path))
                 return;
@@ -351,7 +351,7 @@ namespace HECSFrameWork.Components
         #region CreateGameController
         private static void CreateGameController()
         {
-            var path = (scriptPath + GameController).Replace("//", "/");
+            var path = (ScriptPath + GameController).Replace("//", "/");
 
             if (File.Exists(path))
                 return;
