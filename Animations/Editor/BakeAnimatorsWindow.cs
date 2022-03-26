@@ -2,14 +2,17 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Animancer.Editor;
 using HECSFramework.Core;
 using HECSFramework.Core.Generator;
+using HECSFramework.Serialize;
 using HECSFramework.Unity.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using AnimatorState = UnityEditor.Animations.AnimatorState;
 
 namespace HECSFramework.Unity
 {
@@ -23,9 +26,28 @@ namespace HECSFramework.Unity
         private const string SaveAnimatorHelpers = "SaveAnimatorHelpers";
         private const string EmptyAnimators = "SaveAnimatorHelpers";
         private const char Split = '|';
-
+        
         [OnValueChanged("UpdateAnimators")]
         public AnimatorController[] animators = new AnimatorController[0];
+
+        [BoxGroup("Settings")]
+        [HorizontalGroup("Settings/Split", Width = 100, LabelWidth = 100)]
+        [LabelText("Serialization")]
+        [OnInspectorInit("@SerializationAnimatorState")]
+        public bool SerializationAnimatorState
+        {
+            get => PlayerPrefs.GetInt(nameof(SerializationAnimatorState), 0) == 1;
+            set => PlayerPrefs.SetInt(nameof(SerializationAnimatorState), value ? 1 : 0);
+        }
+
+        [LabelText("| Networking")]
+        [HorizontalGroup("Settings/Split/Next", Width = 100, LabelWidth = 100)]
+        [OnInspectorInit("@AnimatorStateNetworking")]
+        public bool AnimatorStateNetworking
+        {
+            get => PlayerPrefs.GetInt(nameof(AnimatorStateNetworking), 0) == 1;
+            set => PlayerPrefs.SetInt(nameof(AnimatorStateNetworking), value ? 1 : 0);
+        }
 
 
         [MenuItem("HECS Options/Animations/BakeAnimationHelper")]
@@ -72,16 +94,22 @@ namespace HECSFramework.Unity
             PlayerPrefs.Save();
         }
 
-        [Button]
+        [PropertySpace(20)]
+        [Button(ButtonSizes.Large)]
         private void GenerateAnimatorHelpers()
         {
-
             var tree = new TreeSyntaxNode();
             var fields = new TreeSyntaxNode();
             var constructor = new TreeSyntaxNode();
             var initMethods = new TreeSyntaxNode();
 
+            if (SerializationAnimatorState)
+            {
+                tree.Add(new UsingSyntax("HECSFramework.Serialize"));
+            }
+            
             tree.Add(new UsingSyntax("System.Collections.Generic", 1));
+
             tree.Add(new NameSpaceSyntax("HECSFramework.Unity"));
             tree.Add(new LeftScopeSyntax());
             tree.Add(new TabSimpleSyntax(1, "public static partial class AnimatorManager"));
@@ -129,6 +157,12 @@ namespace HECSFramework.Unity
             methodBody.Add(dictionaryBody);
             methodBody.Add(new RightScopeSyntax(3, true));
             methodBody.Add(new ParagraphSyntax());
+
+            if (SerializationAnimatorState)
+            {
+                methodBody.Add(GetStateResolver(animatorController));
+            }
+            
             methodBody.Add(new TabSimpleSyntax(3, $"{animatorController.name} = new {nameof(AnimatorHelper)}({dictionaryName});"));
             methodBody.Add(new TabSimpleSyntax(3, $"animhelpers.Add({CParse.Quote}{animatorController.name}{CParse.Quote}, {animatorController.name});"));
 
@@ -156,6 +190,72 @@ namespace HECSFramework.Unity
                 }
             }
 
+            return tree;
+        }
+
+        private ISyntax GetStateResolver(AnimatorController animatorController)
+        {
+            var tree = new TreeSyntaxNode();
+            var dictBoolBody = new TreeSyntaxNode();
+            var dictIntBody = new TreeSyntaxNode();
+            var dictFloatBody = new TreeSyntaxNode();
+
+            tree.Add(new TabSimpleSyntax(3, "var resolver = new AnimatorStateResolver"));
+            tree.Add(new LeftScopeSyntax(3));
+            
+            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.BoolStates), 
+                "int", nameof(BoolParameterResolver), dictBoolBody, true));
+            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.IntStates),
+                "int", nameof(IntParameterResolver), dictIntBody, true));
+            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.FloatStates),
+                "int", nameof(FloatParameterResolver), dictFloatBody, true));
+
+            tree.Add(new RightScopeSyntax(3, true));
+            tree.Add(new ParagraphSyntax());
+            tree.Add(new TabSimpleSyntax(3, $"animStateProviders.Add({CParse.Quote}{animatorController.name}{CParse.Quote}, resolver);"));
+
+            foreach (var p in animatorController.parameters)
+            {
+                switch (p.type)
+                {
+                    case AnimatorControllerParameterType.Float:
+                        dictFloatBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(FloatParameterResolver)}()"));
+                        break;
+                    case AnimatorControllerParameterType.Int:
+                        dictIntBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(IntParameterResolver)}()"));
+                        break;
+                    case AnimatorControllerParameterType.Bool:
+                        dictBoolBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(BoolParameterResolver)}()"));
+                        break;
+                    case AnimatorControllerParameterType.Trigger:
+                        break;
+                }
+            }
+
+            return tree;
+        }
+
+        private ISyntax GetDictionaryStroke(int step, string key, string value)
+        {
+            var tree = new TreeSyntaxNode();
+            tree.Add(new TabSimpleSyntax(step, $"{CParse.LeftScope}{key}, {value} {CParse.RightScope},"));
+            return tree;
+        }
+
+        private ISyntax GetDictionary(int initialTab, string name, string key, string value, ISyntax bodyOfDic, bool isCommaAtEnd = false, bool isSemicolonAtEnd = false)
+        {
+            var tree = new TreeSyntaxNode();
+            tree.Add(new TabSimpleSyntax(initialTab, $"{name} = new Dictionary<{key},{value}>()"));
+            tree.Add(new LeftScopeSyntax(initialTab));
+            tree.Add(bodyOfDic);
+
+            if (isCommaAtEnd)
+                tree.Add(new RightScopeSyntax(initialTab, false));
+            else if (isSemicolonAtEnd)
+                tree.Add(new RightScopeSyntax(initialTab, true));
+            else
+                tree.Add(new RightScopeSyntax(initialTab));
+            
             return tree;
         }
 

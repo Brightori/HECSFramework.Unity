@@ -19,7 +19,7 @@ namespace Components
 
         public void Init()
         {
-            Actor.TryGetComponent(out animator);
+            Actor.TryGetComponent(out animator, true);
 
             animatorHelper = AnimatorManager.GetAnimatorHelper(animator.runtimeAnimatorController.name);
 
