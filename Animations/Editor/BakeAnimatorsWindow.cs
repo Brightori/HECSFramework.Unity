@@ -2,10 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using Animancer.Editor;
 using HECSFramework.Core;
 using HECSFramework.Core.Generator;
-using HECSFramework.Serialize;
 using HECSFramework.Unity.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
@@ -48,7 +46,6 @@ namespace HECSFramework.Unity
             get => PlayerPrefs.GetInt(nameof(AnimatorStateNetworking), 0) == 1;
             set => PlayerPrefs.SetInt(nameof(AnimatorStateNetworking), value ? 1 : 0);
         }
-
 
         [MenuItem("HECS Options/Animations/BakeAnimationHelper")]
         public static void BakeAnimationsWindow()
@@ -203,12 +200,12 @@ namespace HECSFramework.Unity
             tree.Add(new TabSimpleSyntax(3, "var resolver = new AnimatorStateResolver"));
             tree.Add(new LeftScopeSyntax(3));
             
-            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.BoolStates), 
-                "int", nameof(BoolParameterResolver), dictBoolBody, true));
-            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.IntStates),
-                "int", nameof(IntParameterResolver), dictIntBody, true));
-            tree.Add(GetDictionary(4, nameof(AnimatorStateResolver.FloatStates),
-                "int", nameof(FloatParameterResolver), dictFloatBody, true));
+            tree.Add(GetDictionary(4, "BoolStates", 
+                "int", "BoolParameterResolver", dictBoolBody, true));
+            tree.Add(GetDictionary(4, "IntStates",
+                "int", "IntParameterResolver", dictIntBody, true));
+            tree.Add(GetDictionary(4, "FloatStates",
+                "int", "FloatParameterResolver", dictFloatBody, true));
 
             tree.Add(new RightScopeSyntax(3, true));
             tree.Add(new ParagraphSyntax());
@@ -219,13 +216,13 @@ namespace HECSFramework.Unity
                 switch (p.type)
                 {
                     case AnimatorControllerParameterType.Float:
-                        dictFloatBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(FloatParameterResolver)}()"));
+                        dictFloatBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {"FloatParameterResolver"}()"));
                         break;
                     case AnimatorControllerParameterType.Int:
-                        dictIntBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(IntParameterResolver)}()"));
+                        dictIntBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {"IntParameterResolver"}()"));
                         break;
                     case AnimatorControllerParameterType.Bool:
-                        dictBoolBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {nameof(BoolParameterResolver)}()"));
+                        dictBoolBody.Add(GetDictionaryStroke(5, Animator.StringToHash(p.name).ToString(), $"new {"BoolParameterResolver"}()"));
                         break;
                     case AnimatorControllerParameterType.Trigger:
                         break;
