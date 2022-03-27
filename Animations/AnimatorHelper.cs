@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using HECSFramework.Serialize;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -16,8 +15,6 @@ namespace HECSFramework.Unity
             else
                 throw new System.Exception("we dont have animator helper for "+animatorName);
         }
-
-       
     }
 
     public class AnimatorHelper
