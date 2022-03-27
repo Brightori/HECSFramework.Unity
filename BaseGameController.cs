@@ -13,6 +13,7 @@ namespace HECSFramework.Unity
         [SerializeField] private ActorContainer gameLogicContainer = default;
         [SerializeField] private ActorContainer uiManagerContainer = default;
         [SerializeField] private ActorContainer sceneManagerContainer = default;
+        [SerializeField] private ActorContainer inputManagerContainer = default;
 
         private EntityManager entityManager;
         private GlobalUpdateSystem updateSystem;
@@ -21,6 +22,7 @@ namespace HECSFramework.Unity
         private IEntity player;
         private IEntity uiManager;
         private IEntity sceneManager;
+        private IEntity inputManager;
 
         private World[] worlds;
 
@@ -40,6 +42,7 @@ namespace HECSFramework.Unity
             player = new Entity("Player");
             uiManager = new Entity("UiManager");
             sceneManager = new Entity("SceneManager");
+            inputManager = new Entity("InputManager");
             BaseAwake();
             NetworkAwake();
             StrategiesInit();
@@ -55,12 +58,14 @@ namespace HECSFramework.Unity
             gameLogicContainer?.Init(gameLogic);
             uiManagerContainer?.Init(uiManager);
             sceneManagerContainer?.Init(sceneManager);
+            inputManagerContainer?.Init(inputManager);
 
             player.Init();
             uiManager.Init();
             sceneManager.Init();
             gameLogic.Init();
             player.GenerateGuid();
+            inputManager.Init();
         }
 
         public abstract void BaseAwake();
