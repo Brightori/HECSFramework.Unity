@@ -63,7 +63,7 @@ namespace Systems
         {
             if (!EntityManager.IsAlive) return;
 
-            IEntity[] array = inputListeners.DirectAccess();
+            IEntity[] array = inputListeners.Data;
             var lenght = inputListeners.Count;
             for (int i = 0; i < lenght; i++)
             {
