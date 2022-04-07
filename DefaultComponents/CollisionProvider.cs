@@ -8,7 +8,8 @@ namespace Components
     {
         private void Awake()
         {
-            Actor ??= GetComponent<IActor>();
+            if (Actor == null)
+                Actor = GetComponent<IActor>();
         }
 
         private void OnCollisionEnter(Collision collision)

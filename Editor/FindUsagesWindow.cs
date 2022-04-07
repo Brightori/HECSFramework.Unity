@@ -39,7 +39,7 @@ namespace Helpers
                 return;
             }
 
-            var guid = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(asset)).ToString();
+            var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)).ToString();
             assetsCount = (paths.Length, paths.Length);
 
             Task.Run(() => Parallel.ForEach(paths, a =>
