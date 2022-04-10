@@ -192,7 +192,7 @@ using System;
 namespace Predicates
 {
     [Serializable][Documentation(Doc.NONE, """")]
-    public class #SCRIPTNAME# : IPredicate
+    public sealed class #SCRIPTNAME# : IPredicate
     {
         public bool IsReady(IEntity target)
         {
@@ -219,7 +219,7 @@ using System;
 namespace Abilities
 {
     [Serializable][Documentation(Doc.NONE, """")]
-    public class #SCRIPTNAME# : AbilityBase
+    public sealed class #SCRIPTNAME# : AbilityBase
     {
         public override void Execute<T>(T owner, T target = default, bool enable = true)
         {
@@ -267,7 +267,7 @@ using Components;
 namespace Systems
 {
 	[Serializable][Documentation(Doc.NONE, """")]
-    public class #SCRIPTNAME# : BaseSystem 
+    public sealed class #SCRIPTNAME# : BaseSystem 
     {
         public override void InitSystem()
         {
@@ -299,7 +299,7 @@ using UnityEngine;
 namespace Components
 {
     [Serializable][Documentation(Doc.NONE, """")]
-    public class #SCRIPTNAME# : BaseComponent
+    public sealed class #SCRIPTNAME# : BaseComponent
     {
        
     }
