@@ -8,13 +8,13 @@ using UnityEngine.AI;
 namespace Components
 {
     [Serializable, BluePrint]
-    public class NavMeshAgentComponent : BaseComponent, IHaveActor, IInitable
+    public sealed class NavMeshAgentComponent : BaseComponent, IHaveActor, IInitable, IDisposable
     {
         private LazyMonoBehComponent<NavMeshAgent> navmeshAgent;
         public NavMeshAgent NavMeshAgent => navmeshAgent.GetComponent();
 
         public IActor Actor { get; set; }
-
+     
         public void Init()
         {
             navmeshAgent = new LazyMonoBehComponent<NavMeshAgent>(Owner);
@@ -22,8 +22,18 @@ namespace Components
 
         public void SetDestination(Vector3 destination)
         {
-            NavMeshAgent.SetDestination(destination);
             NavMeshAgent.isStopped = false;
+            NavMeshAgent.SetDestination(destination);
+        }
+
+        public void Stop()
+        {
+            NavMeshAgent.isStopped = true;
+        }
+     
+        public void Dispose()
+        {
+            navmeshAgent.Dispose();
         }
     }
 }

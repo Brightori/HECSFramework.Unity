@@ -19,4 +19,18 @@ namespace HECSFramework.Unity
             }
         }
     }
+
+    public static class IdentifierContainerHelper
+    {
+        public static void InitId(this IdentifierContainer identifierContainer, ref int Id)
+        {
+            if (identifierContainer != null && Id == 0)
+            {
+                Id = identifierContainer.Id;
+                return;
+            }
+
+            Id = 0;
+        }
+    }
 }

@@ -6,12 +6,11 @@ using Components;
 
 namespace Systems
 {
-	[Serializable][Documentation(Doc.GameLogic, Doc.Actor, "System for update transform component")]
-    public sealed class UpdateTransformSystem : BaseSystem, IHaveActor 
+	[Serializable][Documentation(Doc.GameLogic, Doc.HECS, Doc.Actor, "System for update actor position from transform component")]
+    public sealed class UpdateActorByTranformSystem : BaseSystem, IHaveActor
     {
-        private ConcurrencyList<Vector3> m_Vertices = new ConcurrencyList<Vector3>();
-
         public IActor Actor { get; set; }
+        public int Priority { get; } = -100;
 
         [Required]
         private TransformComponent transformComponent;
