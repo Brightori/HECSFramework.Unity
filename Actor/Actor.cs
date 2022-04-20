@@ -214,7 +214,7 @@ namespace HECSFramework.Unity
 
         public override int GetHashCode()
         {
-            return entity.GetHashCode();
+            return entity != null ? entity.GetHashCode() : gameObject.GetHashCode(); 
         }
 
         public override bool Equals(object other)
