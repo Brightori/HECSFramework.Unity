@@ -14,7 +14,8 @@ namespace Systems
         public int Priority { get; } = -100;
 
         [Required]
-        private TransformComponent transformComponent;
+        public TransformComponent transformComponent;
+        
         private Transform transform;
 
         public override void InitSystem()

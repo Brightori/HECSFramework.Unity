@@ -14,7 +14,5 @@ namespace Components
 
         [ShowInInspector] //this property for debing|show at inspector
         public float ShowCurrentValue => modifiersContainer != null ? modifiersContainer.CurrentValue : startValue;
-
-        
     }
 }
