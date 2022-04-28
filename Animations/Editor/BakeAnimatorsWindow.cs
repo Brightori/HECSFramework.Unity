@@ -2,15 +2,21 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web.Razor.Parser.SyntaxTree;
+using Commands;
 using HECSFramework.Core;
 using HECSFramework.Core.Generator;
+using HECSFramework.Serialize;
 using HECSFramework.Unity.Editor;
+using PlasticGui.WorkspaceWindow.PendingChanges;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using AnimatorControllerParameterType = UnityEngine.AnimatorControllerParameterType;
 using AnimatorState = UnityEditor.Animations.AnimatorState;
+using BlendTree = UnityEditor.Animations.BlendTree;
 
 namespace HECSFramework.Unity
 {
@@ -19,12 +25,14 @@ namespace HECSFramework.Unity
     {
         private const string AnimatorHelperSave = "AnimatorHelper.cs";
         private string FilePath => InstallHECS.ScriptPath + InstallHECS.HECSGenerated + AnimatorHelperSave;
-        private string BluePrintsPath => "Assets/" + InstallHECS.BluePrints + InstallHECS.Identifiers + "AnimatorStateIdentifiers/";
+        private string StateBluePrintsPath => "Assets/" + InstallHECS.BluePrints + InstallHECS.Identifiers + "AnimatorStateIdentifiers/";
+        private string AnimParametersBluePrintsPath => InstallHECS.BluePrints + InstallHECS.Identifiers + "AnimatorParametersIdentifiers/";
 
         private const string SaveAnimatorHelpers = "SaveAnimatorHelpers";
         private const string EmptyAnimators = "SaveAnimatorHelpers";
+        private const string SaveSetAnimatorsState = "SetAnimatorStateHelper.cs";
         private const char Split = '|';
-        
+
         [OnValueChanged("UpdateAnimators")]
         public AnimatorController[] animators = new AnimatorController[0];
 
@@ -74,7 +82,8 @@ namespace HECSFramework.Unity
             }
 
             animators = list.ToArray();
-            InstallHECS.CheckFolder(BluePrintsPath);
+            InstallHECS.CheckFolder(StateBluePrintsPath);
+            InstallHECS.CheckFolder(Application.dataPath + AnimParametersBluePrintsPath);
         }
 
         private void UpdateAnimators()
@@ -104,7 +113,7 @@ namespace HECSFramework.Unity
             {
                 tree.Add(new UsingSyntax("HECSFramework.Serialize"));
             }
-            
+
             tree.Add(new UsingSyntax("System.Collections.Generic", 1));
 
             tree.Add(new NameSpaceSyntax("HECSFramework.Unity"));
@@ -135,6 +144,123 @@ namespace HECSFramework.Unity
             }
 
             File.WriteAllText(FilePath, tree.ToString(), Encoding.UTF8);
+            GenerateParametersHelpers();
+        }
+
+        private void GenerateParametersHelpers()
+        {
+            var mapPath = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "AnimParametersMap.cs";
+            var animatorStatesPath = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + SaveSetAnimatorsState;
+
+            var animatorStates = new TreeSyntaxNode();
+            var tree = new TreeSyntaxNode();
+            var parametersMapBody = new TreeSyntaxNode();
+
+            tree.Add(new UsingSyntax("UnityEngine", 2));
+            tree.Add(new TabSimpleSyntax(0, "public static class AnimParametersMap"));
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(parametersMapBody);
+            tree.Add(new RightScopeSyntax());
+
+            var getAnimatorStatesBody = GetSetAnimatorStatesCore(animatorStates);
+
+            foreach (var a in animators)
+            {
+                if (SerializationAnimatorState)
+                    PutAnimatorStateCommandSyntax(getAnimatorStatesBody, a);
+
+                foreach (var p in a.parameters)
+                {
+                    GenerateAnimationParameterIdentifier(p.name);
+                    parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {p.name} = Animator.StringToHash({CParse.Quote}{p.name}{CParse.Quote});"));
+                }
+            }
+
+            if (getAnimatorStatesBody.Tree.Count > 0 && getAnimatorStatesBody.Tree.Last() is ParagraphSyntax)
+            {
+                getAnimatorStatesBody.Tree.Remove(getAnimatorStatesBody.Tree.Last());
+            }
+
+            if (animatorStates.Tree.Count > 0 && animatorStates.Tree.Last() is ParagraphSyntax)
+            {
+                animatorStates.Tree.Remove(animatorStates.Tree.Last());
+            }
+
+            File.WriteAllText(mapPath, tree.ToString(), Encoding.UTF8);
+
+            if (SerializationAnimatorState)
+                File.WriteAllText(animatorStatesPath, animatorStates.ToString(), Encoding.UTF8);
+        }
+
+        private ISyntax GetSetAnimatorStatesCore(ISyntax root)
+        {
+            var tree = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            tree.Add(new UsingSyntax("System"));
+            tree.Add(new UsingSyntax("HECSFramework.Serialize",1));
+            tree.Add(new NameSpaceSyntax("Commands"));
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(body);
+            tree.Add(new RightScopeSyntax());
+
+
+            root.Tree.Add(tree);
+            return body;
+        }
+
+        private void PutAnimatorStateCommandSyntax(ISyntax helperClass, AnimatorController animator)
+        {
+            var tree = new TreeSyntaxNode();
+            var fields = new TreeSyntaxNode();
+            var methodBody = new TreeSyntaxNode();
+
+            tree.Add(new TabSimpleSyntax(1, "[Serializable]"));
+            tree.Add(new TabSimpleSyntax(1, $"public struct Set{animator.name}AnimatorState : ISetAnimatorState"));
+            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(fields);
+            tree.Add(new ParagraphSyntax());
+            tree.Add(new TabSimpleSyntax(2, "public void SetState(AnimatorState animatorState)"));
+            tree.Add(new LeftScopeSyntax(2));
+            tree.Add(methodBody);
+            tree.Add(new RightScopeSyntax(2));
+            tree.Add(new RightScopeSyntax(1));
+            tree.Add(new ParagraphSyntax());
+
+            foreach (var p in animator.parameters)
+            {
+                switch (p.type)
+                {
+                    case AnimatorControllerParameterType.Float:
+                        fields.Add(new TabSimpleSyntax(2, $"public {nameof(FloatId)} {p.name};"));
+                      methodBody.Add(new TabSimpleSyntax(3, $"animatorState.SetFloat({p.name}.Id, {p.name}.Value);"));
+                        break;
+                    case AnimatorControllerParameterType.Int:
+                        fields.Add(new TabSimpleSyntax(2, $"public {nameof(IntId)} {p.name};"));
+                        methodBody.Add(new TabSimpleSyntax(3, $"animatorState.SetInt({p.name}.Id, {p.name}.Value);"));
+                        break;
+                    case AnimatorControllerParameterType.Bool:
+                        fields.Add(new TabSimpleSyntax(2, $"public {nameof(BoolId)} {p.name};"));
+                        methodBody.Add(new TabSimpleSyntax(3, $"animatorState.SetBool({p.name}.Id, {p.name}.Value);"));
+                        break;
+                    case AnimatorControllerParameterType.Trigger:
+                        break;
+                }
+            }
+
+            helperClass.Tree.Add(tree);
+        }
+
+        private void GenerateAnimationParameterIdentifier(string parameterName)
+        {
+            var path = "Assets/" + AnimParametersBluePrintsPath + parameterName + ".asset";
+
+            if (!File.Exists(path))
+            {
+                AnimatorParameterIdentifier so = ScriptableObject.CreateInstance<AnimatorParameterIdentifier>();
+                so.name = parameterName;
+                AssetDatabase.CreateAsset(so, path);
+            }
         }
 
         private ISyntax GetInitMethod(AnimatorController animatorController)
@@ -159,7 +285,7 @@ namespace HECSFramework.Unity
             {
                 methodBody.Add(GetStateResolver(animatorController));
             }
-            
+
             methodBody.Add(new TabSimpleSyntax(3, $"{animatorController.name} = new {nameof(AnimatorHelper)}({dictionaryName});"));
             methodBody.Add(new TabSimpleSyntax(3, $"animhelpers.Add({CParse.Quote}{animatorController.name}{CParse.Quote}, {animatorController.name});"));
 
@@ -199,8 +325,8 @@ namespace HECSFramework.Unity
 
             tree.Add(new TabSimpleSyntax(3, "var resolver = new AnimatorStateResolver"));
             tree.Add(new LeftScopeSyntax(3));
-            
-            tree.Add(GetDictionary(4, "BoolStates", 
+
+            tree.Add(GetDictionary(4, "BoolStates",
                 "int", "BoolParameterResolver", dictBoolBody, true));
             tree.Add(GetDictionary(4, "IntStates",
                 "int", "IntParameterResolver", dictIntBody, true));
@@ -252,7 +378,7 @@ namespace HECSFramework.Unity
                 tree.Add(new RightScopeSyntax(initialTab, true));
             else
                 tree.Add(new RightScopeSyntax(initialTab));
-            
+
             return tree;
         }
 
@@ -262,9 +388,9 @@ namespace HECSFramework.Unity
             {
                 case AnimationClip clip:
 
-                    var filePath = BluePrintsPath + animatorState.name + ".asset";
+                    var filePath = StateBluePrintsPath + animatorState.name + ".asset";
 
-                    if (!File.Exists(Application.dataPath+filePath))
+                    if (!File.Exists(Application.dataPath + filePath))
                     {
                         AnimatorStateIdentifier so = ScriptableObject.CreateInstance<AnimatorStateIdentifier>();
                         so.name = animatorState.name;
@@ -284,7 +410,7 @@ namespace HECSFramework.Unity
                     foreach (var c in blendTree.children)
                     {
                         var name = animatorState.name + "_BlendTree_" + c.motion.name;
-                        var blendTreeStatefilePath = BluePrintsPath + name + ".asset";
+                        var blendTreeStatefilePath = StateBluePrintsPath + name + ".asset";
 
                         if (!File.Exists(Application.dataPath + blendTreeStatefilePath))
                         {
