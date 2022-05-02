@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core;
+using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace HECSFramework.Unity
     [CreateAssetMenu(fileName = "identifier", menuName = "Identifiers/Identifier")]
     public class IdentifierContainer : ScriptableObject, IIdentifier
     {
-        [NonSerialized] private int id; 
+        [SerializeField, ReadOnly] private int id; 
 
         public int Id 
         {
@@ -17,6 +18,12 @@ namespace HECSFramework.Unity
                     id = IndexGenerator.GenerateIndex(name);
                 return id;
             }
+        }
+
+        [Button]
+        private void OnValidate()
+        {
+            id = IndexGenerator.GenerateIndex(name);
         }
     }
 

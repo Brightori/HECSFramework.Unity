@@ -3,7 +3,7 @@ using Systems;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-[Documentation(Doc.GameLogic, Doc.Visual, "Основной компонент для пулинга вьюшек, добаляем на нужный объект, добавляем ассет реф, и не забываем что вьюшку нужно релизить после того как попользовались в " + nameof(PoolingSystem))]
+[Documentation(Doc.GameLogic, Doc.Visual, Doc.Poolable, "Main monobeh component for tagging poolable view" + nameof(PoolingSystem))]
 public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 {
     public AssetReference AssetReference;
