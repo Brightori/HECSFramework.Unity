@@ -19,16 +19,21 @@ namespace Components
 
         public void Init()
         {
+        }
+
+        public void SetupOverrideAnimator()
+        {
             Actor.TryGetComponent(out animator, true);
 
             animatorHelper = AnimatorManager.GetAnimatorHelper(animator.runtimeAnimatorController.name);
 
             animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
             animator.runtimeAnimatorController = animatorOverrideController;
+
             OverrideClips();
         }
 
-        private void OverrideClips()
+        public void OverrideClips()
         {
             foreach (var clipOverride in overrideAnimatonClips)
             {
