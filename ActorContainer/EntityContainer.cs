@@ -31,7 +31,7 @@ namespace HECSFramework.Unity
 
         public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U : ComponentBluePrint
         {
-            return holder.components.Any(x => x.GetHECSComponent.GetTypeHashCode == componentBluePrint.GetHECSComponent.GetTypeHashCode);
+            return holder.components.Any(x => x.GetHECSComponent is U);
         }
 
         public virtual bool IsHaveComponent<T>()

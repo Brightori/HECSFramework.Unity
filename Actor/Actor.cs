@@ -221,5 +221,7 @@ namespace HECSFramework.Unity
         {
             return entity.Equals(other);
         }
+
+        public bool RemoveHecsSystem<T>() where T: ISystem  => entity.RemoveHecsSystem<T>();
     }
 }

@@ -144,12 +144,13 @@ namespace HECSFramework.Unity
             }
 
             File.WriteAllText(FilePath, tree.ToString(), Encoding.UTF8);
-            GenerateParametersHelpers();
+            GenerateParametersAndAnimatorHelpers();
         }
 
-        private void GenerateParametersHelpers()
+        private void GenerateParametersAndAnimatorHelpers()
         {
             var mapPath = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "AnimParametersMap.cs";
+            var animatorStateHashFile = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "AnimatorHashStatesMap.cs";
             var animatorStatesPath = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + SaveSetAnimatorsState;
 
             var animatorStates = new TreeSyntaxNode();
