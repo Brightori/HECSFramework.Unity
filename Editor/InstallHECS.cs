@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core.Generator;
+using PlasticGui.WorkspaceWindow.PendingChanges;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -357,15 +358,24 @@ namespace HECSFrameWork.Components
                 return;
 
             var template = new TreeSyntaxNode();
+            template.Add(new UsingSyntax("System.Collections.Generic"));
+            template.Add(new UsingSyntax("HECSFramework.Core"));
+            template.Add(new UsingSyntax("UnityEngine", 1));
             template.Add(new NameSpaceSyntax("HECSFramework.Unity"));
             template.Add(new LeftScopeSyntax());
             template.Add(new TabSimpleSyntax(1, "public class GameController : BaseGameController"));
             template.Add(new LeftScopeSyntax(1));
+            template.Add(new TabSimpleSyntax(2, "[SerializeField] private ActorContainer[] additionalGlobalEntities = default;"));
+            template.Add(new TabSimpleSyntax(2, "private List<IEntity> additionalEntities = new List<IEntity>(8);"));
+            template.Add(new ParagraphSyntax());
             template.Add(new TabSimpleSyntax(2, "public override void BaseAwake()"));
             template.Add(new LeftScopeSyntax(2));
-            template.Add(new RightScopeSyntax(2));    
+            template.Add(GetAwakeBody());
+            template.Add(new RightScopeSyntax(2));
+            template.Add(new ParagraphSyntax());
             template.Add(new TabSimpleSyntax(2, "public override void BaseStart()"));
             template.Add(new LeftScopeSyntax(2));
+            template.Add(StartBody());
             template.Add(new RightScopeSyntax(2));
             template.Add(new RightScopeSyntax(1));
             template.Add(new RightScopeSyntax());
@@ -375,6 +385,29 @@ namespace HECSFrameWork.Components
             path = path.Replace(Application.dataPath, "Assets");
             AssetDatabase.ImportAsset(path);
         }
+
+        private static ISyntax GetAwakeBody()
+        {
+            var body = new TreeSyntaxNode();
+            body.Add(new TabSimpleSyntax(3, "foreach (var a in additionalGlobalEntities)"));
+            body.Add(new LeftScopeSyntax(3));
+            body.Add(new TabSimpleSyntax(4, "var additionlEntity = new Entity(a.name);"));
+            body.Add(new TabSimpleSyntax(4, "a.Init(additionlEntity);"));
+            body.Add(new TabSimpleSyntax(4, "additionalEntities.Add(additionlEntity);"));
+            body.Add(new RightScopeSyntax(3));
+            return body;
+        }
+
+        private static ISyntax StartBody()
+        {
+            var body = new TreeSyntaxNode();
+
+            body.Add(new TabSimpleSyntax(4, "foreach (var a in additionalEntities)"));
+            body.Add(new TabSimpleSyntax(5, "a.Init();"));
+
+            return body;
+        }
+
         #endregion
     }
 }

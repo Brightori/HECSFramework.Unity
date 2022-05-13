@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Components
 {
     [Serializable]
-    [Documentation(Doc.Animation, Doc.Character, "Компонент который используется для перезаписи аниматора")]
+    [Documentation(Doc.HECS, Doc.Animation, "This component override animations, but u should run  SetupOverrideAnimator() manualy, because in some cases we have view with animator later then actor ")]
     public sealed class OverrideAnimatorComponent : BaseComponent, IInitable, IHaveActor
     {
         [SerializeField] private OverrideAnimatonClip[] overrideAnimatonClips = new OverrideAnimatonClip[0];
