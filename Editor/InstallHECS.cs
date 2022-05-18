@@ -195,8 +195,9 @@ namespace Predicates
     [Serializable][Documentation(Doc.NONE, """")]
     public sealed class #SCRIPTNAME# : IPredicate
     {
-        public bool IsReady(IEntity target)
+        public bool IsReady(IEntity target, IEntity owner = null)
         {
+            return false;
         }
     }
 }";
