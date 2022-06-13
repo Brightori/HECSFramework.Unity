@@ -1,62 +1,135 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Components;
 using HECSFramework.Core;
 using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor.Drawers;
 using UnityEngine;
 
 namespace HECSFramework.Unity
 {
     [CreateAssetMenu(fileName = "ActorReferenceContainer", menuName = "Actor Reference Container")]
-    [Documentation(Doc.GameLogic, "Это референс контейнер который инитит референс контейнеры, потом заменят инфу своими данными")]
-    public class ActorReferenceContainer : ActorContainer
+    [Documentation(Doc.GameLogic, "Это референс контейнер который инитит референс контейнеры, потом заменеят инфу своими данными")]
+    public class ActorReferenceContainer : ReferenceContainerBase<ActorContainer>
+    {
+    }
+
+
+    public abstract class ReferenceContainerBase<U> : ActorContainer, IReferenceContainer where U : EntityContainer
     {
         [PropertyOrder(-9)]
-        public ActorContainer[] References = default;
+        public U[] References = default;
+
+        [NonSerialized]
+        private bool isInited;
+        [NonSerialized]
+        private List<ComponentBluePrint> componentsBluePrints = new List<ComponentBluePrint>(32);
+        [NonSerialized]
+        private List<SystemBaseBluePrint> systemBaseBluePrints = new List<SystemBaseBluePrint>(32);
+        [NonSerialized]
+        private HashSet<EntityContainer> entityContainersPassed = new HashSet<EntityContainer>(8);
+        private List<RefContainerNode> refContainersOnQueue = new List<RefContainerNode>(8);
+
+        private int maxGeneration;
 
         public override void Init(IEntity entity, bool pure = false)
         {
-            if (References != null && References.Length > 0)
+            if (!isInited)
             {
-                foreach (var reference in References)
-                {
-                    reference.Init(entity, pure);
-                }
+                CollectComponentAndSystems(this, 0);
+                isInited = true;
+                ProcessGenerations();
             }
+
+            InitComponents(entity, componentsBluePrints, pure);
+            InitSystems(entity, systemBaseBluePrints, pure);
 
             entity.AddOrReplaceComponent(new ActorContainerID { ID = name });
-            
-            foreach (var component in holder.components)
+        }
+
+        private void ProcessGenerations()
+        {
+            for (int i = 0; i < maxGeneration+1; i++)
             {
-                if (component == null)
+                foreach (var n in refContainersOnQueue)
                 {
-                    Debug.LogAssertion("null component у " + name, this);
-                    continue;
+                    if (n.Generation == i)
+                    {
+                        ProcessComponents(n.EntityContainer);
+                        ProcessSystems(n.EntityContainer);
+                    }
                 }
+            }
+        }
 
-                var unpackComponent = Instantiate(component).GetHECSComponent;
-
-                if (!pure && unpackComponent is IHaveActor && !(entity is IActor actor))
-                    continue;
-
-                entity.AddOrReplaceComponent(unpackComponent, entity);
+        private void CollectComponentAndSystems(EntityContainer entityContainer, int generation)
+        {
+            if (!entityContainersPassed.Contains(entityContainer))
+            {
+                entityContainersPassed.Add(entityContainer);
+                refContainersOnQueue.Add(new RefContainerNode { EntityContainer = entityContainer, Generation = generation });
             }
 
-            foreach (var system in holder.systems)
+            if (entityContainer is IReferenceContainer referenceContainer)
             {
-                if (system == null)
+                var nextGen = ++generation;
+                if (maxGeneration < nextGen)
+                    maxGeneration = nextGen;
+
+                foreach (var container in referenceContainer.ReferenceContainers())
                 {
-                    Debug.LogAssertion("null system у " + name, this);
-                    continue;
+                    CollectComponentAndSystems(container, nextGen);
                 }
-
-                var unpackSys = Instantiate(system).GetSystem;
-
-                if (!pure && unpackSys is IHaveActor && !(entity is IActor actor))
-                    continue;
-
-                entity.AddHecsSystem(unpackSys, entity);
             }
+        }
+
+        private void ProcessComponents(EntityContainer entityContainer)
+        {
+            foreach (var c in entityContainer.Components)
+            {
+                if (!IsAlrdyContainsComponent(c))
+                {
+                    componentsBluePrints.Add(c);
+                }
+            }
+        }
+
+        private void ProcessSystems(EntityContainer entityContainer)
+        {
+            foreach (var s in entityContainer.Systems)
+            {
+                if (!IsAlrdyContainesSystem(s))
+                {
+                    systemBaseBluePrints.Add(s);
+                }
+            }
+        }
+
+        private bool IsAlrdyContainesSystem(SystemBaseBluePrint systemBaseBluePrint)
+        {
+            var sysType = systemBaseBluePrint.GetType();
+
+            foreach (var c in systemBaseBluePrints)
+            {
+                if (c.GetType() == sysType)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool IsAlrdyContainsComponent(ComponentBluePrint componentBluePrint)
+        {
+            var compType = componentBluePrint.GetType();
+
+            foreach (var c in componentsBluePrints)
+            {
+                if (c.GetType() == compType)
+                    return true;
+            }
+
+            return false;
         }
 
         public override bool IsHaveComponent<T>()
@@ -66,14 +139,14 @@ namespace HECSFramework.Unity
 
         public override void OnEnable()
         {
-            base.OnEnable(); 
+            base.OnEnable();
             foreach (var componentBluePrint in Components)
             {
                 componentBluePrint.IsColorNeeded = true;
                 componentBluePrint.IsOverride = References.Any(a => a.IsHaveComponentBlueprint(componentBluePrint));
             }
         }
-        
+
         public override T GetComponent<T>()
         {
             foreach (var c in holder.components)
@@ -87,9 +160,21 @@ namespace HECSFramework.Unity
                 var component = reference.GetComponent<T>();
                 if (component != null) return component;
             }
-            
+
             return default;
         }
+
+        public IEnumerable<EntityContainer> ReferenceContainers() => References;
     }
-    
+
+    public struct RefContainerNode
+    {
+        public int Generation;
+        public EntityContainer EntityContainer;
+    }
+
+    public interface IReferenceContainer
+    {
+        IEnumerable<EntityContainer> ReferenceContainers();
+    }
 }

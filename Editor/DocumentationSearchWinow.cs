@@ -8,7 +8,7 @@ using static DocumentationWindow;
 
 public class DocumentationSearchWinow : OdinEditorWindow
 {
-    [ShowInInspector, OnValueChanged("Search")]
+    [ShowInInspector]
     public string SearchWord = string.Empty;
 
     [ShowInInspector]

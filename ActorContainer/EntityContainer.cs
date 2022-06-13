@@ -71,7 +71,13 @@ namespace HECSFramework.Unity
         public virtual void Init(IEntity entity, bool pure = false)
         {
             entity.AddHecsComponent(new ActorContainerID { ID = name });
-            foreach (var component in holder.components)
+            InitComponents(entity, holder.components, pure);
+            InitSystems(entity, holder.systems, pure);
+        }
+
+        protected void InitComponents(IEntity entity, List<ComponentBluePrint> components, bool pure = false)
+        {
+            foreach (var component in components)
             {
                 if (component == null)
                 {
@@ -86,8 +92,11 @@ namespace HECSFramework.Unity
 
                 entity.AddHecsComponent(unpackComponent, entity);
             }
+        }
 
-            foreach (var system in holder.systems)
+        protected void InitSystems(IEntity entity, List<SystemBaseBluePrint> systems, bool pure = false)
+        {
+            foreach (var system in systems)
             {
                 if (system == null)
                 {
