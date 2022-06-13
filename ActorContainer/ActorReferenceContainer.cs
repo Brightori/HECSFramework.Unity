@@ -4,18 +4,17 @@ using System.Linq;
 using Components;
 using HECSFramework.Core;
 using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Drawers;
 using UnityEngine;
 
 namespace HECSFramework.Unity
 {
     [CreateAssetMenu(fileName = "ActorReferenceContainer", menuName = "Actor Reference Container")]
-    [Documentation(Doc.GameLogic, "Это референс контейнер который инитит референс контейнеры, потом заменеят инфу своими данными")]
+    [Documentation(Doc.HECS, "This is reference container for actor containers, if u need reference container for ur own containers, u should make another class with generic param")]
     public class ActorReferenceContainer : ReferenceContainerBase<ActorContainer>
     {
     }
 
-
+    [Documentation(Doc.HECS, "This is base for all reference containers, reference container also contain references to other containers, and init entity from itself first and after init from references")]
     public abstract class ReferenceContainerBase<U> : ActorContainer, IReferenceContainer where U : EntityContainer
     {
         [PropertyOrder(-9)]
