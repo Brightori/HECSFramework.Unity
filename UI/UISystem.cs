@@ -130,7 +130,7 @@ namespace Systems
         {
             if (EntityManager.TryGetEntityByComponents(out var canvas, ref mainCanvasTagComponentMask))
             {
-                if (!canvas.TryGetHecsComponent(HMasks.TransformComponent, out mainCanvasTransform))
+                if (!canvas.TryGetHecsComponent(HMasks.UnityTransformComponent, out mainCanvasTransform))
                     Debug.LogAssertion("нет трансформа у маин канваса");
             }
             else
