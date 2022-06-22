@@ -8,7 +8,7 @@ namespace Systems
 {
     public sealed partial class AbilitiesSystem : BaseSystem
     {
-        public override void InitSystem()
+        partial void ClientInit()
         {
             foreach (var abilityContainer in abilitiesHolderComponent.AbilitiesContainers)
             {
