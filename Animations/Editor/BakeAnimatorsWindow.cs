@@ -401,7 +401,7 @@ namespace HECSFramework.Unity
                         EditorUtility.SetDirty(needed);
                     }
 
-                    tree.Tree.Add(GetDictionaryPosition(clip, animatorState.name));
+                    tree.AddUnique(GetDictionaryPosition(clip, animatorState.name));
                     break;
                 case BlendTree blendTree:
 
@@ -422,7 +422,7 @@ namespace HECSFramework.Unity
                             needed.name = name;
                             EditorUtility.SetDirty(needed);
                         }
-                        tree.Tree.Add(GetDictionaryPosition(c.motion, name));
+                        tree.AddUnique(GetDictionaryPosition(c.motion, name));
                     }
 
                     break;
