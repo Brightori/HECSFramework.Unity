@@ -9,7 +9,7 @@ using UnityEngine.AddressableAssets;
 
 namespace Systems
 {
-    [Documentation(Doc.GameLogic, "Глобальная система пулинга")]
+    [Documentation(Doc.GameLogic, Doc.HECS, "Global pooling system, contains pooling views, containers, actors")]
     public partial class PoolingSystem : BaseSystem
     {
         public const int minPoolSize = 5;
@@ -88,6 +88,52 @@ namespace Systems
                         awaitContainer.Init(newActor);
                 }
 
+                return newActor;
+            }
+        }
+
+        public async Task<IActor> GetActorFromPool(EntityContainer entityContainer)
+        {
+            var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
+            var key = viewReferenceComponent.ViewReference.AssetGUID;
+
+            if (pooledActors.TryGetValue(key, out var pool))
+            {
+                var view = await pool.Get();
+                view.SetActive(true);
+                IActor actor = null;
+
+                if (!view.TryGetComponent<IActor>(out var actorFromView))
+                {
+                    view.AddComponent(pooledActorsType[key]);
+                    actor = view.GetComponent<IActor>();
+                    entityContainer.Init(actor);
+                }
+                else
+                {
+                    actor = actorFromView;
+                    entityContainer.Init(actor);
+                }
+                    
+
+                return actor;
+            }
+            else
+            {
+                var task = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference).Task;
+                var objFromRef = await task;
+                var newActor = GetNewInstance(objFromRef).GetComponent<Actor>();
+                entityContainer.Init(newActor);
+
+                if (pooledActors.ContainsKey(viewReferenceComponent.ViewReference.AssetGUID))
+                {
+                    return newActor;
+                }
+
+                var newpool = new HECSPool<GameObject>(task, maxPoolSize);
+
+                pooledActorsType.Add(key, newActor.GetType());
+                pooledActors.Add(viewReferenceComponent.ViewReference.AssetGUID, newpool);
                 return newActor;
             }
         }

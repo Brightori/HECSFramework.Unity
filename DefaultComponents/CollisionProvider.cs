@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Components
 {
+    [DisallowMultipleComponent]
     public class CollisionProvider : MonoBehaviour, IHaveActor
     {
         public IActor Actor { get; set; }

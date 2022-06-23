@@ -33,6 +33,19 @@ namespace Helpers
             return false;
         }
 
+        public static T GetOrAddMonoComponent<T>(this GameObject gameObject) where T: Component
+        {
+            if (gameObject == null)
+                throw new System.Exception("Monobehaviour is null");
+
+            if (gameObject.TryGetComponent(out T component))
+            {
+                return component;
+            }
+
+            return gameObject.AddComponent<T>();
+        }
+
         public static void RemoveDestroyedValues<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
             where TValue : Object
         {

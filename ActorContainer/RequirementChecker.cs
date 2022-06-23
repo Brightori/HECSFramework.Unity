@@ -10,8 +10,8 @@ namespace HECSFramework.Unity
    
 
     /// <summary>
-    /// это для контейнеров абилок, тут мы гарантируем что у актор контейнера что содержит в себе абилку, 
-    /// будут эти компоненты
+    /// пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, 
+    /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public class RequiredOnOwnerAttribute : Attribute { }
@@ -48,7 +48,7 @@ namespace HECSFramework.Unity
         }
 
         /// <summary>
-        /// это для проверки рантайм добавляемых абилок и просмотра что нужно на ентити
+        /// пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <param name="ability"></param>
         /// <param name="assetID"></param>
@@ -308,7 +308,7 @@ namespace HECSFramework.Unity
             asset.name = neededType.Name;
             container.AddComponent(asset as ComponentBluePrint);
 
-            Debug.LogWarning($"добавили компонент в контейнер {container.name} " + (asset as ComponentBluePrint).GetHECSComponent.GetType());
+            Debug.LogWarning($"We added new requirement component {container.name} " + (asset as ComponentBluePrint).GetHECSComponent.GetType());
 #endif
         }
 
@@ -322,7 +322,7 @@ namespace HECSFramework.Unity
             asset.name = neededType.Name;
             container.AddSystem(asset as SystemBaseBluePrint);
 
-            Debug.LogWarning($"добавили систему в контейнер {container.name}" + (asset as SystemBaseBluePrint).GetSystem.GetType());
+            Debug.LogWarning($"We added new required system  {container.name}" + (asset as SystemBaseBluePrint).GetSystem.GetType());
 #endif
         }
 
@@ -336,7 +336,7 @@ namespace HECSFramework.Unity
 //            asset.name = neededType.Name;
 //            havePredicateContainers.Predicates.Add(asset as PredicateBluePrint);
 
-//            Debug.LogWarning($"добавили предикаты в контейнер {container.name}" + (asset as PredicateBluePrint).GetPredicate.GetType());
+//            Debug.LogWarning($"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ {container.name}" + (asset as PredicateBluePrint).GetPredicate.GetType());
 //#endif
 //        }
 

@@ -14,4 +14,9 @@ namespace HECSFramework.Unity
     {
         IActor Actor { get; set; }
     }
+
+    public interface IInitAferView
+    {
+        void InitAferView();
+    }
 }
