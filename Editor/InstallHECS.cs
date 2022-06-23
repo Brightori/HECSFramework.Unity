@@ -24,6 +24,10 @@ namespace HECSFramework.Unity.Editor
         public static string Identifiers = "/Identifiers/";
         private static string GlobalEntities = "/GlobalEntities/";
         private static string Presets = "/Presets/";
+        public static string UIBluePrints = "/UIBluePrints/";
+
+        //Identifiers
+        public static string UIIdentifiers = "/UIIdentifiers/";
 
         //ScriptBluePrintsFolders
         private static string AbilitiesBlueprints = "/AbilitiesBlueprints/";
@@ -44,6 +48,7 @@ namespace HECSFramework.Unity.Editor
 
         public static string DataPath => Application.dataPath;
         public static string ScriptPath => Application.dataPath + "/Scripts/";
+        public static string Assets => "Assets/";
 
         private static string ComponentID = "ComponentID.cs";
         private static string GameController = "GameController.cs";
@@ -139,10 +144,12 @@ namespace HECSFrameWork
             //BluePrintsFolders
             CheckFolder(DataPath + BluePrints);
             CheckFolder(DataPath + BluePrints + Identifiers);
+            CheckFolder(DataPath + BluePrints + Identifiers + UIIdentifiers);
             CheckFolder(DataPath + BluePrints + Abilities);
             CheckFolder(DataPath + BluePrints + GlobalEntities);
             CheckFolder(DataPath + BluePrints + Strategies);
             CheckFolder(DataPath + BluePrints + Presets);
+            CheckFolder(DataPath + BluePrints + UIBluePrints);
 
             //MonoBehaviourComponents
             CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
