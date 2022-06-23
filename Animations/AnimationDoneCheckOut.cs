@@ -4,7 +4,7 @@ using HECSFramework.Core;
 
 namespace Commands
 {
-    [Documentation(Doc.Animation, Doc.HECS, "We send this command when we need to know when animation will be done, we take this command from " + nameof(AnimationCheckOutsHolderComponent))]
+    [Documentation(Doc.Animation, Doc.HECS, "We send this command when we need to know when animation will be done, we take this command from AnimationCheckOutsHolderComponent")]
     public struct AnimationDoneCheckOut : ICommand
     {
         public int AnimationEventID;
