@@ -15,7 +15,11 @@ namespace Systems
     [Documentation("UI", "Основная система которая отвечает за показ или скрытие определенного UI")]
     public class UISystem : BaseSystem, IUISystem
     {
+        public const string UIBluePrints = "UIBluePrints";
+
+
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
+
 
         private ConcurrencyList<IEntity> uiCurrents;
 
@@ -35,7 +39,7 @@ namespace Systems
         public override void InitSystem()
         {
             uiCurrents = EntityManager.Filter(new FilterMask(uiTagMask));
-            Addressables.LoadAssetsAsync<UIBluePrint>("UIBluePrints", null).Completed += LoadReact;
+            Addressables.LoadAssetsAsync<UIBluePrint>(UIBluePrints, null).Completed += LoadReact;
         }
 
         private void LoadReact(AsyncOperationHandle<IList<UIBluePrint>> obj)
