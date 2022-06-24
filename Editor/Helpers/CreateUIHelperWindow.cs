@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Editor;
 using Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.OdinInspector.Editor.Validation;
 using Systems;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
@@ -15,9 +17,13 @@ using UnityEngine;
 [Documentation(Doc.Editor, Doc.HECS, Doc.UI, "Its helper for create ui, this window create ui identifier, ui blueprint, and set ui actor to prfb if needed, after this ui blueprint and uiactor will be added to addressables")]
 public class CreateUIHelperWindow : OdinEditorWindow
 {
-    private const string UIActors = "UIActors";
+    //Addressables Group names
+    private const string UIActors = "UI_Actors";
+    private const string UIBluePrints = "UI_BluePrints";
 
     public string IdentifierName;
+
+    [AssetSelector()]
     public GameObject UIprfb;
     public UIGroupIdentifier[] Groups;
     public bool IsNeedContainer = true;
@@ -73,14 +79,13 @@ public class CreateUIHelperWindow : OdinEditorWindow
         //Try to add uiactor component to prfb and save it
         var actor = UIprfb.GetOrAddMonoComponent<UIActor>();
         var uiActorPath = AssetDatabase.GetAssetPath(UIprfb);
-        AssetDatabase.SaveAssets();
 
         //This all around adding ui blueprint and prfb to addressables groups
         var addressablesSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
         var addressablesSchemas = CreateInstance<PlayerDataGroupSchema>();
 
         var uiactorsGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == UIActors);
-        var uiBluePrintsGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == UISystem.UIBluePrints);
+        var uiBluePrintsGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == UIBluePrints);
 
         var uiBluePrintsLabel = addressablesSettings.GetLabels().FirstOrDefault(x=> x == UISystem.UIBluePrints);
 
@@ -92,15 +97,16 @@ public class CreateUIHelperWindow : OdinEditorWindow
         {
             uiactorsGroup = addressablesSettings.CreateGroup(UIActors, false, false, false, 
                 new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() 
-                    { addressablesSchemas } , null);
+                    { addressablesSchemas } , new System.Type[0]);
         }
 
         //if we dont have group for ui actor we add group
+        var addressablesSchemas2 = CreateInstance<PlayerDataGroupSchema>();
         if (uiBluePrintsGroup == null)
         {
-            uiBluePrintsGroup = addressablesSettings.CreateGroup(UIActors, false, false, false, 
+            uiBluePrintsGroup = addressablesSettings.CreateGroup(UIBluePrints, false, false, false, 
                 new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() 
-                    { addressablesSchemas }, null);
+                    { addressablesSchemas2 }, new System.Type[0]);
         }
 
         //take guid from prfb and save prfb to addressables groupd
@@ -112,5 +118,23 @@ public class CreateUIHelperWindow : OdinEditorWindow
         var uiBluePrintGuid = AssetDatabase.GUIDFromAssetPath(uiBluePrintPath);
         var uiBluePrintEntry = addressablesSettings.CreateOrMoveEntry(uiBluePrintGuid.ToString(), uiBluePrintsGroup);
         uiBluePrintEntry.SetLabel(UISystem.UIBluePrints, true);
+
+        //assign fields of blueprints
+        uibluePrint.UIType = uiidentifier;
+        uibluePrint.UIActor = new UIActorReference(prfbGuid.ToString());
+        var uiGroupsType = uibluePrint.Groups.GetType();
+
+        var fields = uiGroupsType.GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        
+        foreach (var f in fields)
+        {
+            if (f.Name == "Groups")
+            {
+                f.SetValue(uibluePrint.Groups, Groups);
+                break;
+            }
+        }
+
+        AssetDatabase.SaveAssets();
     }
 }
