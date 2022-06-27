@@ -23,10 +23,16 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
     public string IdentifierName;
 
-    [AssetSelector()]
+    [AssetsOnly]
+    [OnValueChanged(nameof(SetNameOfIdentifierByPrfbName))]
     public GameObject UIprfb;
+
     public UIGroupIdentifier[] Groups;
+    
     public bool IsNeedContainer = true;
+
+    [HideIf(nameof(IsNeedContainer), true)]
+    public ActorContainer Container;
 
     [MenuItem("HECS Options/Helpers/Create UI Window")]
     public static void GetCreateUIHelperWindow()
@@ -135,8 +141,49 @@ public class CreateUIHelperWindow : OdinEditorWindow
             }
         }
 
+        if (IsNeedContainer)
+        {
+            var newContainer = ScriptableObject.CreateInstance<ActorContainer>();
+            newContainer.name = UIprfb.name + "Container";
+            var path = AssetDatabase.GetAssetPath(UIprfb);
 
+            var split = path.Split('/');
+            path = path.Replace(split.Last(), "");
+            path += newContainer.name + ".asset";
+
+            AssetDatabase.CreateAsset(newContainer, path);
+
+            var uiActor = UIprfb.GetOrAddMonoComponent<UIActor>();
+            SetActorField(uiActor, newContainer);
+        }
+        else if (Container != null)
+        {
+
+        }
 
         AssetDatabase.SaveAssets();
+    }
+
+    private void SetActorField(Actor actor, ActorContainer actorContainer)
+    {
+        var fieldsOfUIActor = typeof(Actor).GetFields(System.Reflection.BindingFlags.NonPublic
+               | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance
+               | System.Reflection.BindingFlags.Static
+               | System.Reflection.BindingFlags.FlattenHierarchy);
+
+        foreach (var f in fieldsOfUIActor)
+        {
+            if (f.Name == "actorContainer")
+            {
+                f.SetValue(actor, actorContainer);
+                break;
+            }
+        }
+    }
+
+    private void SetNameOfIdentifierByPrfbName()
+    {
+        if (string.IsNullOrEmpty(IdentifierName) && UIprfb != null)
+            IdentifierName = UIprfb.name + "_UIIdentifier";
     }
 }
