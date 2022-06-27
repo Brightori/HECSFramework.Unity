@@ -1,12 +1,11 @@
+using System;
 using Commands;
 using HECSFramework.Core;
-using HECSFramework.Unity;
-using System;
 
 namespace Components
 {
-    [Serializable, BluePrint]
-    [Documentation("UI", "??? ??? ???????? ???????")]
+    [Serializable, RequiredAtContainer(typeof(UnityTransformComponent))]
+    [Documentation(Doc.UI, Doc.Tag, "This component marks main canvas for placing ui")]
     public class MainCanvasTagComponent : BaseComponent, IAfterEntityInit
     {
         public void AfterEntityInit()

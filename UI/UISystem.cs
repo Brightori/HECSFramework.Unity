@@ -12,21 +12,18 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Systems
 {
     [Serializable, BluePrint]
-    [Documentation("UI", "Основная система которая отвечает за показ или скрытие определенного UI")]
+    [Documentation(Doc.UI, Doc.HECS, "This system default for operating ui at hecs, this system have command for show and hide ui plus show or hide ui groups, this system still in progress")]
     public class UISystem : BaseSystem, IUISystem
     {
         public const string UIBluePrints = "UIBluePrints";
 
-
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
-
 
         private ConcurrencyList<IEntity> uiCurrents;
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
 
-        //это блок масок для проектонезависимости, т.к. когда мы залили фрейм, у нас еще нет кодоген масок
         private HECSMask uiTagMask = HMasks.GetMask<UITagComponent>();
         private HECSMask transformComponent = HMasks.GetMask<TransformComponent>();
         private HECSMask uiGroupTagMask = HMasks.GetMask<UIGroupTagComponent>();
@@ -83,7 +80,7 @@ namespace Systems
 
             if (spawn == null)
             {
-                Debug.LogAssertion("нет нужного ui референса " + command.UIViewType);
+                Debug.LogAssertion("пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ ui пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ " + command.UIViewType);
                 return;
             }
 
@@ -135,10 +132,10 @@ namespace Systems
             if (EntityManager.TryGetEntityByComponents(out var canvas, ref mainCanvasTagComponentMask))
             {
                 if (!canvas.TryGetHecsComponent(HMasks.UnityTransformComponent, out mainCanvasTransform))
-                    Debug.LogAssertion("нет трансформа у маин канваса");
+                    Debug.LogAssertion("пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
             }
             else
-                Debug.LogAssertion("не нашли маин канваса");
+                Debug.LogAssertion("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
             isReady = true;
 
