@@ -124,13 +124,13 @@ namespace HECSFramework.Unity
             if (needRegister)
                 EntityManager.RegisterEntity(this, true);
 
-            _ = GetOrAddComponent<TransformComponent>(this);
+            GetOrAddComponent<TransformComponent>(this);
             entity.AfterInit();
         }
 
         public void Init(int worldIndex, bool needRegister = true)
         {
-            (entity as IChangeWorld).SetWorld(worldIndex);
+            entity.InitWorld(EntityManager.Worlds.Data[worldIndex]);
             Init(needRegister);
         }
 
