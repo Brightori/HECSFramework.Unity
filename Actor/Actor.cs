@@ -116,7 +116,9 @@ namespace HECSFramework.Unity
             if (entity == null)
                 entity = new Entity(gameObject.name);
 
-            entity.SetWorld();
+            if (World == null)
+                entity.SetWorld(0);
+
             entity.InitComponentsAndSystems(needRegister);
 
             if (needRegister)
@@ -128,7 +130,7 @@ namespace HECSFramework.Unity
 
         public void Init(int worldIndex, bool needRegister = true)
         {
-            (entity as IChangeWorldIndex).SetWorldIndex(worldIndex);
+            (entity as IChangeWorld).SetWorld(worldIndex);
             Init(needRegister);
         }
 

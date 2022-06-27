@@ -158,7 +158,8 @@ public class CreateUIHelperWindow : OdinEditorWindow
         }
         else if (Container != null)
         {
-
+            var uiActor = UIprfb.GetOrAddMonoComponent<UIActor>();
+            SetActorField(uiActor, Container);
         }
 
         AssetDatabase.SaveAssets();

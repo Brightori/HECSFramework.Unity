@@ -34,7 +34,7 @@ public class DebugHECS : OdinEditorWindow
         if (EntityManager.Default == null)
             return;
 
-        if (worldIndex < EntityManager.Worlds.Length && Entities.Count != EntityManager.Worlds[worldIndex].EntitiesCount)
+        if (worldIndex < EntityManager.Worlds.Count&& Entities.Count != EntityManager.Worlds.Data[worldIndex].EntitiesCount)
             RedrawWindow();
         Repaint();
     }
@@ -47,10 +47,10 @@ public class DebugHECS : OdinEditorWindow
         if (!EntityManager.IsAlive)
             return;
 
-        if (worldIndex >= EntityManager.Worlds.Length)
+        if (worldIndex >= EntityManager.Worlds.Count)
             return;
 
-        foreach (var e in EntityManager.Worlds[worldIndex].Entities)
+        foreach (var e in EntityManager.Worlds.Data[worldIndex].Entities)
         {
             if (e == null)
                 continue;

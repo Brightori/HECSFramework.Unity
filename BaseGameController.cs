@@ -24,7 +24,7 @@ namespace HECSFramework.Unity
         private IEntity sceneManager;
         private IEntity inputManager;
 
-        private World[] worlds;
+        private ConcurrencyList<World> worlds;
 
         private void Awake()
         {
@@ -89,17 +89,17 @@ namespace HECSFramework.Unity
 
         private void Update()
         {
-            var worldsCount = worlds.Length;
+            var worldsCount = worlds.Count;
             for (int i = 0; i < worldsCount; i++)
             {
-                worlds[i].GlobalUpdateSystem.Update();
-                worlds[i].GlobalUpdateSystem.UpdateDelta(Time.deltaTime);
+                worlds.Data[i].GlobalUpdateSystem.Update();
+                worlds.Data[i].GlobalUpdateSystem.UpdateDelta(Time.deltaTime);
             }
         }
 
         private void LateUpdate()
         {
-            var worldsCount = worlds.Length;
+            var worldsCount = worlds.Count;
             for (int i = 0; i < worldsCount; i++)
             {
                 updateSystem.LateUpdate();
@@ -109,7 +109,7 @@ namespace HECSFramework.Unity
 
         private void FixedUpdate()
         {
-            var worldsCount = worlds.Length;
+            var worldsCount = worlds.Count;
             for (int i = 0; i < worldsCount; i++)
             {
                 updateSystem.FixedUpdate();
