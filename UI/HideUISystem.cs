@@ -7,7 +7,7 @@ namespace Systems
 {
     [Documentation(Doc.UI, "This system destroy ui on hide command")]
     [Serializable, BluePrint]
-    public sealed class HideUISystem : BaseSystem
+    public sealed class HideUISystem : BaseSystem, IReactCommand<HideUICommand>
     {
         public override void InitSystem()
         { }
