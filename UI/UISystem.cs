@@ -20,15 +20,17 @@ namespace Systems
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
 
         private ConcurrencyList<IEntity> uiCurrents;
+        private ConcurrencyList<IEntity> additionalCanvases;
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
 
         private HECSMask uiTagMask = HMasks.GetMask<UITagComponent>();
-        private HECSMask transformComponent = HMasks.GetMask<TransformComponent>();
+        private HECSMask additionalCanvasMask = HMasks.GetMask<AdditionalCanvasTagComponent>();
         private HECSMask uiGroupTagMask = HMasks.GetMask<UIGroupTagComponent>();
         private HECSMask mainCanvasTagComponentMask = HMasks.GetMask<MainCanvasTagComponent>();
         private HECSMask uiTagComponentMask = HMasks.GetMask<UITagComponent>();
+        private HECSMask unityTransformMask = HMasks.GetMask<UnityTransformComponent>();
 
         private bool isReady;
         private bool isLoaded;
@@ -36,6 +38,7 @@ namespace Systems
         public override void InitSystem()
         {
             uiCurrents = EntityManager.Filter(new FilterMask(uiTagMask));
+            additionalCanvases = EntityManager.Filter(new FilterMask(additionalCanvasMask));
             Addressables.LoadAssetsAsync<UIBluePrint>(UIBluePrints, null).Completed += LoadReact;
         }
 
@@ -84,12 +87,12 @@ namespace Systems
                 return;
             }
 
-            SpawnUIFromBluePrint(spawn, command.OnUILoad);
+            SpawnUIFromBluePrint(spawn, command.OnUILoad, mainCanvasTransform.Transform);
         }
 
-        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<IEntity> action)
+        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<IEntity> action, Transform transform)
         {
-            Addressables.InstantiateAsync(spawn.UIActor, mainCanvasTransform.Transform).Completed += a => LoadUI(a, action);
+            Addressables.InstantiateAsync(spawn.UIActor, transform).Completed += a => LoadUI(a, action);
         }
 
         private void LoadUI(AsyncOperationHandle<GameObject> obj, Action<IEntity> onUILoad)
@@ -246,7 +249,7 @@ namespace Systems
                     if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
                     && !uiCurrents.Any(x => x.GetHECSComponent<UITagComponent>(ref uiTagComponentMask).ViewType.Id == uIBluePrints[i].UIType.Id))
                     {
-                        SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI);
+                        SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI, mainCanvasTransform.Transform);
                     }
                 }
                 catch (Exception ex)
@@ -255,10 +258,55 @@ namespace Systems
                 }
             }
         }
+
+        public void CommandGlobalReact(ShowUIOnAdditionalCommand command)
+        {
+            if (!command.MultyView)
+            {
+                foreach (var ui in uiCurrents)
+                {
+                    if (ui == null || !ui.IsAlive)
+                        continue;
+
+                    var uiTag = ui.GetHECSComponent<UITagComponent>(ref uiTagComponentMask);
+
+                    if (uiTag.ViewType.Id == command.UIViewType)
+                    {
+                        uiTag.Owner.Command(command);
+                        command.OnUILoad?.Invoke(uiTag.Owner);
+                        return;
+                    }
+                }
+            }
+
+            var spawn = uIBluePrints.FirstOrDefault(x => x.UIType.Id == command.UIViewType);
+
+            if (spawn == null)
+            {
+                Debug.LogAssertion("We dont have ui bluePrint " + command.UIViewType);
+                return;
+            }
+
+            var neededCanvas = additionalCanvases
+                .FirstOrDefault(x => x.GetHECSComponent<AdditionalCanvasTagComponent>
+                    (ref additionalCanvasMask).AdditionalCanvasIdentifier.Id == command.AdditionalCanvasID);
+
+            if (neededCanvas == null)
+            {
+                HECSDebug.LogError("We dont have canvas with id " + command.AdditionalCanvasID);
+                return;
+            }
+
+            if (neededCanvas.TryGetHecsComponent(unityTransformMask, out UnityTransformComponent unityTransformComponent))
+                SpawnUIFromBluePrint(spawn, command.OnUILoad, unityTransformComponent.Transform);
+            else
+                HECSDebug.LogError("we dont have unityTransform on " + neededCanvas.ID);
+        }
     }
 
     public interface IUISystem : ISystem,
         IReactGlobalCommand<ShowUICommand>,
+        IReactGlobalCommand<ShowUIOnAdditionalCommand>,
         IReactGlobalCommand<HideUICommand>,
         IReactGlobalCommand<ShowUIAndHideOthersCommand>,
         IReactGlobalCommand<HideAllUIExceptCommand>,
