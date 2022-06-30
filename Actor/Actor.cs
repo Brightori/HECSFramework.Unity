@@ -37,9 +37,9 @@ namespace HECSFramework.Unity
 
         public LocalComponentListenersService RegisterComponentListenersService => entity.RegisterComponentListenersService;
 
-        public void AddHecsComponent(IComponent component, IEntity owner, bool silently = false)
+        public T AddHecsComponent<T>(T component, IEntity owner, bool silently = false) where T : IComponent
         {
-            entity.AddHecsComponent(component, this, silently);
+            return entity.AddHecsComponent(component, this, silently);
         }
 
         public void AddHecsSystem<T>(T system, IEntity owner = null) where T : ISystem
