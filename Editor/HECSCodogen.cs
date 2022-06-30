@@ -1,3 +1,5 @@
+using HECSFramework.Core.Generator;
+using HECSFramework.Unity.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
@@ -226,6 +228,26 @@ public class HECSRoslynCodegen : OdinEditorWindow
             p = null;
             tcs.TrySetResult(data);
         };
+
+        var path = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "mpcHeader.cs";
+        File.WriteAllText(path, GetResolverMapStaticConstructor().ToString());
         return tcs.Task;
+    }
+
+    public static ISyntax GetResolverMapStaticConstructor()
+    {
+        var tree = new TreeSyntaxNode();
+
+        tree.Add(new TabSimpleSyntax(2, "private static bool isMessagePackInited;"));
+        tree.Add(new TabSimpleSyntax(3, "static ResolversMap()"));
+        tree.Add(new LeftScopeSyntax(3));
+        tree.Add(new TabSimpleSyntax(4, "if (isMessagePackInited)"));
+        tree.Add(new TabSimpleSyntax(5, "return;"));
+        tree.Add(new TabSimpleSyntax(4, "StaticCompositeResolver.Instance.Register(StandardResolver.Instance, GeneratedResolver.Instance);"));
+        tree.Add(new TabSimpleSyntax(4, "isMessagePackInited = true;"));
+        tree.Add(new TabSimpleSyntax(4, "MessagePackSerializer.DefaultOptions = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);"));
+        tree.Add(new RightScopeSyntax());
+        tree.Add(new ParagraphSyntax());
+        return tree;
     }
 }
