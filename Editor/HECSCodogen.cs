@@ -238,16 +238,27 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         var tree = new TreeSyntaxNode();
 
+        tree.Add(new UsingSyntax("MessagePack"));
+        tree.Add(new UsingSyntax("MessagePack.Resolvers",1));
+
+        tree.Add(new NameSpaceSyntax("HECSFramework.Core"));
+        tree.Add(new LeftScopeSyntax());
+
+        tree.Add(new TabSimpleSyntax(1, "public partial class ResolversMap"));
+        tree.Add(new LeftScopeSyntax(1));
+
         tree.Add(new TabSimpleSyntax(2, "private static bool isMessagePackInited;"));
-        tree.Add(new TabSimpleSyntax(3, "static ResolversMap()"));
-        tree.Add(new LeftScopeSyntax(3));
-        tree.Add(new TabSimpleSyntax(4, "if (isMessagePackInited)"));
-        tree.Add(new TabSimpleSyntax(5, "return;"));
-        tree.Add(new TabSimpleSyntax(4, "StaticCompositeResolver.Instance.Register(StandardResolver.Instance, GeneratedResolver.Instance);"));
-        tree.Add(new TabSimpleSyntax(4, "isMessagePackInited = true;"));
-        tree.Add(new TabSimpleSyntax(4, "MessagePackSerializer.DefaultOptions = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);"));
+        tree.Add(new TabSimpleSyntax(2, "static ResolversMap()"));
+        tree.Add(new LeftScopeSyntax(2));
+        tree.Add(new TabSimpleSyntax(3, "if (isMessagePackInited)"));
+        tree.Add(new TabSimpleSyntax(4, "return;"));
+        tree.Add(new TabSimpleSyntax(3, "StaticCompositeResolver.Instance.Register(StandardResolver.Instance, GeneratedResolver.Instance);"));
+        tree.Add(new TabSimpleSyntax(3, "isMessagePackInited = true;"));
+        tree.Add(new TabSimpleSyntax(3, "MessagePackSerializer.DefaultOptions = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);"));
+        tree.Add(new RightScopeSyntax(2));
+        tree.Add(new RightScopeSyntax(1));
+
         tree.Add(new RightScopeSyntax());
-        tree.Add(new ParagraphSyntax());
         return tree;
     }
 }
