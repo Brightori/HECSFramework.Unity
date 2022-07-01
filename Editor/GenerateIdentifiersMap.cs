@@ -1,4 +1,6 @@
-﻿using HECSFramework.Core.Generator;
+﻿using Components;
+using HECSFramework.Core;
+using HECSFramework.Core.Generator;
 using HECSFramework.Unity.Editor;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
-    public class GenerateIdentifiersMap : UnityEditor.Editor
+    public partial class GenerateIdentifiersMap : UnityEditor.Editor
     {
         [MenuItem("HECS Options/Generate Identifiers Map")]
         public static void GenerateIdentifiers()
@@ -17,6 +19,10 @@ namespace HECSFramework.Unity
             var identifiersContainers = AssetDatabase.FindAssets("t:IdentifierContainer")
               .Select(x => UnityEditor.AssetDatabase.GUIDToAssetPath(x))
               .Select(x => UnityEditor.AssetDatabase.LoadAssetAtPath<IdentifierContainer>(x)).ToList();
+
+            var entityContainers = AssetDatabase.FindAssets($"t:{nameof(EntityContainer)}")
+             .Select(x => UnityEditor.AssetDatabase.GUIDToAssetPath(x))
+             .Select(x => UnityEditor.AssetDatabase.LoadAssetAtPath<EntityContainer>(x)).ToList();
 
             var sort = new Dictionary<Type, HashSet<IdentifierContainer>>(64);
 
@@ -28,6 +34,9 @@ namespace HECSFramework.Unity
 
             foreach (var sorted in sort)
                 maps += GetIdentifiersMap(sorted.Key, sorted.Value);
+
+            maps += GetContainersMap(entityContainers);
+            maps += GetNetworkContainersMap(entityContainers);
 
             SaveToFile(maps);
         }
@@ -43,6 +52,49 @@ namespace HECSFramework.Unity
                 dict.Add(type, new HashSet<IdentifierContainer>());
                 dict[type].Add(container);
             }
+        }
+
+        private static string GetContainersMap(List<EntityContainer> entityContainers)
+        {
+            var tree = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            tree.Add(new SimpleSyntax($"public static class EntityContainersMap" + CParse.Paragraph));
+
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(body);
+            tree.Add(new RightScopeSyntax());
+
+            foreach (var e in entityContainers)
+            {
+                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+            }
+
+            return tree.ToString();
+        }
+
+        private static string GetNetworkContainersMap(List<EntityContainer> entityContainers)
+        {
+            var tree = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            tree.Add(new SimpleSyntax($"public static class NetworkEntityContainersMap" + CParse.Paragraph));
+
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(body);
+            tree.Add(new RightScopeSyntax());
+
+            foreach (var e in entityContainers)
+            {
+                if (!e.IsHaveComponent<NetworkEntityTagComponent>())
+                    continue;
+
+                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+            }
+
+            return tree.ToString();
         }
 
         private static string GetIdentifiersMap(Type type, HashSet<IdentifierContainer> identifierContainers)
@@ -76,7 +128,7 @@ namespace HECSFramework.Unity
             {
                 path = find[0];
             }
-            
+
             try
             {
                 if (!Directory.Exists(pathToDirectory))
