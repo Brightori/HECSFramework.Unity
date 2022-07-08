@@ -11,6 +11,7 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Validation;
 using Systems;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ public class CreateUIHelperWindow : OdinEditorWindow
 {
     //Addressables Group names
     private const string UIActors = "UI_Actors";
+    private const string UIActorsContainers = "UI_ActorsContainers";
     private const string UIBluePrints = "UI_BluePrints";
 
     public string IdentifierName;
@@ -155,11 +157,17 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
             var uiActor = UIprfb.GetOrAddMonoComponent<UIActor>();
             SetActorField(uiActor, newContainer);
+
+            var entryOfContainer = AddAssetToGroup(newContainer, UIActorsContainers);
+            uibluePrint.Container = new UnityEngine.AddressableAssets.AssetReference(entryOfContainer.guid);
         }
         else if (Container != null)
         {
             var uiActor = UIprfb.GetOrAddMonoComponent<UIActor>();
             SetActorField(uiActor, Container);
+
+            var entryOfContainer = AddAssetToGroup(Container, UIActorsContainers);
+            uibluePrint.Container = new UnityEngine.AddressableAssets.AssetReference(entryOfContainer.guid);
         }
 
         AssetDatabase.SaveAssets();
@@ -180,6 +188,26 @@ public class CreateUIHelperWindow : OdinEditorWindow
                 break;
             }
         }
+    }
+
+    public AddressableAssetEntry AddAssetToGroup(UnityEngine.Object asset, string group)
+    {
+        var addressablesSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+        var neededGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == group);
+
+        var addressablesSchemas = CreateInstance<PlayerDataGroupSchema>();
+        if (neededGroup == null)
+        {
+            neededGroup = addressablesSettings.CreateGroup(group, false, false, false,
+                new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>()
+                    { addressablesSchemas }, new System.Type[0]);
+        }
+
+        var path = AssetDatabase.GetAssetPath(asset);
+        var prfbGuid = AssetDatabase.GUIDFromAssetPath(path);
+        var entry = addressablesSettings.CreateOrMoveEntry(prfbGuid.ToString(), neededGroup);
+
+        return entry;
     }
 
     private void SetNameOfIdentifierByPrfbName()

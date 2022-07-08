@@ -5,6 +5,7 @@ using HECSFramework.Unity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -13,7 +14,7 @@ namespace Systems
 {
     [Serializable, BluePrint]
     [Documentation(Doc.UI, Doc.HECS, "This system default for operating ui at hecs, this system have command for show and hide ui plus show or hide ui groups, this system still in progress")]
-    public class UISystem : BaseSystem, IUISystem
+    public class UISystem : BaseSystem, IUISystem, IGlobalStart
     {
         public const string UIBluePrints = "UIBluePrints";
 
@@ -32,6 +33,8 @@ namespace Systems
         private HECSMask uiTagComponentMask = HMasks.GetMask<UITagComponent>();
         private HECSMask unityTransformMask = HMasks.GetMask<UnityTransformComponent>();
 
+        private Systems.PoolingSystem poolingSystem;
+
         private bool isReady;
         private bool isLoaded;
 
@@ -40,6 +43,11 @@ namespace Systems
             uiCurrents = EntityManager.Filter(new FilterMask(uiTagMask));
             additionalCanvases = EntityManager.Filter(new FilterMask(additionalCanvasMask));
             Addressables.LoadAssetsAsync<UIBluePrint>(UIBluePrints, null).Completed += LoadReact;
+        }
+
+        public void GlobalStart()
+        {
+            poolingSystem = Owner.World.GetSingleSystem<PoolingSystem>();
         }
 
         private void LoadReact(AsyncOperationHandle<IList<UIBluePrint>> obj)
@@ -93,6 +101,82 @@ namespace Systems
         private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<IEntity> action, Transform transform)
         {
             Addressables.InstantiateAsync(spawn.UIActor, transform).Completed += a => LoadUI(a, action);
+        }
+
+        public async Task<IEntity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
+        {
+            while (!isReady)
+                await Task.Delay(50);
+
+            if (!isMultiple)
+            {
+                if (TryGetFromCurrentUI(uiType, out var ui))
+                    return ui;
+            }
+
+            Transform canvas = null;
+
+            if (additionalCanvas == 0)
+                canvas = mainCanvasTransform.Transform;
+            else
+            {
+                var needCanvas = additionalCanvases
+                    .FirstOrDefault(x => x.GetHECSComponent<AdditionalCanvasTagComponent>
+                        (ref additionalCanvasMask).AdditionalCanvasIdentifier.Id == additionalCanvas);
+
+                if (needCanvas == null)
+                    throw new Exception("We dont have additional canvas " + additionalCanvas);
+
+                canvas = needCanvas.GetHECSComponent<UnityTransformComponent>(ref unityTransformMask).Transform;
+            }
+
+            var bluePrint = GetUIBluePrint(uiType);
+
+            if (bluePrint == null)
+                throw new Exception("we dont have blue print for this ui " + uiType);
+
+            if (ispoolable)
+            {
+                var container = await poolingSystem.GetEntityContainerFromPool(bluePrint.Container);
+                var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(bluePrint.UIActor, container);
+                uiActorFromPool.Init();
+
+                uiActorFromPool.GetUnityTransformComponent().Transform.SetParent(canvas);
+                return uiActorFromPool;
+            }
+
+            var newUIactorPrfb = await Addressables.LoadAssetAsync<GameObject>(bluePrint.UIActor).Task;
+            var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
+
+            newUiActor.GetUnityTransformComponent().Transform.SetParent(canvas);
+            newUiActor.Init();
+            return newUiActor;
+        }
+
+        private UIBluePrint GetUIBluePrint(int uiType)
+        {
+            return uIBluePrints.FirstOrDefault(x => x.UIType.Id == uiType);
+        }
+
+        private bool TryGetFromCurrentUI(int uiType, out IEntity uiEntity)
+        {
+            uiEntity = null;
+
+            foreach (var ui in uiCurrents)
+            {
+                if (ui == null || !ui.IsAlive)
+                    continue;
+
+                var uiTag = ui.GetHECSComponent<UITagComponent>(ref uiTagComponentMask);
+
+                if (uiTag.ViewType.Id == uiType)
+                {
+                    uiEntity = uiTag.Owner;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void LoadUI(AsyncOperationHandle<GameObject> obj, Action<IEntity> onUILoad)
@@ -302,6 +386,8 @@ namespace Systems
             else
                 HECSDebug.LogError("we dont have unityTransform on " + neededCanvas.ID);
         }
+
+
     }
 
     public interface IUISystem : ISystem,

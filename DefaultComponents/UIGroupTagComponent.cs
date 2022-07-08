@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Components
 {
-    [Serializable, Documentation(Doc.UI, "Компонент тег, который мы вешаем на UI и таким образом обозначаем принадлежность как какой группе, может содержать несколько тегов")]
+    [Serializable, Documentation(Doc.UI, "The tag component, which we hang on the UI and thus designate belonging to which group, can contain several tags")]
     public class UIGroupTagComponent : BaseComponent
     {
         [SerializeField] private UIGroupIdentifier[] Groups = new UIGroupIdentifier[0];

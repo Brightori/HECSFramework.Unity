@@ -7,18 +7,18 @@ using UnityEngine;
 namespace Components
 {
     [Serializable]
-    [Documentation(Doc.HECS, Doc.Actor, "This component provide access to unity transform, if this entity not actor, this component remove self")]
-    public sealed class UnityTransformComponent : BaseComponent, IHaveActor, IInitable
+    [Documentation(Doc.HECS, Doc.Actor, "This component provide access to unity rect transform, if this entity not actor, this component remove self")]
+    public sealed class UnityRectTransformComponent : BaseComponent, IHaveActor, IInitable
     {
         public IActor Actor { get; set; }
-        
+
         [ReadOnly]
-        public Transform Transform;
+        public RectTransform RectTransform;
 
         public void Init()
         {
             if (Actor != null)
-                Transform = Actor.GameObject.GetComponent<Transform>();
+                RectTransform = Actor.GameObject.GetComponent<RectTransform>();
             else
                 Actor.RemoveHecsComponent(this);
         }

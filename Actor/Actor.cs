@@ -86,8 +86,11 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            entity.HecsDestroy();
-            MonoBehaviour.Destroy(gameObject);
+            if (EntityManager.IsAlive)
+            {
+                entity.HecsDestroy();
+                MonoBehaviour.Destroy(gameObject);
+            }
         }
 
         public bool Equals(IEntity other) => entity.Equals(other);

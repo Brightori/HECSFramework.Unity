@@ -4,7 +4,8 @@ using HECSFramework.Unity;
 
 namespace Components
 {
-    [Serializable, Documentation(Doc.UI, Doc.Tag, "Это компонент по которому мы определяем принадлежность к UI и храним тут идентификатор UI")]
+    [RequiredAtContainer(typeof(UnityTransformComponent), typeof(UnityRectTransformComponent))]
+    [Serializable, Documentation(Doc.UI, Doc.Tag, "this components marks ui and provide identifier info for this ui")]
     public class UITagComponent : BaseComponent
     {
         public UIIdentifier ViewType;

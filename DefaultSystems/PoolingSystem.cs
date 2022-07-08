@@ -24,6 +24,58 @@ namespace Systems
         private HECSMask viewRefMask = HMasks.GetMask<ViewReferenceComponent>();
         private HECSMask ActorContainerIDMask = HMasks.GetMask<ActorContainerID>();
 
+        public async Task<T> GetActorFromPool<T>(AssetReference assetReference, EntityContainer entityContainer = null) where T : Component, IActor
+        {
+            var key = assetReference.AssetGUID;
+
+            if (pooledActors.TryGetValue(key, out var pool))
+            {
+                var view = await pool.Get();
+                view.SetActive(true);
+                T actor = null;
+
+                if (!view.TryGetComponent<T>(out var actorFromView))
+                {
+                    view.AddComponent(pooledActorsType[key]);
+                    actor = view.GetComponent<T>();
+                }
+                else
+                    actor = actorFromView;
+
+                if (entityContainer != null)
+                    entityContainer.Init(actor);
+
+                return actor;
+            }
+            else
+            {
+                var task = Addressables.LoadAssetAsync<GameObject>(assetReference).Task;
+                var objFromRef = await task;
+                var newActor = GetNewInstance(objFromRef).GetComponent<T>();
+
+                //we have this scope bcz abother task can be completed before and init pool
+                if (pooledActors.ContainsKey(assetReference.AssetGUID))
+                {
+                    if (entityContainer != null)
+                        entityContainer.Init(newActor);
+
+                    return newActor;
+                }
+
+                var newpool = new HECSPool<GameObject>(task, maxPoolSize);
+
+                pooledActorsType.Add(key, newActor.GetType());
+                pooledActors.Add(key, newpool);
+
+                if (entityContainer != null)
+                {
+                    entityContainer.Init(newActor);
+                }
+
+                return newActor;
+            }
+        }
+
         public async Task<IActor> GetActorFromPool(ViewReferenceComponent viewReferenceComponent, bool setFromContainer = false)
         {
             var key = viewReferenceComponent.ViewReference.AssetGUID;
@@ -114,7 +166,7 @@ namespace Systems
                     actor = actorFromView;
                     entityContainer.Init(actor);
                 }
-                    
+
 
                 return actor;
             }
@@ -180,6 +232,23 @@ namespace Systems
                 if (pooledContainers.ContainsKey(key)) return loaded;
 
                 pooledContainers.Add(key, loaded);
+                return loaded;
+            }
+        }
+
+        public async Task<EntityContainer> GetEntityContainerFromPool(AssetReference assetReference)
+        {
+            if (pooledContainers.TryGetValue(assetReference.AssetGUID, out var container))
+            {
+                return container;
+            }
+            else
+            {
+                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(assetReference).Task;
+
+                if (pooledContainers.ContainsKey(assetReference.AssetGUID)) return loaded;
+
+                pooledContainers.Add(assetReference.AssetGUID, loaded);
                 return loaded;
             }
         }
