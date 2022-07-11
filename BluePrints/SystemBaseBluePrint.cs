@@ -1,5 +1,4 @@
 ﻿using HECSFramework.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -25,6 +24,12 @@ namespace HECSFramework.Unity
         #endregion
 
         public abstract ISystem GetSystem { get; }
+
+        public ISystem GetSystemInstance()
+        {
+            var t = Instantiate(this);
+            return t.GetSystem;
+        }
 
     }
 }

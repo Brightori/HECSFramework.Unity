@@ -55,6 +55,17 @@ namespace HECSFramework.Unity
             return default;
         }
 
+        public virtual T GetComponentInstance<T>() where T : IComponent
+        {
+            foreach (var c in holder.components)
+            {
+                if (c.GetHECSComponent is T needed)
+                    return (T)c.GetComponentInstance();
+            }
+
+            return default;
+        }
+
         /// <summary>
         /// looking for blueprints typeHashCode not for components itself
         /// </summary>

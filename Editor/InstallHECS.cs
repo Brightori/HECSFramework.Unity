@@ -1,4 +1,5 @@
-﻿using HECSFramework.Core.Generator;
+﻿using Codice.Utils;
+using HECSFramework.Core.Generator;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -64,6 +65,11 @@ namespace HECSFramework.Unity.Editor
             CreateGameController();
             //CreatePartialRegisterService();
             CreateReserveNamespace();
+        }
+
+        public static void SaveToFile(string data, string path)
+{
+            File.WriteAllText(path, data, Encoding.UTF8);
         }
 
         #region ReservedNameSpaces

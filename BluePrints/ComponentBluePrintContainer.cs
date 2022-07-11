@@ -13,6 +13,12 @@ namespace HECSFramework.Unity
         public virtual bool IsVisible { get; } = true;
         public virtual bool IsOverride { get; set; }
         public virtual bool IsColorNeeded { get; set; }
+
+        public IComponent GetComponentInstance()
+        {
+            var t = Instantiate(this);
+            return t.GetHECSComponent;
+        }
     }
     
     public class ComponentBluePrintContainer<T> : ComponentBluePrint, IEditorInit where T : class, IComponent, new()
@@ -66,7 +72,7 @@ namespace HECSFramework.Unity
         [SerializeField, HideLabel] 
         protected T component= new T();
         public override IComponent GetHECSComponent => component;
-        
+
         void IEditorInit.Init()
             => component = new T();
     }
