@@ -129,6 +129,13 @@ namespace HECSFramework.Unity
 
             GetOrAddComponent<TransformComponent>(this);
             entity.AfterInit();
+
+            for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
+            {
+                var c = GetAllComponents[ComponentsMask.CurrentIndexes[i]];
+                World?.AddOrRemoveComponent(c, false);
+                TypesMap.RegisterComponent(c.ComponentsMask.Index, c.Owner, true);
+            }
         }
 
         public void Init(int worldIndex, bool needRegister = true)
