@@ -26,9 +26,10 @@ namespace HECSFramework.Unity
         public IComponent[] GetAllComponents => entity.GetAllComponents;
 
         public string ID => entity.ID;
-        public bool IsInited => entity.IsInited;
-        public bool IsAlive => entity.IsAlive;
-        public bool IsPaused => entity.IsPaused;
+        public bool IsInited => entity != null && entity.IsInited;
+        public bool IsAlive => entity != null && entity.IsAlive;
+        public bool IsPaused => entity != null && entity.IsPaused;
+        private bool entityCreated;
 
         public string ContainerID => entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
@@ -36,6 +37,8 @@ namespace HECSFramework.Unity
         public HECSMultiMask ComponentsMask => entity.ComponentsMask;
 
         public LocalComponentListenersService RegisterComponentListenersService => entity.RegisterComponentListenersService;
+
+        private HECSMask actorContainerMask = HMasks.GetMask<ActorContainerID>();
 
         public T AddHecsComponent<T>(T component, IEntity owner, bool silently = false) where T : IComponent
         {
@@ -59,11 +62,28 @@ namespace HECSFramework.Unity
         private void Awake()
         {
             actorInitModule.InitModule(this);
+            
+            if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
+            {
+                CreateEntity();
+                
+                if (actorContainer != null && !IsInited)
+                    actorContainer.Init(this);
+            }
+        }
+
+        private void CreateEntity()
+        {
             entity = new Entity(actorInitModule.ID, actorInitModule.WorldIndex);
             entity.SetGuid(actorInitModule.Guid);
+            entityCreated = true;
+        }
 
-            if (actorContainer != null && !IsInited)
-                actorContainer.Init(this);
+        private void CreateEntity(World world)
+        {
+            entity = new Entity(actorInitModule.ID, world);
+            entity.SetGuid(actorInitModule.Guid);
+            entityCreated = true;
         }
 
         public void InitWithContainer()
@@ -76,6 +96,44 @@ namespace HECSFramework.Unity
         {
             actorContainer = entityContainer;
             InitWithContainer();
+        }
+
+        public void Init(bool needRegister = true)
+        {
+            if (entity == null)
+                CreateEntity();
+
+            if (World == null)
+                entity.SetWorld(0);
+
+            if (!IsInited && actorContainer != null && !entity.ContainsMask(ref actorContainerMask))
+                actorContainer.Init(this);
+
+            entity.InitComponentsAndSystems(needRegister);
+
+            if (needRegister)
+                EntityManager.RegisterEntity(this, true);
+
+            GetOrAddComponent<TransformComponent>(this);
+            entity.AfterInit();
+
+            if (needRegister)
+            {
+                for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
+                {
+                    var c = GetAllComponents[ComponentsMask.CurrentIndexes[i]];
+                    World?.AddOrRemoveComponent(c, false);
+                    TypesMap.RegisterComponent(c.ComponentsMask.Index, c.Owner, true);
+                }
+            }
+        }
+
+        public void Init(int worldIndex, bool needRegister = true)
+        {
+            if (!entityCreated)
+                CreateEntity(EntityManager.Worlds.Data[worldIndex]);
+
+            Init(needRegister);
         }
 
         protected virtual void Start()
@@ -114,35 +172,7 @@ namespace HECSFramework.Unity
 
         public void EntityDestroy() => entity.HecsDestroy();
 
-        public void Init(bool needRegister = true)
-        {
-            if (entity == null)
-                entity = new Entity(gameObject.name);
-
-            if (World == null)
-                entity.SetWorld(0);
-
-            entity.InitComponentsAndSystems(needRegister);
-
-            if (needRegister)
-                EntityManager.RegisterEntity(this, true);
-
-            GetOrAddComponent<TransformComponent>(this);
-            entity.AfterInit();
-
-            for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
-            {
-                var c = GetAllComponents[ComponentsMask.CurrentIndexes[i]];
-                World?.AddOrRemoveComponent(c, false);
-                TypesMap.RegisterComponent(c.ComponentsMask.Index, c.Owner, true);
-            }
-        }
-
-        public void Init(int worldIndex, bool needRegister = true)
-        {
-            entity.InitWorld(EntityManager.Worlds.Data[worldIndex]);
-            Init(needRegister);
-        }
+        
 
         public void InjectEntity(IEntity entity, IEntity owner = null, bool additive = false) => this.entity.InjectEntity(entity, this, additive);
 
