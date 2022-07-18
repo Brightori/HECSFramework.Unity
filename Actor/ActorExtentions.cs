@@ -1,8 +1,7 @@
-﻿using Components;
-using HECSFramework.Core;
-using System;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
+using Components;
+using HECSFramework.Core;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
@@ -27,7 +26,7 @@ namespace HECSFramework.Unity
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }
-        
+
         public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0)
         {
             var entity = new Entity(entityContainer.name, worldIndex);
@@ -36,17 +35,17 @@ namespace HECSFramework.Unity
             entity.GenerateGuid();
             return entity;
         }
-        
+
         public static EntityModel GetEntityModel(this EntityContainer entityContainer, int worldIndex = 0)
         {
             var entity = new EntityModel(worldIndex, entityContainer.name);
             entityContainer.Init(entity);
-            entity.GetOrAddComponent<ActorContainerID>(containerMask) .ID = entityContainer.name;
+            entity.GetOrAddComponent<ActorContainerID>(containerMask).ID = entityContainer.name;
             entity.GenerateGuid();
             return entity;
         }
 
-        public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
+        public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true, Action<IActor> callBack = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.name;
@@ -60,6 +59,27 @@ namespace HECSFramework.Unity
 
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb);
+
+            callBack?.Invoke(actorPrfb);
+            return actorPrfb;
+        }
+
+        public static async Task<IActor> GetActorExluding<Exluding>(this EntityContainer entityContainer, bool needLoadContainer = true, Action<IActor> callBack = null)
+        {
+            var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
+            var actorID = entityContainer.name;
+
+            if (viewReferenceComponent == null)
+                throw new Exception("нет вью рефа у " + actorID);
+
+            var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
+            var prefab = await asynData.Task;
+            var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
+
+            if (needLoadContainer)
+                entityContainer.Init(actorPrfb);
+
+            actorPrfb.RemoveHecsComponentsAndSystems<Exluding>();
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
@@ -87,17 +107,34 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 #endif
-        
+
         public static T GetComponentInstance<T>(this EntityContainer entityContainer) where T : class, IComponent, new()
         {
             foreach (var componentBluePrint in entityContainer.Components)
             {
-                if (!(componentBluePrint is ComponentBluePrintContainer<T>)) continue;
+                if (!(componentBluePrint.GetHECSComponent is T)) continue;
 
-                return (T)componentBluePrint.GetHECSComponent;
+                return (T)componentBluePrint.GetComponentInstance();
             }
 
             throw new ArgumentOutOfRangeException();
+        }
+
+
+
+        public static void RemoveHecsComponentsAndSystems<T>(this IEntity entity)
+        {
+            foreach (var c in entity.GetAllComponents)
+            {
+                if (c is T)
+                { entity.RemoveHecsComponent(c); }
+            }
+
+            foreach (var s in entity.GetAllSystems.ToArray())
+            {
+                if (s is T)
+                { entity.RemoveHecsSystem(s); }
+            }
         }
     }
 }

@@ -7,17 +7,17 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace HECSFramework.Unity
 {
-    [Documentation(Doc.HECS, "This helper load location to ")]
+    [Documentation(Doc.HECS, "This helper load location to world")]
     public static partial class WorldHelpers
     {
-        public static async Task<SceneInstance> LoadLocationToWorld(World world, AssetReference location)
+        public static async Task<SceneInstance> LoadLocationToWorld(this World world, AssetReference location)
         {
             var scene = await Addressables.LoadSceneAsync(location, UnityEngine.SceneManagement.LoadSceneMode.Additive).Task;
             InitGameObjects(world, scene.Scene.GetRootGameObjects());
             return scene;
         }
 
-        public static async Task<SceneInstance> LoadLocationToWorld(World world, string location)
+        public static async Task<SceneInstance> LoadLocationToWorld(this World world, string location)
         {
             var scene = await Addressables.LoadSceneAsync(location, UnityEngine.SceneManagement.LoadSceneMode.Additive).Task;
             InitGameObjects(world, scene.Scene.GetRootGameObjects());
