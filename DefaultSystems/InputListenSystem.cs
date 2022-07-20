@@ -63,14 +63,17 @@ namespace Systems
         {
             if (!EntityManager.IsAlive) return;
 
-            IEntity[] array = inputListeners.Data;
-            var lenght = inputListeners.Count;
-            for (int i = 0; i < lenght; i++)
+            foreach (var w in EntityManager.Worlds)
             {
-                IEntity listener = array[i];
-                listener.Command(command);
+                var collection = w.Filter(InputListenerTagComponentMask);
+                var lenght = collection.Count;
+                for (int i = 0; i < lenght; i++)
+                {
+                    IEntity listener = collection.Data[i];
+                    listener.Command(command);
+                }
+                w.Command(command);
             }
-            EntityManager.GlobalCommand(command);
         }
 
         public override void Dispose()

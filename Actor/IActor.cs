@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core;
+using TMPro;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -7,6 +8,7 @@ namespace HECSFramework.Unity
     {
         bool TryGetComponent<T>(out T component, bool lookInChildsToo = false);
         bool TryGetComponents<T>(out T[] components);
+        void SetWorld(World world = null);
         GameObject GameObject { get; }
     }
 

@@ -42,6 +42,9 @@ namespace HECSFramework.Unity
 
         public T AddHecsComponent<T>(T component, IEntity owner, bool silently = false) where T : IComponent
         {
+            if (!entityCreated)
+                CreateEntity();
+
             return entity.AddHecsComponent(component, this, silently);
         }
 
@@ -62,11 +65,11 @@ namespace HECSFramework.Unity
         private void Awake()
         {
             actorInitModule.InitModule(this);
-            
+
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
             {
                 CreateEntity();
-                
+
                 if (actorContainer != null && !IsInited)
                     actorContainer.Init(this);
             }
@@ -74,6 +77,9 @@ namespace HECSFramework.Unity
 
         private void CreateEntity()
         {
+            if (entityCreated)
+                return;
+
             entity = new Entity(actorInitModule.ID, actorInitModule.WorldIndex);
             entity.SetGuid(actorInitModule.Guid);
             entityCreated = true;
@@ -81,6 +87,9 @@ namespace HECSFramework.Unity
 
         private void CreateEntity(World world)
         {
+            if (entityCreated)
+                return;
+
             entity = new Entity(actorInitModule.ID, world);
             entity.SetGuid(actorInitModule.Guid);
             entityCreated = true;
@@ -122,7 +131,7 @@ namespace HECSFramework.Unity
                 for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
                 {
                     var c = GetAllComponents[ComponentsMask.CurrentIndexes[i]];
-                    World?.AddOrRemoveComponent(c, false);
+                    World?.AddOrRemoveComponent(c, true);
                     TypesMap.RegisterComponent(c.ComponentsMask.Index, c.Owner, true);
                 }
             }
@@ -172,7 +181,7 @@ namespace HECSFramework.Unity
 
         public void EntityDestroy() => entity.HecsDestroy();
 
-        
+
 
         public void InjectEntity(IEntity entity, IEntity owner = null, bool additive = false) => this.entity.InjectEntity(entity, this, additive);
 
@@ -256,7 +265,7 @@ namespace HECSFramework.Unity
 
         public override int GetHashCode()
         {
-            return entity != null ? entity.GetHashCode() : gameObject.GetHashCode(); 
+            return entity != null ? entity.GetHashCode() : gameObject.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -264,6 +273,27 @@ namespace HECSFramework.Unity
             return entity.Equals(other);
         }
 
-        public bool RemoveHecsSystem<T>() where T: ISystem  => entity.RemoveHecsSystem<T>();
+        public bool RemoveHecsSystem<T>() where T : ISystem => entity.RemoveHecsSystem<T>();
+
+
+        /// <summary>
+        /// if u need actor on different world, u should set world before init from container
+        /// </summary>
+        /// <param name="world"></param>
+        public void SetWorld(World world = null)
+        {
+            if (world == null)
+                world = EntityManager.Default;
+
+            if (entity == null)
+                CreateEntity(world);
+         
+            entity.SetWorld(world);
+        }
+
+        public void MigrateEntityToWorld(World world, bool needInit = true)
+        {
+            entity.MigrateEntityToWorld(world, needInit);
+        }
     }
 }

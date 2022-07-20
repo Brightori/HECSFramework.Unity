@@ -75,6 +75,9 @@ namespace Systems
             }
             else
             {
+                if (actor == null || actor.gameObject == null)
+                    return;
+
                 actor.EntityDestroy();
                 MonoBehaviour.Destroy(actor.gameObject);
             }

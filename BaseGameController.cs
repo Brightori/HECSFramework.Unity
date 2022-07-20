@@ -1,4 +1,5 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 using Systems;
 using UnityEngine;
 
@@ -31,6 +32,8 @@ namespace HECSFramework.Unity
             HECSDebug.Init(new HECSDebugUnitySide());
 
             entityManager = new EntityManager(worldCount);
+            EntityManager.OnNewWorldAdded += NewWorldReact;
+            
             updateSystem = EntityManager.Default.GlobalUpdateSystem;
 
             foreach (var w in EntityManager.Worlds)
@@ -46,6 +49,11 @@ namespace HECSFramework.Unity
             BaseAwake();
             NetworkAwake();
             StrategiesInit();
+        }
+
+        private void NewWorldReact(World world)
+        {
+            world.GlobalUpdateSystem.InitCustomUpdate(this);
         }
 
         partial void NetworkAwake();
@@ -102,8 +110,8 @@ namespace HECSFramework.Unity
             var worldsCount = worlds.Count;
             for (int i = 0; i < worldsCount; i++)
             {
-                updateSystem.LateUpdate();
-                updateSystem.FinishUpdate?.Invoke();
+                worlds.Data[i].GlobalUpdateSystem.LateUpdate();
+                worlds.Data[i].GlobalUpdateSystem.FinishUpdate?.Invoke();
             }
         }
 
@@ -112,7 +120,7 @@ namespace HECSFramework.Unity
             var worldsCount = worlds.Count;
             for (int i = 0; i < worldsCount; i++)
             {
-                updateSystem.FixedUpdate();
+                worlds.Data[i].GlobalUpdateSystem.FixedUpdate();
             }
         }
 
@@ -120,5 +128,6 @@ namespace HECSFramework.Unity
         {
             entityManager?.Dispose();
         }
+
     }
 }
