@@ -31,7 +31,13 @@ namespace HECSFramework.Unity
 
         public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U : ComponentBluePrint
         {
-            return holder.components.Any(x => x.GetHECSComponent is U);
+            foreach (var c in Components)
+            {
+                if (c.Equals(componentBluePrint))
+                    return true;
+            }
+
+            return false;
         }
 
         public virtual bool IsHaveComponent<T>()
@@ -44,7 +50,7 @@ namespace HECSFramework.Unity
             return IsHaveComponent<T>();
         }
 
-        public virtual T GetComponent<T>() where T: IComponent
+        public virtual T GetComponent<T>() where T : IComponent
         {
             foreach (var c in holder.components)
             {
@@ -86,6 +92,20 @@ namespace HECSFramework.Unity
             InitSystems(entity, holder.systems, pure);
         }
 
+        public bool TryGetComponent<T>(Func<T,bool> func, out T result)
+        {
+            foreach (var component in holder.components)
+            {
+                if (component is T needed && func(needed))
+                {
+                    result = needed;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
+        }
+
         protected void InitComponents(IEntity entity, List<ComponentBluePrint> components, bool pure = false)
         {
             foreach (var component in components)
@@ -96,7 +116,7 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                var unpackComponent = Instantiate(component).GetHECSComponent;
+                var unpackComponent = component.GetComponentInstance();
 
                 if (!pure && unpackComponent is IHaveActor && !(entity is IActor actor))
                     continue;
@@ -115,7 +135,7 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                var unpackSys = Instantiate(system).GetSystem;
+                var unpackSys = system.GetSystemInstance();
 
                 if (!pure && unpackSys is IHaveActor && !(entity is IActor actor))
                     continue;
@@ -213,9 +233,14 @@ namespace HECSFramework.Unity
             getWindow.Init(this);
         }
 
-       
-#endif
 
+        [Button]
+        public void Sort()
+        {
+            holder.SortComponents();
+        }
+
+#endif
         private void SortComponents()
         {
             holder.components.Sort((a, b) =>
@@ -261,9 +286,9 @@ namespace HECSFramework.Unity
         private void OnValidate()
         {
 #if UNITY_EDITOR
-            if (Application.isPlaying || EntityManager.IsAlive)
-                return;
-            holder.OnValidate(this);
+            //if (Application.isPlaying || EntityManager.IsAlive)
+            //    return;
+            //holder.OnValidate(this);
 #endif
         }
 

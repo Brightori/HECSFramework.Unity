@@ -78,9 +78,12 @@ namespace HECSFramework.Unity
                     continue;
 
                 var asset = ScriptableObject.CreateInstance(neededType);
+                var componentBP = asset as ComponentBluePrint;
+
                 AssetDatabase.AddObjectToAsset(asset, parent);
-                asset.name = neededType.Name;
-                parent.AddComponent(asset as ComponentBluePrint);
+                asset.name = componentBP.GetHECSComponent.GetType().Name;
+                parent.AddComponent(componentBP);
+                EditorUtility.SetDirty(parent);
             }
         }
     }
@@ -96,11 +99,16 @@ namespace HECSFramework.Unity
         public override void AddBluePrint()
         {
             var asset = ScriptableObject.CreateInstance(neededType);
+            var system = asset as SystemBaseBluePrint;
+
             foreach (EntityContainer parent in containers)
             {
+                if (parent.IsHaveSystem(system))
+                    continue;
+
                 AssetDatabase.AddObjectToAsset(asset, parent);
-                asset.name = neededType.Name;
-                parent.AddSystem(asset as SystemBaseBluePrint);
+                asset.name = system.GetSystem.GetType().Name;
+                parent.AddSystem(system);
             }
         }
     }

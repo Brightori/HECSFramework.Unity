@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using Object = UnityEngine.Object;
 using HECSFramework.Core;
 using UnityEngine;
+using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -39,20 +40,20 @@ namespace HECSFramework.Unity
 #endif
         [Searchable, HideIf("@this.systems.Count == 0")]
         public List<SystemBaseBluePrint> systems = new List<SystemBaseBluePrint>();
-        
+
         public Color GetColor(int index, Color defaultColor, List<ComponentBluePrint> list)
         {
 #if UNITY_EDITOR
-	        var baseColor =  EditorGUIUtility.isProSkin
-		        ? new Color32(56, 56, 56, 255)
-		        : new Color32(194, 194, 194, 255);
+            var baseColor = EditorGUIUtility.isProSkin
+                ? new Color32(56, 56, 56, 255)
+                : new Color32(194, 194, 194, 255);
 #else
 	        var baseColor =  new Color();
 #endif
-	        
-	        if (!list[index].IsColorNeeded) return defaultColor;
-	        if (list[index].IsOverride) return baseColor + new Color(.0375f, .0375f, 0);
-	        return baseColor + new Color(0, .0375f, 0);
+
+            if (!list[index].IsColorNeeded) return defaultColor;
+            if (list[index].IsOverride) return baseColor + new Color(.0375f, .0375f, 0);
+            return baseColor + new Color(0, .0375f, 0);
         }
 
 #if UNITY_EDITOR
@@ -60,7 +61,7 @@ namespace HECSFramework.Unity
         [HideInInspector]
 #endif
         public EntityContainer Parent;
-        
+
         private void RemoveComponent(ComponentBluePrint element)
         {
             components.Remove(element);
@@ -68,7 +69,7 @@ namespace HECSFramework.Unity
             ClearDeletedBluePrints();
 #endif
         }
-        
+
         private void RemoveSystem(SystemBaseBluePrint element)
         {
             systems.Remove(element);
@@ -76,7 +77,7 @@ namespace HECSFramework.Unity
             ClearDeletedBluePrints();
 #endif
         }
-        
+
 #if UNITY_EDITOR
 #if DeveloperMode
         [Button]
@@ -84,7 +85,7 @@ namespace HECSFramework.Unity
         public void ClearDeletedBluePrints()
         {
             if (Parent == null) return;
-            
+
             var path = AssetDatabase.GetAssetPath(Parent);
             var allSo = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
 
@@ -96,7 +97,7 @@ namespace HECSFramework.Unity
                 Object go = allSo[i];
 
                 if (go == null) continue;
-                
+
                 if (go is ComponentBluePrint component && !components.Contains(component))
                 {
                     AssetDatabase.RemoveObjectFromAsset(go);
@@ -118,80 +119,80 @@ namespace HECSFramework.Unity
 #endif
         private void ClearBrokenSubAssets()
         {
-	        if (Parent == null) return;
+            if (Parent == null) return;
 
-	        //Create a new instance of the object to delete
-	        ScriptableObject newInstance = ScriptableObject.CreateInstance(Parent.GetType().ToString());
+            //Create a new instance of the object to delete
+            ScriptableObject newInstance = ScriptableObject.CreateInstance(Parent.GetType().ToString());
 
-	        //Copy the original content to the new instance
-	        EditorUtility.CopySerialized(Parent, newInstance);
-	        newInstance.name = Parent.name;
+            //Copy the original content to the new instance
+            EditorUtility.CopySerialized(Parent, newInstance);
+            newInstance.name = Parent.name;
 
-	        string toDeletePath = AssetDatabase.GetAssetPath(Parent);
-	        string clonePath = toDeletePath.Replace(".asset", "CLONE.asset");
+            string toDeletePath = AssetDatabase.GetAssetPath(Parent);
+            string clonePath = toDeletePath.Replace(".asset", "CLONE.asset");
 
-	        //Create the new asset on the project files
-	        AssetDatabase.CreateAsset(newInstance, clonePath);
-	        AssetDatabase.ImportAsset(clonePath);
+            //Create the new asset on the project files
+            AssetDatabase.CreateAsset(newInstance, clonePath);
+            AssetDatabase.ImportAsset(clonePath);
 
-	        //Unhide sub-assets
-	        var subAssets = AssetDatabase.LoadAllAssetsAtPath(toDeletePath);
-	        HideFlags[] flags = new HideFlags[subAssets.Length];
-	        for (int i = 0; i < subAssets.Length; i++)
-	        {
-		        //Ignore the "corrupt" one
-		        if (subAssets[i] == null) continue;
+            //Unhide sub-assets
+            var subAssets = AssetDatabase.LoadAllAssetsAtPath(toDeletePath);
+            HideFlags[] flags = new HideFlags[subAssets.Length];
+            for (int i = 0; i < subAssets.Length; i++)
+            {
+                //Ignore the "corrupt" one
+                if (subAssets[i] == null) continue;
 
-		        //Store the previous hide flag
-		        flags[i] = subAssets[i].hideFlags;
-		        subAssets[i].hideFlags = HideFlags.None;
-		        EditorUtility.SetDirty(subAssets[i]);
-	        }
+                //Store the previous hide flag
+                flags[i] = subAssets[i].hideFlags;
+                subAssets[i].hideFlags = HideFlags.None;
+                EditorUtility.SetDirty(subAssets[i]);
+            }
 
-	        EditorUtility.SetDirty(Parent);
-	        AssetDatabase.SaveAssets();
+            EditorUtility.SetDirty(Parent);
+            AssetDatabase.SaveAssets();
 
-	        //Reparent the subAssets to the new instance
-	        foreach (var subAsset in AssetDatabase.LoadAllAssetRepresentationsAtPath(toDeletePath))
-	        {
-		        //Ignore the "corrupt" one
-		        if (subAsset == null) continue;
+            //Reparent the subAssets to the new instance
+            foreach (var subAsset in AssetDatabase.LoadAllAssetRepresentationsAtPath(toDeletePath))
+            {
+                //Ignore the "corrupt" one
+                if (subAsset == null) continue;
 
-		        //We need to remove the parent before setting a new one
-		        AssetDatabase.RemoveObjectFromAsset(subAsset);
-		        AssetDatabase.AddObjectToAsset(subAsset, newInstance);
-	        }
+                //We need to remove the parent before setting a new one
+                AssetDatabase.RemoveObjectFromAsset(subAsset);
+                AssetDatabase.AddObjectToAsset(subAsset, newInstance);
+            }
 
-	        //Import both assets back to unity
-	        AssetDatabase.ImportAsset(toDeletePath);
-	        AssetDatabase.ImportAsset(clonePath);
+            //Import both assets back to unity
+            AssetDatabase.ImportAsset(toDeletePath);
+            AssetDatabase.ImportAsset(clonePath);
 
-	        //Reset sub-asset flags
-	        for (int i = 0; i < subAssets.Length; i++)
-	        {
-		        //Ignore the "corrupt" one
-		        if (subAssets[i] == null) continue;
+            //Reset sub-asset flags
+            for (int i = 0; i < subAssets.Length; i++)
+            {
+                //Ignore the "corrupt" one
+                if (subAssets[i] == null) continue;
 
-		        subAssets[i].hideFlags = flags[i];
-		        EditorUtility.SetDirty(subAssets[i]);
-	        }
+                subAssets[i].hideFlags = flags[i];
+                EditorUtility.SetDirty(subAssets[i]);
+            }
 
-	        EditorUtility.SetDirty(newInstance);
-	        AssetDatabase.SaveAssets();
+            EditorUtility.SetDirty(newInstance);
+            AssetDatabase.SaveAssets();
 
-	        //Here's the magic. First, we need the system path of the assets
-	        string globalToDeletePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), toDeletePath);
-	        string globalClonePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), clonePath);
+            //Here's the magic. First, we need the system path of the assets
+            string globalToDeletePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), toDeletePath);
+            string globalClonePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), clonePath);
 
-	        //We need to delete the original file (the one with the missing script asset)
-	        //Rename the clone to the original file and finally
-	        //Delete the meta file from the clone since it no longer exists
+            //We need to delete the original file (the one with the missing script asset)
+            //Rename the clone to the original file and finally
+            //Delete the meta file from the clone since it no longer exists
 
-	        System.IO.File.Delete(globalToDeletePath);
-	        System.IO.File.Delete(globalClonePath + ".meta");
-	        System.IO.File.Move(globalClonePath, globalToDeletePath);
+            System.IO.File.Delete(globalToDeletePath);
+            System.IO.File.Delete(globalClonePath + ".meta");
+            System.IO.File.Move(globalClonePath, globalToDeletePath);
 
-	        AssetDatabase.Refresh();
+            AssetDatabase.Refresh();
         }
 
 #if DeveloperMode
@@ -210,10 +211,10 @@ namespace HECSFramework.Unity
 
             foreach (Object go in allSo)
             {
-                if (go is ComponentBluePrint component && !components.Contains(component)) 
+                if (go is ComponentBluePrint component && !components.Contains(component))
                     components.Add(component);
 
-                if (go is SystemBaseBluePrint system && !systems.Contains(system)) 
+                if (go is SystemBaseBluePrint system && !systems.Contains(system))
                     systems.Add(system);
             }
         }
@@ -228,9 +229,15 @@ namespace HECSFramework.Unity
             ClearDeletedBluePrints();
             //CheckRequirements();
         }
+
+        public void SortComponents()
+        {
+            components = components.OrderBy(x => x.name).ToList();
+            systems = systems.OrderBy(x => x.name).ToList();
+        }
 #endif
     }
-    
+
     public enum HecsEditorMode
     {
         Basic = 0,

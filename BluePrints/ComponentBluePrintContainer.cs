@@ -14,10 +14,27 @@ namespace HECSFramework.Unity
         public virtual bool IsOverride { get; set; }
         public virtual bool IsColorNeeded { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is ComponentBluePrint print) 
+            {
+                var fullname = GetHECSComponent.GetType().FullName;
+                var fullnameObj = print.GetHECSComponent.GetType().FullName;
+                return (string.Equals(fullname, fullnameObj));
+            }
+
+            return false;
+        }
+
         public IComponent GetComponentInstance()
         {
             var t = Instantiate(this);
             return t.GetHECSComponent;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), GetHECSComponent);
         }
     }
     

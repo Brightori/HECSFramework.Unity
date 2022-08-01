@@ -20,9 +20,6 @@ namespace HECSFramework.Unity.Helpers
 
             return containers;
 #endif
-#if UNITY_2017_1_OR_NEWER
-            return Enumerable.Empty<T>();
-#endif
         }
     }
 }

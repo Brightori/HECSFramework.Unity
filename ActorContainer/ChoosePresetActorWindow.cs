@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using HECSFramework.Core;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
@@ -36,6 +37,7 @@ namespace HECSFramework.Unity
                 
                 asset.name = componentBP.GetHECSComponent.GetType().Name;
                 actorContainer.AddComponent(asset);
+                HECSDebug.LogWarning($"we add component from preset {asset.name}");
             } 
             
             foreach (var sysBP in presetContainer.SystemsBluePrints)
@@ -50,6 +52,7 @@ namespace HECSFramework.Unity
                 actorContainer.AddSystem(asset);
             }
 
+            EditorUtility.SetDirty(actorContainer);
             AssetDatabase.SaveAssets();
             Close();
         }
@@ -66,24 +69,24 @@ namespace HECSFramework.Unity
         } 
         
         
-        [Button("Insert bluePrints from container", ButtonSizes.Medium), HideIf("@presetContainer == null")]
-        [PropertyTooltip("ссылки на эти объекты мы просто добавляем текущему актору, у акторов эти объекты будут общими")]
-        public void InsertContainerByPreset()
-        {
-            if (inAction)
-                return;
+        //[Button("Insert bluePrints from container", ButtonSizes.Medium), HideIf("@presetContainer == null")]
+        //[PropertyTooltip("ссылки на эти объекты мы просто добавляем текущему актору, у акторов эти объекты будут общими")]
+        //public void InsertContainerByPreset()
+        //{
+        //    if (inAction)
+        //        return;
 
-            inAction = true;
+        //    inAction = true;
 
-            foreach (var component in presetContainer.ComponentsBluePrints)
-                actorContainer.AddComponent(component);
+        //    foreach (var component in presetContainer.ComponentsBluePrints)
+        //        actorContainer.AddComponent(component);
 
-            foreach (var system in presetContainer.SystemsBluePrints)
-                actorContainer.AddSystem(system);
+        //    foreach (var system in presetContainer.SystemsBluePrints)
+        //        actorContainer.AddSystem(system);
 
-            AssetDatabase.SaveAssets();
-            Copy();
-        }
+        //    AssetDatabase.SaveAssets();
+        //    Copy();
+        //}
     }
 }
 #endif
