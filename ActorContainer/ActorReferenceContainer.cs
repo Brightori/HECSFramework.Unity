@@ -10,7 +10,7 @@ namespace HECSFramework.Unity
 {
     [CreateAssetMenu(fileName = "ActorReferenceContainer", menuName = "Actor Reference Container")]
     [Documentation(Doc.HECS, "This is reference container for actor containers, if u need reference container for ur own containers, u should make another class with generic param")]
-    public class ActorReferenceContainer : ReferenceContainerBase<ActorContainer>
+    public sealed class ActorReferenceContainer : ReferenceContainerBase<ActorContainer>
     {
     }
 
@@ -139,6 +139,14 @@ namespace HECSFramework.Unity
         public override void OnEnable()
         {
             base.OnEnable();
+
+            if (!isInited)
+            {
+                CollectComponentAndSystems(this, 0);
+                isInited = true;
+                ProcessGenerations();
+            }
+
             foreach (var componentBluePrint in Components)
             {
                 componentBluePrint.IsColorNeeded = true;
@@ -148,18 +156,12 @@ namespace HECSFramework.Unity
 
         public override T GetComponent<T>()
         {
-            foreach (var c in holder.components)
+            foreach (var c in componentsBluePrints)
             {
                 if (c.GetHECSComponent is T needed)
                     return needed;
             }
-
-            foreach (var reference in References)
-            {
-                var component = reference.GetComponent<T>();
-                if (component != null) return component;
-            }
-
+          
             return default;
         }
 
