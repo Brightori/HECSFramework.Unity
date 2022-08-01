@@ -97,8 +97,7 @@ namespace HECSFramework.Unity
 
         private void Update()
         {
-            var worldsCount = worlds.Count;
-            for (int i = 0; i < worldsCount; i++)
+            for (int i = 0; i < worlds.Count; i++)
             {
                 worlds.Data[i].GlobalUpdateSystem.Update();
                 worlds.Data[i].GlobalUpdateSystem.UpdateDelta(Time.deltaTime);

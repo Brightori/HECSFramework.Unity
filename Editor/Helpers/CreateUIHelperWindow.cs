@@ -170,6 +170,10 @@ public class CreateUIHelperWindow : OdinEditorWindow
             uibluePrint.Container = new UnityEngine.AddressableAssets.AssetReference(entryOfContainer.guid);
         }
 
+        EditorUtility.SetDirty(uibluePrint);
+        EditorUtility.SetDirty(UIprfb);
+        EditorUtility.SetDirty(uiidentifier);
+
         AssetDatabase.SaveAssets();
     }
 
