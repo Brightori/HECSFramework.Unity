@@ -165,6 +165,20 @@ namespace HECSFramework.Unity
             return default;
         }
 
+        public override bool TryGetComponent<T>(Func<T, bool> func, out T result)
+        {
+            foreach (var component in componentsBluePrints)
+            {
+                if (component is T needed && func(needed))
+                {
+                    result = needed;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
+        }
+
         public IEnumerable<EntityContainer> ReferenceContainers() => References;
     }
 

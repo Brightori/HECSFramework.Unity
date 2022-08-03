@@ -92,7 +92,7 @@ namespace HECSFramework.Unity
             InitSystems(entity, holder.systems, pure);
         }
 
-        public bool TryGetComponent<T>(Func<T,bool> func, out T result)
+        public virtual bool TryGetComponent<T>(Func<T,bool> func, out T result)
         {
             foreach (var component in holder.components)
             {
