@@ -169,7 +169,21 @@ namespace HECSFramework.Unity
         {
             foreach (var component in componentsBluePrints)
             {
-                if (component is T needed && func(needed))
+                if (component.GetHECSComponent is T needed && func(needed))
+                {
+                    result = needed;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
+        }
+
+        public override bool TryGetComponent<T>(out T result)
+        {
+            foreach (var component in componentsBluePrints)
+            {
+                if (component.GetHECSComponent is T needed)
                 {
                     result = needed;
                     return true;

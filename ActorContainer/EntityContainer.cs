@@ -22,10 +22,14 @@ namespace HECSFramework.Unity
         public List<SystemBaseBluePrint> Systems => holder.systems;
         public List<ComponentBluePrint> Components => holder.components;
 
-        public int ContainerIndex => IndexGenerator.GenerateIndex(name);
+        [SerializeField, HideInInspector]
+        private int containerIndex;
+
+        public int ContainerIndex => containerIndex;
 
         public virtual void OnEnable()
         {
+            containerIndex = IndexGenerator.GenerateIndex(name);
             holder.Parent = this;
         }
 
@@ -96,7 +100,21 @@ namespace HECSFramework.Unity
         {
             foreach (var component in holder.components)
             {
-                if (component is T needed && func(needed))
+                if (component.GetHECSComponent is T needed && func(needed))
+                {
+                    result = needed;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
+        }
+
+        public virtual bool TryGetComponent<T>( out T result)
+        {
+            foreach (var component in holder.components)
+            {
+                if (component.GetHECSComponent is T needed)
                 {
                     result = needed;
                     return true;
