@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HECSFramework.Core;
 using UnityEngine;
 
 namespace HECSFramework.Unity.Editor
@@ -38,7 +39,7 @@ namespace HECSFramework.Unity.Editor
         public ComponentHistory(ComponentBluePrint componentBluePrint)
         {
             Name = componentBluePrint.GetHECSComponent.GetType().Name;
-            Index = componentBluePrint.GetHECSComponent.GetTypeHashCode;
+            Index = IndexGenerator.GenerateIndex(Name);
             JSON = JsonUtility.ToJson(componentBluePrint, true);
         }
     }

@@ -30,8 +30,9 @@ public class LoadHistoriesWindow : OdinEditorWindow
 
         foreach (var file in files)
         {
-            var split = file.Split('_', '_', '_');
-            var nameNeeded = split[split.Length - 5];
+            var fileName =  Path.GetFileName(file);
+            var split = fileName.Split('_');
+            var nameNeeded = split[0];
 
             if (nameNeeded == entityContainer.name)
             {

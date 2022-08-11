@@ -239,9 +239,11 @@ namespace HECSFramework.Unity
         [Button(ButtonSizes.Large)]
         public void AddToHistory()
         {
-            var path = Application.dataPath + "/BluePrints/History/" + "___" + this.name + "___" + $"{DateTime.Now.ToString("u").Replace(" ", "_").Replace(":", "-")}" + ".history";
+            var path = Application.dataPath + "/BluePrints/History/" + this.name + "_" + $"{DateTime.UtcNow.ToFileTimeUtc()}" + ".history";
+            var path2 = "Assets/" + "/BluePrints/History/" + this.name + "_" + $"{DateTime.UtcNow.ToFileTimeUtc()}" + ".history";
             var json = JsonUtility.ToJson(new History(this), true);
             System.IO.File.WriteAllText(path, json);
+            AssetDatabase.Refresh();
         }
 
         [Button(ButtonSizes.Large)]
@@ -300,6 +302,8 @@ namespace HECSFramework.Unity
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
         }
+
+        public void ClearDeletedBluePrints() => holder.ClearDeletedBluePrints();
 
         private void OnValidate()
         {
