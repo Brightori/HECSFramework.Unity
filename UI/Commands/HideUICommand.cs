@@ -2,9 +2,7 @@ using HECSFramework.Core;
 
 namespace Commands
 {
-    /// <summary>
-    /// это часть UI логики, здесь мы просим скрыть какой то элемент UI
-    /// </summary>
+    [Documentation(Doc.HECS, Doc.UI, "Its core ui command, we send it for asking hide ui widget")]
     public struct HideUICommand : ICommand, IGlobalCommand
     {
         public int UIViewType;
