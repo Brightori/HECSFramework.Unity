@@ -91,7 +91,7 @@ namespace Systems
 
             if (spawn == null)
             {
-                Debug.LogAssertion("��� ������� ui ��������� " + command.UIViewType);
+                Debug.LogAssertion("Cannot find UIBluePrint for " + command.UIViewType);
                 return;
             }
 

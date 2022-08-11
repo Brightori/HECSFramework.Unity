@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HECSFramework.Core;
+using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
-using UnityEngine;
 
 namespace HECSFramework.Unity.Helpers
 {
@@ -23,3 +22,5 @@ namespace HECSFramework.Unity.Helpers
         }
     }
 }
+
+#endif
