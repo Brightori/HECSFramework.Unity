@@ -4,7 +4,9 @@ using HECSFramework.Core;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
+#endif
 
+#pragma warning disable
 namespace HECSFramework.Unity.Helpers
 {
     [Documentation(Doc.HECS, Doc.Helpers, "this helper gather all SO of needed type and return IEnumerable, its useful for drop down menus")]
@@ -19,8 +21,8 @@ namespace HECSFramework.Unity.Helpers
 
             return containers;
 #endif
+
+            return default;
         }
     }
 }
-
-#endif
