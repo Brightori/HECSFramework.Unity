@@ -153,7 +153,7 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            if (EntityManager.IsAlive)
+            if (EntityManager.IsAlive && gameObject != null)
             {
                 entity.HecsDestroy();
                 MonoBehaviour.Destroy(gameObject);
