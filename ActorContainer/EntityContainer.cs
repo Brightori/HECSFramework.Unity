@@ -29,8 +29,12 @@ namespace HECSFramework.Unity
 
         public virtual void OnEnable()
         {
-            containerIndex = IndexGenerator.GenerateIndex(name);
             holder.Parent = this;
+
+            if (string.IsNullOrEmpty(name)) 
+                return;
+            
+            containerIndex = IndexGenerator.GenerateIndex(name);
         }
 
         public bool IsHaveComponentBlueprint<U>(U componentBluePrint) where U : ComponentBluePrint
@@ -159,6 +163,15 @@ namespace HECSFramework.Unity
                     continue;
 
                 entity.AddHecsSystem(unpackSys, entity);
+            }
+        }
+
+        public IEnumerable<T> GetComponents<T>()
+        {
+            foreach (var c in holder.components)
+            {
+                if (c.GetHECSComponent is T needed)
+                    yield return needed;
             }
         }
 

@@ -15,7 +15,7 @@ namespace Components
                 return component;
 
             component = GetComponent<T>();
-            Assert.IsNotNull(component, $"нет компонента Button у {gameObject.name}");
+            Assert.IsNotNull(component, $"we dont have component {typeof(T).Name} у {gameObject.name}");
 
             return component;
         }
