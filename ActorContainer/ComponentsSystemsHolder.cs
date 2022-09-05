@@ -70,6 +70,20 @@ namespace HECSFramework.Unity
 #endif
         }
 
+        public void RemoveComponentBluePrint<T> (T component) where T: IComponent
+        {
+            var typeID = IndexGenerator.GetIndexForType(component.GetType());
+
+            foreach (var c in components)
+            {
+                if (IndexGenerator.GetIndexForType(component.GetType()) == typeID)
+                {
+                    RemoveComponent(c);
+                    break;
+                }
+            }
+        }
+
         private void RemoveSystem(SystemBaseBluePrint element)
         {
             systems.Remove(element);

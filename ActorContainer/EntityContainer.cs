@@ -273,6 +273,27 @@ namespace HECSFramework.Unity
             holder.SortComponents();
         }
 
+        public void AddComponent<T>(T component) where T: class, IComponent, new()
+        {
+            var bpProvider = new BluePrintsProvider();
+            var key = component.GetType();
+
+            if (bpProvider.Components.TryGetValue(key, out var needed))
+            {
+                var componentNode = new ComponentBluePrintNode(key.Name, needed, new List<EntityContainer> { this });
+                componentNode.AddBluePrint(component);
+            }
+            else
+                Debug.LogError($"we dont have bp for {key.Name} mby u should codogen first");
+        }
+
+        /// <summary>
+        /// this method remove blueprint of component, by component type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="component"></param>
+        public void RemoveComponentBluePrint<T>(T component) where T : IComponent => holder.RemoveComponentBluePrint(component);
+
 #endif
         private void SortComponents()
         {

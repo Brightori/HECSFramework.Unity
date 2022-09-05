@@ -130,11 +130,18 @@ namespace HECSFramework.Unity
             {
                 for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
                 {
-                    var c = GetAllComponents[ComponentsMask.CurrentIndexes[i]];
+                    var c =  entity.GetAllComponents[ComponentsMask.CurrentIndexes[i]];
+
+                    if (c.IsRegistered)
+                        continue;
+
                     World?.AddOrRemoveComponent(c, true);
                     TypesMap.RegisterComponent(c.ComponentsMask.Index, c.Owner, true);
+                    c.SetIsRegistered();
                 }
             }
+
+            entity.SetIsInited();
         }
 
         public void Init(int worldIndex, bool needRegister = true)

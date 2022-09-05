@@ -5,6 +5,7 @@ using Sirenix.OdinInspector.Editor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -86,6 +87,39 @@ namespace HECSFramework.Unity
                 EditorUtility.SetDirty(parent);
             }
         }
+
+        public void AddBluePrint<T>(T component) where T : class, IComponent, new()
+        {
+            var typeIndex = IndexGenerator.GetIndexForType(neededType);
+
+            foreach (EntityContainer parent in containers)
+            {
+                if (parent.IsHaveComponent(typeIndex))
+                    continue;
+
+                var asset = ScriptableObject.CreateInstance(neededType);
+                var componentBP = asset as ComponentBluePrintContainer<T>;
+
+                var fields = componentBP.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+                foreach (var f in fields)
+                {
+                    if (f.Name == "component")
+                    {
+                        f.SetValue(componentBP, component);
+                        break;
+                    }
+                }
+                
+                EditorUtility.SetDirty(componentBP);
+
+                AssetDatabase.AddObjectToAsset(asset, parent);
+                asset.name = componentBP.GetHECSComponent.GetType().Name;
+                parent.AddComponent(componentBP);
+                EditorUtility.SetDirty(parent);
+            }
+        }
+
     }
     
     [Serializable]
