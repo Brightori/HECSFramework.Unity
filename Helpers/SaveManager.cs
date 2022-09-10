@@ -11,7 +11,7 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [Documentation(Doc.GameLogic, Doc.Player, "Хелпер который отвечает за сохранение и чтение файлов")]
-    public class SaveManager
+    public partial class SaveManager
     {
         public static string DefaultSaveDataPath => Application.persistentDataPath + "/saveData.dat";
 
@@ -43,6 +43,8 @@ namespace HECSFramework.Unity
             data = null;
             return false;
         }
+
+      
 
         public static void SaveToFile(string path, object saveData)
         {
