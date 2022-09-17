@@ -4,6 +4,7 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Serialization;
 using System;
 using System.Collections.Generic;
+using HECSFramework.HECS.Unity.ActorContainer;
 using UnityEditor;
 using UnityEngine;
 
@@ -55,18 +56,21 @@ namespace HECSFramework.Unity.Editor
         public Guid Guid;
         public string ContainerID;
 
-        [ListDrawerSettings(Expanded = true, ShowPaging =false)]
+        [ListDrawerSettings(Expanded = true, ShowPaging =false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
         public List<IComponent> Components;
 
-        [ListDrawerSettings(Expanded = true, ShowPaging = false)]
+        [ListDrawerSettings(Expanded = true, ShowPaging = false, CustomAddFunction = nameof(HandleAddingSystem), CustomRemoveElementFunction = nameof(HandleRemovingSystem))]
         public List<ISystem> Systems;
 
         public bool IsAlive;
         public bool IsInited;
         public bool IsPaused;
+        
+        private readonly IEntity entity;
 
         public ActorPresentation (IEntity entity)
         {
+            this.entity = entity;
             Guid = entity.GUID;
             ContainerID = entity.ContainerID;
             
@@ -77,17 +81,52 @@ namespace HECSFramework.Unity.Editor
             Components = new List<IComponent>(16);
             Systems = new List<ISystem>(16);
 
-            foreach (var c in entity.GetAllComponents)
-            {
-                if (c != null)
-                    Components.Add(c);
-            }
+            UpdateComponents();
 
+            UpdateSystems();
+        }
+
+        private void UpdateSystems()
+        {
+            Systems.Clear();
             foreach (var s in entity.GetAllSystems)
             {
                 if (s != null)
                     Systems.Add(s);
             }
+        }
+
+        private void UpdateComponents()
+        {
+            Components.Clear();
+            foreach (var c in entity.GetAllComponents)
+            {
+                if (c != null)
+                    Components.Add(c);
+            }
+        }
+
+        private void HandleAddingComponent(List<IComponent> list)
+        {
+            var window = EditorWindow.GetWindow<RuntimeAddingSystemOrComponentWindow>();
+            window.Init(new List<IEntity>{entity}, TypeOfBluePrint.Component);
+            UpdateComponents();
+        }
+        private void HandleRemovingComponent(List<IComponent> list, IComponent componentToRemove)
+        {
+            list.Remove(componentToRemove);
+            entity.RemoveHecsComponent(componentToRemove);
+        }
+        private void HandleRemovingSystem(List<ISystem> list, ISystem systemToRemove)
+        {
+            list.Remove(systemToRemove);
+            entity.RemoveHecsSystem(systemToRemove);
+        }
+        private void HandleAddingSystem(List<ISystem> list)
+        {
+            var window = EditorWindow.GetWindow<RuntimeAddingSystemOrComponentWindow>();
+            window.Init(new List<IEntity>{entity}, TypeOfBluePrint.System);
+            UpdateSystems();
         }
     }
 }

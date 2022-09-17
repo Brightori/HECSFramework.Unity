@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Editor;
 using Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using Sirenix.OdinInspector.Editor.Validation;
 using Systems;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Settings;
@@ -88,48 +86,16 @@ public class CreateUIHelperWindow : OdinEditorWindow
         var actor = UIprfb.GetOrAddMonoComponent<UIActor>();
         var uiActorPath = AssetDatabase.GetAssetPath(UIprfb);
 
-        //This all around adding ui blueprint and prfb to addressables groups
-        var addressablesSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
-        var addressablesSchemas = CreateInstance<PlayerDataGroupSchema>();
-
-        var uiactorsGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == UIActors);
-        var uiBluePrintsGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == UIBluePrints);
-
-        var uiBluePrintsLabel = addressablesSettings.GetLabels().FirstOrDefault(x=> x == UISystem.UIBluePrints);
-
-        if (uiBluePrintsLabel == null)
-            addressablesSettings.AddLabel(UISystem.UIBluePrints);
-
-        //if we dont have group for ui actor we add group
-        if (uiactorsGroup == null)
-        {
-            uiactorsGroup = addressablesSettings.CreateGroup(UIActors, false, false, false, 
-                new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() 
-                    { addressablesSchemas } , new System.Type[0]);
-        }
-
-        //if we dont have group for ui actor we add group
-        var addressablesSchemas2 = CreateInstance<PlayerDataGroupSchema>();
-        if (uiBluePrintsGroup == null)
-        {
-            uiBluePrintsGroup = addressablesSettings.CreateGroup(UIBluePrints, false, false, false, 
-                new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() 
-                    { addressablesSchemas2 }, new System.Type[0]);
-        }
-
         //take guid from prfb and save prfb to addressables groupd
-        var prfbGuid = AssetDatabase.GUIDFromAssetPath(uiActorPath);
-        var entry = addressablesSettings.CreateOrMoveEntry(prfbGuid.ToString(), uiactorsGroup);
+        var uiActorentry = AddressablesHelpers.SetAddressableGroup(UIprfb, UIActors);
 
         //take guid from bluePrint and save prfb to addressables groupd
-        var uiBluePrintPath = AssetDatabase.GetAssetPath(uibluePrint);
-        var uiBluePrintGuid = AssetDatabase.GUIDFromAssetPath(uiBluePrintPath);
-        var uiBluePrintEntry = addressablesSettings.CreateOrMoveEntry(uiBluePrintGuid.ToString(), uiBluePrintsGroup);
+        var uiBluePrintEntry = AddressablesHelpers.SetAddressableGroup(uibluePrint, UIBluePrints);
         uiBluePrintEntry.SetLabel(UISystem.UIBluePrints, true);
 
         //assign fields of blueprints
         uibluePrint.UIType = uiidentifier;
-        uibluePrint.UIActor = new UIActorReference(prfbGuid.ToString());
+        uibluePrint.UIActor = new UIActorReference(uiActorentry.guid);
         var uiGroupsType = uibluePrint.Groups.GetType();
 
         var fields = uiGroupsType.GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
@@ -179,8 +145,10 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
     private void SetActorField(Actor actor, ActorContainer actorContainer)
     {
-        var fieldsOfUIActor = typeof(Actor).GetFields(System.Reflection.BindingFlags.NonPublic
-               | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance
+        var fieldsOfUIActor = typeof(Actor).GetFields(
+                 System.Reflection.BindingFlags.NonPublic
+               | System.Reflection.BindingFlags.Public 
+               | System.Reflection.BindingFlags.Instance
                | System.Reflection.BindingFlags.Static
                | System.Reflection.BindingFlags.FlattenHierarchy);
 

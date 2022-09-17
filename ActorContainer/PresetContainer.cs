@@ -58,7 +58,7 @@ namespace HECSFramework.Unity.Editor
 
         [Button("Copy Unique Data to Preset ", ButtonSizes.Medium), HideIf("@presetContainer == null")]
         [PropertyTooltip("добавляем уникальные(актор будет иметь свобственный экземпляр блупринта) копии из пресета в актор")]
-        public void Copy()
+        public void Copy(bool close = true)
         {
             if (inAction)
                 return;
@@ -90,7 +90,9 @@ namespace HECSFramework.Unity.Editor
             }
 
             AssetDatabase.SaveAssets();
-            Close();
+            
+            if (close)
+                Close();
         }
     }
 }

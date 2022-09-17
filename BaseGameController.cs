@@ -1,4 +1,5 @@
 ﻿using System;
+using Commands;
 using HECSFramework.Core;
 using Systems;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace HECSFramework.Unity
         private IEntity inputManager;
 
         private ConcurrencyList<World> worlds;
+        private ConcurrencyList<World> waitForStart = new ConcurrencyList<World>();
+        private ConcurrencyList<World> waitForLateStart = new ConcurrencyList<World>();
 
         private void Awake()
         {
@@ -54,6 +57,17 @@ namespace HECSFramework.Unity
         private void NewWorldReact(World world)
         {
             world.GlobalUpdateSystem.InitCustomUpdate(this);
+            
+            if (updateSystem.IsGlobalStarted && world.IsInited)
+                world.GlobalUpdateSystem.Start();
+            else
+                waitForStart.Add(world);
+
+            if (world.GlobalUpdateSystem.IsLateStarted && world.IsInited)
+                world.GlobalUpdateSystem.LateStart();
+            {
+                waitForLateStart.Add(world);
+            }
         }
 
         partial void NetworkAwake();
@@ -84,7 +98,9 @@ namespace HECSFramework.Unity
             InitEntities();
             InitNetWorkEntities();
             BaseStart();
-            updateSystem.Start();
+
+            foreach (var w in EntityManager.Worlds)
+                w.GlobalUpdateSystem.Start();
         }
 
         public void LateStart()
@@ -92,11 +108,32 @@ namespace HECSFramework.Unity
             if (gameLogic.TryGetSystem(out IStartSystem startSystem))
                 startSystem.StartGame();
 
-            updateSystem.LateStart();
+            foreach (var w in EntityManager.Worlds)
+                w.GlobalUpdateSystem.LateStart();
         }
 
         private void Update()
         {
+            for (int i = 0; i < waitForStart.Count; i++)
+            {
+                if (waitForStart.Data[i].IsInited)
+                {
+                    var world = waitForStart.Data[i];
+                    world.GlobalUpdateSystem.Start();
+                    EntityManager.Command(new WaitAndCallbackCommand { Timer = 0, CallBack = () => waitForStart.Remove(world) });
+                }
+            }
+
+            for (int i = 0; i < waitForLateStart.Count; i++)
+            {
+                if (waitForLateStart.Data[i].IsInited)
+                {
+                    var world = waitForLateStart.Data[i];
+                    world.GlobalUpdateSystem.LateStart();
+                    EntityManager.Command(new WaitAndCallbackCommand { Timer = 0, CallBack = () => waitForLateStart.Remove(world) });
+                }
+            }
+
             for (int i = 0; i < worlds.Count; i++)
             {
                 worlds.Data[i].GlobalUpdateSystem.Update();

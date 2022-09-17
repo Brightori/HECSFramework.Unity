@@ -14,7 +14,7 @@ using Sirenix.OdinInspector;
 
 namespace HECSFramework.Unity
 {
-    public class EntityContainer : ScriptableObject
+    public class EntityContainer : ScriptableObject, IValidate
     {
         [SerializeField]
         protected ComponentsSystemsHolder holder = new ComponentsSystemsHolder();
@@ -31,9 +31,9 @@ namespace HECSFramework.Unity
         {
             holder.Parent = this;
 
-            if (string.IsNullOrEmpty(name)) 
+            if (string.IsNullOrEmpty(name))
                 return;
-            
+
             containerIndex = IndexGenerator.GenerateIndex(name);
         }
 
@@ -50,7 +50,7 @@ namespace HECSFramework.Unity
 
         public virtual bool IsHaveComponent<T>()
         {
-            return holder.components.Any(x => x.GetHECSComponent is T);
+            return holder.components.Any(x => x != null && x.GetHECSComponent is T);
         }
 
         public bool IsHaveComponent<T>(T component)
@@ -100,7 +100,7 @@ namespace HECSFramework.Unity
             InitSystems(entity, holder.systems, pure);
         }
 
-        public virtual bool TryGetComponent<T>(Func<T,bool> func, out T result)
+        public virtual bool TryGetComponent<T>(Func<T, bool> func, out T result)
         {
             foreach (var component in holder.components)
             {
@@ -114,7 +114,7 @@ namespace HECSFramework.Unity
             return false;
         }
 
-        public virtual bool TryGetComponent<T>( out T result)
+        public virtual bool TryGetComponent<T>(out T result)
         {
             foreach (var component in holder.components)
             {
@@ -273,7 +273,7 @@ namespace HECSFramework.Unity
             holder.SortComponents();
         }
 
-        public void AddComponent<T>(T component) where T: class, IComponent, new()
+        public void AddComponent<T>(T component) where T : class, IComponent, new()
         {
             var bpProvider = new BluePrintsProvider();
             var key = component.GetType();
@@ -346,6 +346,29 @@ namespace HECSFramework.Unity
             //    return;
             //holder.OnValidate(this);
 #endif
+        }
+
+        public bool IsValid()
+        {
+            foreach (var component in holder.components)
+            {
+                if (component == null)
+                {
+                    Debug.LogError($"we have null component on {name}", this);
+                    return false;
+                }
+            }
+
+            foreach (var sys in holder.systems)
+            {
+                if (sys == null)
+                {
+                    Debug.LogError($"we have null system on {name}", this);
+                    return false;
+                }
+            }
+
+            return true;
         }
 
 #endif

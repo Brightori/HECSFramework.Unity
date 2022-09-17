@@ -12,8 +12,17 @@ namespace HECSFramework.Unity.Helpers
     [Documentation(Doc.HECS, Doc.Helpers, "this helper gather all SO of needed type and return IEnumerable, its useful for drop down menus")]
     public class SOProvider<T> where T: ScriptableObject
     {
-        public IEnumerable<T> GetNeeded()
+        /// <summary>
+        /// this is editor only code,  dont run it runtime
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> GetCollection()
         {
+
+#if UNITY_ANDROID || UNITY_IOS
+Debug.LogError("dont use soProvider runtime");
+#endif
+
 #if UNITY_EDITOR
             var containers = AssetDatabase.FindAssets($"t: {typeof(T).Name}")
             .Select(x => UnityEditor.AssetDatabase.GUIDToAssetPath(x))
