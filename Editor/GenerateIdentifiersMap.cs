@@ -35,7 +35,10 @@ namespace HECSFramework.Unity
             foreach (var sorted in sort)
                 maps += GetIdentifiersMap(sorted.Key, sorted.Value);
 
+            var abilities = entityContainers.Where(x=> x.IsHaveComponent<AbilityTagComponent>()).ToList();
+
             maps += GetContainersMap(entityContainers);
+            maps += GetAbilitiesMap(abilities);
             maps += GetNetworkContainersMap(entityContainers);
 
             SaveToFile(maps);
@@ -60,6 +63,26 @@ namespace HECSFramework.Unity
             var body = new TreeSyntaxNode();
 
             tree.Add(new SimpleSyntax($"public static class EntityContainersMap" + CParse.Paragraph));
+
+            tree.Add(new LeftScopeSyntax());
+            tree.Add(body);
+            tree.Add(new RightScopeSyntax());
+
+            foreach (var e in entityContainers)
+            {
+                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+            }
+
+            return tree.ToString();
+        }
+
+        private static string GetAbilitiesMap(List<EntityContainer> entityContainers)
+        {
+            var tree = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            tree.Add(new SimpleSyntax($"public static class AbilitiesMap" + CParse.Paragraph));
 
             tree.Add(new LeftScopeSyntax());
             tree.Add(body);
