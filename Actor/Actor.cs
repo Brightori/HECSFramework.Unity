@@ -118,12 +118,14 @@ namespace HECSFramework.Unity
             if (!IsInited && actorContainer != null && !entity.ContainsMask(ref actorContainerMask))
                 actorContainer.Init(this);
 
-            entity.InitComponentsAndSystems(needRegister);
+            entity.InitComponentsAndSystems();
 
             if (needRegister)
                 EntityManager.RegisterEntity(this, true);
 
             GetOrAddComponent<TransformComponent>(this);
+            GetOrAddComponent<UnityTransformComponent>(this);
+
             entity.AfterInit();
 
             if (needRegister)
@@ -160,7 +162,7 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            if (EntityManager.IsAlive && gameObject != null)
+            if (EntityManager.IsAlive && this.IsAlive() && gameObject != null)
             {
                 entity.HecsDestroy();
                 MonoBehaviour.Destroy(gameObject);
@@ -301,6 +303,19 @@ namespace HECSFramework.Unity
         public void MigrateEntityToWorld(World world, bool needInit = true)
         {
             entity.MigrateEntityToWorld(world, needInit);
+        }
+
+        public void InjectContainer(EntityContainer container, bool isAdditive = false)
+        {
+            var components = container.GetComponentsInstances();
+            var systems = container.GetSystemsInstances();
+            
+            entity.Inject(components, systems, isAdditive, this);
+        }
+
+        public void Inject(List<IComponent> components, List<ISystem> systems, bool isAdditive = false, IEntity owner = null)
+        {
+            entity.Inject(components, systems, isAdditive, this);
         }
     }
 }

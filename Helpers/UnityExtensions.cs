@@ -67,5 +67,17 @@ namespace Helpers
             }
         }
 
+        public static Vector3 GetRandomPositionInBounds(Bounds bounds)
+        {
+            var left = bounds.center.x - bounds.extents.x;
+            var right = bounds.center.x + bounds.extents.x;
+            var top = bounds.center.y + bounds.extents.y;
+            var bottom = bounds.center.y - bounds.extents.y;
+
+            var horizontalRandom = UnityEngine.Random.Range(left, right);
+            var verticalRandom = UnityEngine.Random.Range(bottom, top);
+
+            return new Vector3(horizontalRandom, verticalRandom, 0);
+        }
     }
 }

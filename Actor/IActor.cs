@@ -9,6 +9,8 @@ namespace HECSFramework.Unity
         bool TryGetComponent<T>(out T component, bool lookInChildsToo = false);
         bool TryGetComponents<T>(out T[] components);
         void SetWorld(World world = null);
+        void InjectContainer(EntityContainer container, bool isAdditive = false);
+        
         GameObject GameObject { get; }
     }
 
