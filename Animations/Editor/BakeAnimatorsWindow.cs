@@ -29,6 +29,8 @@ namespace HECSFramework.Unity
         private const string EmptyAnimators = "SaveAnimatorHelpers";
         private const string SaveSetAnimatorsState = "SetAnimatorStateHelper.cs";
         private const char Split = '|';
+        private const string AnimParametersMap = "AnimParametersMap.cs";
+
 
         [OnValueChanged("UpdateAnimators")]
         public AnimatorController[] animators = new AnimatorController[0];
@@ -170,7 +172,7 @@ namespace HECSFramework.Unity
                 foreach (var p in a.parameters)
                 {
                     GenerateAnimationParameterIdentifier(p.name);
-                    parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {p.name} = Animator.StringToHash({CParse.Quote}{p.name}{CParse.Quote});"));
+                    parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {p.name} = {Animator.StringToHash(p.name)};"));
                 }
             }
 
@@ -184,11 +186,13 @@ namespace HECSFramework.Unity
                 animatorStates.Tree.Remove(animatorStates.Tree.Last());
             }
 
-            File.WriteAllText(mapPath, tree.ToString(), Encoding.UTF8);
+            SaveFileHelper.SaveToFileIfExists(tree.ToString(), InstallHECS.ScriptPath + InstallHECS.HECSGenerated, AnimParametersMap);
 
             if (SerializationAnimatorState)
                 File.WriteAllText(animatorStatesPath, animatorStates.ToString(), Encoding.UTF8);
         }
+
+        
 
         private ISyntax GetSetAnimatorStatesCore(ISyntax root)
         {

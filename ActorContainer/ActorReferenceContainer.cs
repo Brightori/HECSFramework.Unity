@@ -18,7 +18,7 @@ namespace HECSFramework.Unity
     public abstract class ReferenceContainerBase<U> : ActorContainer, IReferenceContainer where U : EntityContainer
     {
         [PropertyOrder(-9)]
-        public U[] References = default;
+        public U[] References = new U[0];
 
         [NonSerialized]
         private bool isInited;
@@ -120,8 +120,12 @@ namespace HECSFramework.Unity
 
         private bool IsAlrdyContainsComponent(ComponentBluePrint componentBluePrint)
         {
+
             if (componentBluePrint == null)
+            {
+                Debug.Log($"{name}: componentBluePrint == null");
                 return false;
+            }
 
             var compType = componentBluePrint.GetType();
 
@@ -139,7 +143,7 @@ namespace HECSFramework.Unity
 
         public override bool IsHaveComponent<T>()
         {
-            return base.IsHaveComponent<T>() || References.Any(x => x.IsHaveComponent<T>());
+            return base.IsHaveComponent<T>() || (References != null && References.Any(x => x.IsHaveComponent<T>()));
         }
 
         public override void OnEnable()

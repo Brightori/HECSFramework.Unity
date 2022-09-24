@@ -1,16 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using Systems;
+using HECSFramework.Core;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+#endif
+
 using UnityEngine;
 
 namespace HECSFramework.Unity
 {
+    //this is not in Editor folder coz we need sometimes addressables operations from components with settings
+    [Documentation(Doc.HECS, Doc.Helpers, Doc.Editor, "helpers for addressables editors funcs")]
     public static class AddressablesHelpers
     {
+#if UNITY_EDITOR
         public static AddressableAssetEntry SetAddressableGroup(Object obj, string groupName)
         {
             var settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -42,6 +49,13 @@ namespace HECSFramework.Unity
             return entry != null;
         }
 
+        public static bool IsAssetAddressable(string guid)
+        {
+            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            AddressableAssetEntry entry = settings.FindAssetEntry(guid);
+            return entry != null;
+        }
+
         public static string GetGuidOfObject(Object obj)
         {
             return AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(obj));
@@ -68,4 +82,6 @@ namespace HECSFramework.Unity
             assetEntry.SetLabel(label, true);
         }
     }
+
+#endif
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HECSFramework.Core;
 using UnityEngine;
@@ -27,6 +28,8 @@ namespace HECSFramework.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void InitGameObjects(World world, GameObject[] gameObjects)
         {
+            var actorsList = new List<Actor>(16);
+
             foreach (var gameObject in gameObjects)
             {
                 var actors = gameObject.GetComponentsInChildren<Actor>();
@@ -40,6 +43,18 @@ namespace HECSFramework.Unity
                     }
 
                     a.Init(world.Index, true);
+                    actorsList.Add(a);
+                }
+
+                foreach (var a in actors)
+                {
+                    foreach (var s in a.GetAllSystems)
+                    {
+                        if (s is IStartOnScene startOnScene)
+                        {
+                            startOnScene.StartOnScene();
+                        }
+                    }
                 }
             }
         }

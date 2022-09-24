@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Components;
 using HECSFramework.Core;
+using Helpers;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
@@ -18,7 +19,7 @@ namespace HECSFramework.Unity
             return entity as IActor;
         }
 
-        public static async Task<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<IActor> callBack = null)
+        public static async ValueTask<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<IActor> callBack = null)
         {
             var asynData = viewReferenceComponent.ViewReference.InstantiateAsync();
             var actorPrfb = await asynData.Task;
@@ -45,7 +46,7 @@ namespace HECSFramework.Unity
             return entity;
         }
 
-        public static async Task<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null, Vector3 position = default, Transform transform = null)
+        public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null, Vector3 position = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.name;
@@ -55,7 +56,7 @@ namespace HECSFramework.Unity
 
             var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
             var prefab = await asynData.Task;
-            var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity, transform).GetComponent<IActor>();
+            var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity, transform).GetOrAddMonoComponent<Actor>();
 
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb);
@@ -64,7 +65,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static async Task<IActor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<IActor> callBack = null)
+        public static async ValueTask<IActor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<IActor> callBack = null, Vector3 position = new Vector3())
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.name;
@@ -74,7 +75,7 @@ namespace HECSFramework.Unity
 
             var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
             var prefab = await asynData.Task;
-            var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
+            var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity).GetComponent<IActor>();
 
             actorPrfb.SetWorld(world);
 

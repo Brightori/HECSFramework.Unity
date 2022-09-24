@@ -50,7 +50,25 @@ namespace HECSFramework.Unity
 
         public virtual bool IsHaveComponent<T>()
         {
-            return holder.components.Any(x => x != null && x.GetHECSComponent is T);
+            if (holder == null)
+            {
+                HECSDebug.LogError($"{name}.EntityContainer:holder == null");
+                return false;
+            }
+            if (holder.components == null)
+            {
+                HECSDebug.LogError($"{name}.EntityContainer:components == null");
+                return false;
+            }
+            return holder.components.Any(x =>
+            {
+                if (x == null || x.GetHECSComponent == null)
+                {
+                    HECSDebug.LogError($"{name}.EntityContainer:GetHECSComponent == null");
+                    return false;
+                }
+                return x.GetHECSComponent is T;
+            });
         }
 
         public bool IsHaveComponent<T>(T component)
