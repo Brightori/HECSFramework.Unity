@@ -204,6 +204,32 @@ namespace HECSFramework.Unity
             return list;
         }
 
+        public bool IsValid()
+        {
+#if UNITY_EDITOR
+            foreach (var component in holder.components)
+            {
+                if (component == null)
+                {
+                    Debug.LogError($"we have null component on {name}", this);
+                    return false;
+                }
+            }
+
+            foreach (var sys in holder.systems)
+            {
+                if (sys == null)
+                {
+                    Debug.LogError($"we have null system on {name}", this);
+                    return false;
+                }
+            }
+#endif
+
+            return true;
+        }
+
+
         #region Editor
 
 #if UNITY_EDITOR
@@ -348,28 +374,7 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        public bool IsValid()
-        {
-            foreach (var component in holder.components)
-            {
-                if (component == null)
-                {
-                    Debug.LogError($"we have null component on {name}", this);
-                    return false;
-                }
-            }
-
-            foreach (var sys in holder.systems)
-            {
-                if (sys == null)
-                {
-                    Debug.LogError($"we have null system on {name}", this);
-                    return false;
-                }
-            }
-
-            return true;
-        }
+       
 
 #endif
         #endregion

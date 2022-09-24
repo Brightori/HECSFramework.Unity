@@ -120,10 +120,16 @@ namespace HECSFramework.Unity
 
         private bool IsAlrdyContainsComponent(ComponentBluePrint componentBluePrint)
         {
+            if (componentBluePrint == null)
+                return false;
+
             var compType = componentBluePrint.GetType();
 
             foreach (var c in componentsBluePrints)
             {
+                if (c == null)
+                    continue;
+
                 if (c.GetType() == compType)
                     return true;
             }

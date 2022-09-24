@@ -12,8 +12,8 @@ namespace Systems
     [Serializable, BluePrint]
     [Documentation(Doc.Audio, Doc.Global, Doc.HECS, "Default sound solution for HECS, its all about 2d sound on this moment")]
     public class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IReactEntity,
-        IReactGlobalCommand<PlayAudioCommand>,
-        IReactGlobalCommand<StopAudioCommand>
+        IReactGlobalCommand<PlaySoundCommand>,
+        IReactGlobalCommand<StopSoundCommand>
     {
         [SerializeField] private AudioMixerGroup audioMixerGroup;
 
@@ -37,7 +37,7 @@ namespace Systems
 
             if (Actor.TryGetComponent(out DefaultMusicMonoComponent defaultMusicMonoComponent))
             {
-                CommandGlobalReact(new PlayAudioCommand { AudioType = SoundType.Music, IsRepeatable = true, Clip = defaultMusicMonoComponent.AudioClip, Owner = this.Owner.GUID });
+                CommandGlobalReact(new PlaySoundCommand { AudioType = SoundType.Music, IsRepeatable = true, Clip = defaultMusicMonoComponent.AudioClip, Owner = this.Owner.GUID });
             }
         }
 
@@ -47,7 +47,7 @@ namespace Systems
                 go.AudioSource.loop = false;
         }
 
-        private void PlaySound(PlayAudioCommand playAudioCommand)
+        private void PlaySound(PlaySoundCommand playAudioCommand)
         {
             if (playAudioCommand.Clip == null)
                 return;
@@ -81,7 +81,7 @@ namespace Systems
             }
         }
 
-        private void PlayMusic(PlayAudioCommand playAudioCommand)
+        private void PlayMusic(PlaySoundCommand playAudioCommand)
         {
             for (int i = 0; i < SoundSources.Count; i++)
             {
@@ -161,12 +161,12 @@ namespace Systems
             SoundSources[indexOfSource].AudioSource.DOFade(0, 1).OnComplete(() => { SoundSources[indexOfSource].Stop(); });
         }
 
-        public void CommandGlobalReact(PlayAudioCommand command)
+        public void CommandGlobalReact(PlaySoundCommand command)
         {
             PlaySound(command);
         }
 
-        public void CommandGlobalReact(StopAudioCommand command)
+        public void CommandGlobalReact(StopSoundCommand command)
         {
             StopFromSource(command.Owner, command.Clip);
         }

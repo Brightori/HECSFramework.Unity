@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Commands
 {
     [Documentation(Doc.Audio, "command to play sound")]
-    public struct PlayAudioCommand : IGlobalCommand
+    public struct PlaySoundCommand : IGlobalCommand
     {
         public Guid Owner;
         public AudioClip Clip;
@@ -15,7 +15,7 @@ namespace Commands
     }
 
     [Documentation(Doc.Audio, "command to stop sound")]
-    public struct StopAudioCommand : IGlobalCommand
+    public struct StopSoundCommand : IGlobalCommand
     {
         public Guid Owner;
         public AudioClip Clip;
