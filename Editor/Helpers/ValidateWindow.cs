@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class ValidateWindow : OdinEditorWindow
 {
-    [MenuItem("Universe/Validate")]
+    [MenuItem("HECS Options/Helpers/Validate window")]
     public static void GetValidateWindow()
     {
         var entityContainers = new SOProvider<EntityContainer>();
@@ -42,5 +42,20 @@ public class ValidateWindow : OdinEditorWindow
         }
 
         Debug.Log("Validation Complete");
+    }
+
+    [MenuItem("HECS Options/Helpers/Save Histories")]
+    public static void SaveHistories()
+    {
+        var entityContainers = new SOProvider<EntityContainer>();
+        var list = entityContainers.GetCollection().ToList();
+
+        foreach (var container in list)
+        {
+            if (container is PresetContainer)
+                continue;
+
+            container.AddToHistory();
+        }
     }
 }
