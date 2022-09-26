@@ -1,4 +1,5 @@
 ﻿using Commands;
+using Components;
 using DG.Tweening;
 using HECSFramework.Core;
 using HECSFramework.Unity;
@@ -16,6 +17,9 @@ namespace Systems
         IReactGlobalCommand<StopSoundCommand>
     {
         [SerializeField] private AudioMixerGroup audioMixerGroup;
+
+        [Required]
+        public SoundVolumeComponent volumeComponent;
 
         private List<SoundSourceContainer> SoundSources = new List<SoundSourceContainer>(32);
 
@@ -70,7 +74,7 @@ namespace Systems
                     soundSource.Owner = playAudioCommand.Owner;
                     soundSource.AudioType = playAudioCommand.AudioType;
 
-                    source.volume = 1;
+                    source.volume = volumeComponent.SoundVolume;
                     source.clip = playAudioCommand.Clip;
                     source.loop = playAudioCommand.IsRepeatable;
                     source.Play();
@@ -113,7 +117,7 @@ namespace Systems
                     source.clip = playAudioCommand.Clip;
                     source.loop = playAudioCommand.IsRepeatable;
                     source.Play();
-                    source.DOFade(1, 1);
+                    source.DOFade(volumeComponent.MusicVolume, 1);
 
                     SoundSources[i] = soundSource;
                     return;
