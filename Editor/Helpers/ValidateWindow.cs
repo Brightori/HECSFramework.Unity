@@ -29,15 +29,22 @@ public class ValidateWindow : OdinEditorWindow
                     Debug.LogWarning($"we have problem with {c.GetType()} on {container.name}");
             }
 
-            if (container.TryGetComponent(out ViewReferenceComponent viewReferenceComponent))
+            try
             {
-                if (viewReferenceComponent.ViewReference == null)
+                if (container.TryGetComponent(out ViewReferenceComponent viewReferenceComponent))
                 {
-                    Debug.LogError("viewRef null on container " + container.name);
-                }
+                    if (viewReferenceComponent.ViewReference == null)
+                    {
+                        Debug.LogError("viewRef null on container " + container.name);
+                    }
 
-                if (!AddressablesHelpers.IsAssetAddressable(viewReferenceComponent.ViewReference.AssetGUID))
-                    Debug.LogError("viewRef not addressable at " + container.name);
+                    if (!AddressablesHelpers.IsAssetAddressable(viewReferenceComponent.ViewReference.AssetGUID))
+                        Debug.LogError("viewRef not addressable at " + container.name);
+                }
+            }
+            catch
+            {
+                Debug.LogError("we have problem with" + container.name);
             }
         }
 

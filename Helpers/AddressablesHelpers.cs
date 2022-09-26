@@ -81,7 +81,6 @@ namespace HECSFramework.Unity
 
             assetEntry.SetLabel(label, true);
         }
-    }
-
 #endif
+    }
 }
