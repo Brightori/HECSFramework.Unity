@@ -46,6 +46,8 @@ public class ValidateWindow : OdinEditorWindow
             {
                 Debug.LogError("we have problem with" + container.name);
             }
+
+            EntityContainerEditorHelper.MarkDirtyAllInContainer(container);
         }
 
         Debug.Log("Validation Complete");
