@@ -18,8 +18,7 @@ namespace HECSFramework.Unity.Helpers
         /// <returns></returns>
         public IEnumerable<T> GetCollection()
         {
-
-#if UNITY_ANDROID || UNITY_IOS
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
 Debug.LogError("dont use soProvider runtime");
 #endif
 
