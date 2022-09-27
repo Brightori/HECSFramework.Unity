@@ -21,7 +21,8 @@ namespace Systems
         [Required]
         public SoundVolumeComponent volumeComponent;
 
-        private List<SoundSourceContainer> SoundSources = new List<SoundSourceContainer>(32);
+        private List<SoundSourceContainer> soundSources = new List<SoundSourceContainer>(32);
+
 
         public IActor Actor { get; set; }
 
@@ -32,7 +33,7 @@ namespace Systems
             if (soundSources != null)
             {
                 foreach (var s in soundSources)
-                    SoundSources.Add(new SoundSourceContainer(s));
+                    this.soundSources.Add(new SoundSourceContainer(s));
             }
             else
                 Debug.LogAssertion("нет аудио сорсов у актора глобальной аудио системы");
@@ -47,7 +48,7 @@ namespace Systems
 
         void SetupSoundGroup()
         {
-            foreach (var go in SoundSources)
+            foreach (var go in soundSources)
                 go.AudioSource.loop = false;
         }
 
@@ -62,9 +63,9 @@ namespace Systems
                 return;
             }
 
-            for (int i = 0; i < SoundSources.Count; i++)
+            for (int i = 0; i < soundSources.Count; i++)
             {
-                SoundSourceContainer soundSource = SoundSources[i];
+                SoundSourceContainer soundSource = soundSources[i];
 
                 if (!soundSource.IsBusy)
                 {
@@ -79,7 +80,7 @@ namespace Systems
                     source.loop = playAudioCommand.IsRepeatable;
                     source.Play();
 
-                    SoundSources[i] = soundSource;
+                    soundSources[i] = soundSource;
                     return;
                 }
             }
@@ -87,9 +88,9 @@ namespace Systems
 
         private void PlayMusic(PlaySoundCommand playAudioCommand)
         {
-            for (int i = 0; i < SoundSources.Count; i++)
+            for (int i = 0; i < soundSources.Count; i++)
             {
-                SoundSourceContainer soundSource = SoundSources[i];
+                SoundSourceContainer soundSource = soundSources[i];
 
                 if (soundSource.AudioType == SoundType.Music)
                 {
@@ -103,9 +104,9 @@ namespace Systems
                 StopFromSource(playAudioCommand.Owner, playAudioCommand.Clip);
             }
 
-            for (int i = 0; i < SoundSources.Count; i++)
+            for (int i = 0; i < soundSources.Count; i++)
             {
-                SoundSourceContainer soundSource = SoundSources[i];
+                SoundSourceContainer soundSource = soundSources[i];
 
                 if (!soundSource.IsBusy)
                 {
@@ -117,9 +118,9 @@ namespace Systems
                     source.clip = playAudioCommand.Clip;
                     source.loop = playAudioCommand.IsRepeatable;
                     source.Play();
-                    source.DOFade(volumeComponent.MusicVolume, 1);
+                    soundSource.AudioTween =  source.DOFade(volumeComponent.MusicVolume, 1);
 
-                    SoundSources[i] = soundSource;
+                    soundSources[i] = soundSource;
                     return;
                 }
             }
@@ -127,9 +128,9 @@ namespace Systems
 
         public void StopAllFromSource(Guid owner)
         {
-            for (int i = 0; i < SoundSources.Count; i++)
+            for (int i = 0; i < soundSources.Count; i++)
             {
-                var soundSource = SoundSources[i];
+                var soundSource = soundSources[i];
                 var index = i;
 
                 if (soundSource.Owner == owner)
@@ -141,9 +142,9 @@ namespace Systems
 
         public void StopFromSource(Guid owner, AudioClip sound)
         {
-            for (int i = 0; i < SoundSources.Count; i++)
+            for (int i = 0; i < soundSources.Count; i++)
             {
-                var soundSource = SoundSources[i];
+                var soundSource = soundSources[i];
                 var index = i;
 
                 if (soundSource.Owner == owner && soundSource.AudioSource.clip == sound)
@@ -162,17 +163,38 @@ namespace Systems
 
         private void Stop(int indexOfSource)
         {
-            SoundSources[indexOfSource].AudioSource.DOFade(0, 1).OnComplete(() => { SoundSources[indexOfSource].Stop(); });
+            soundSources[indexOfSource].AudioSource.DOFade(0, 1).OnComplete(() => { soundSources[indexOfSource].Stop(); });
         }
 
         public void CommandGlobalReact(PlaySoundCommand command)
         {
+            if (IsDisposed)
+                return;
+
             PlaySound(command);
         }
 
         public void CommandGlobalReact(StopSoundCommand command)
         {
+            if (IsDisposed)
+                return;
+
             StopFromSource(command.Owner, command.Clip);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            foreach (var s in soundSources.ToArray())
+            {
+                if (s.AudioTween != null)
+                    DOTween.Kill(s.AudioTween);
+                
+                s.AudioSource.Stop();
+            }
+
+            DOTween.KillAll();
         }
     }
 
@@ -181,6 +203,7 @@ namespace Systems
         public AudioSource AudioSource;
         public Guid Owner;
         public SoundType AudioType;
+        public Tween AudioTween;
 
         public bool IsRepeatable;
         private bool isBusy;
