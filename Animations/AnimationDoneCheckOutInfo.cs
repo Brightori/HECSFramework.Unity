@@ -22,6 +22,11 @@ namespace HECSFramework.Unity
         [Header("This value should be calculated from animation clip")]
         public float Timing;
 
+
+        [ReadOnly]
+        [Header("lenght at seconds of animation clip")]
+        public float ClipLenght;
+
         [Button("Force check")]
         public void FillTiming()
         {
@@ -39,6 +44,8 @@ namespace HECSFramework.Unity
                     return;
                 }
             }
+
+            ClipLenght = AnimationClip.length;
 
             HECSDebug.LogError($"you should setup event {AnimationEventID.name} to {AnimationClip.name} ");
         }
