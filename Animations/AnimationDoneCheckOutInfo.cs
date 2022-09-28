@@ -30,6 +30,8 @@ namespace HECSFramework.Unity
         [Button("Force check")]
         public void FillTiming()
         {
+            ClipLenght = AnimationClip.length;
+
             if (AnimationClip == null || AnimationEventID == null)
             {
                 HECSDebug.LogError("U need fill AnimationDoneCheckOutInfo properly");
@@ -44,8 +46,6 @@ namespace HECSFramework.Unity
                     return;
                 }
             }
-
-            ClipLenght = AnimationClip.length;
 
             HECSDebug.LogError($"you should setup event {AnimationEventID.name} to {AnimationClip.name} ");
         }

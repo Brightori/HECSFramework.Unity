@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Numerics;
 using HECSFramework.Core;
-using Unity.VisualScripting;
-using UnityEngine;
 
 namespace Commands
 {
@@ -21,9 +18,10 @@ namespace Commands
         public int CycleCount;
 
         public Action Action;
+        public Action CycleComplete;
         public Action Complete;
 
-        public AnimationCycleCheckout(Guid owner, int animationEventID, float actionTime, float clipTime, int cycleCount, Action action, Action complete)
+        public AnimationCycleCheckout(Guid owner, int animationEventID, float actionTime, float clipTime, int cycleCount, Action action, Action complete, Action cycleComplete)
         {
             Owner = owner;
             AnimationEventID = animationEventID;
@@ -34,6 +32,7 @@ namespace Commands
             CycleCount = cycleCount;
             Action = action;
             Complete = complete;
+            CycleComplete = cycleComplete;
         }
 
         public override bool Equals(object obj)
