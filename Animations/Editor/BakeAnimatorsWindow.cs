@@ -2,6 +2,7 @@
 using HECSFramework.Core;
 using HECSFramework.Core.Generator;
 using HECSFramework.Unity.Editor;
+using HECSFramework.Unity.Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Collections.Generic;
@@ -191,8 +192,6 @@ namespace HECSFramework.Unity
             if (SerializationAnimatorState)
                 File.WriteAllText(animatorStatesPath, animatorStates.ToString(), Encoding.UTF8);
         }
-
-        
 
         private ISyntax GetSetAnimatorStatesCore(ISyntax root)
         {

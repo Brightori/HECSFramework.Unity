@@ -25,10 +25,17 @@ namespace Components
         {
             Actor.TryGetComponent(out animator, true);
 
-            animatorHelper = AnimatorManager.GetAnimatorHelper(animator.runtimeAnimatorController.name);
-
-            animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-            animator.runtimeAnimatorController = animatorOverrideController;
+            if (animator.runtimeAnimatorController is AnimatorOverrideController overrideController)
+            {
+                animatorHelper = AnimatorManager.GetAnimatorHelper(overrideController.runtimeAnimatorController.name);
+                animatorOverrideController = overrideController;
+            }
+            else
+            {
+                animatorHelper = AnimatorManager.GetAnimatorHelper(animator.runtimeAnimatorController.name);
+                animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+                animator.runtimeAnimatorController = animatorOverrideController;
+            }
 
             OverrideClips();
         }

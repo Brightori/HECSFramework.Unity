@@ -10,7 +10,7 @@ using UnityEditor;
 namespace HECSFramework.Unity.Helpers
 {
     [Documentation(Doc.HECS, Doc.Helpers, "this helper gather all SO of needed type and return IEnumerable, its useful for drop down menus")]
-    public class SOProvider<T> where T: ScriptableObject
+    public class SOProvider<T> where T : UnityEngine.Object
     {
         /// <summary>
         /// this is editor only code,  dont run it runtime
