@@ -186,6 +186,9 @@ namespace Systems
         {
             base.Dispose();
 
+            if (!EntityManager.IsAlive)
+                return;
+
             foreach (var s in soundSources.ToArray())
             {
                 if (s.AudioTween != null)

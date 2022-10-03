@@ -7,7 +7,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Animation, "This component override animations, but u should run  SetupOverrideAnimator() manualy, because in some cases we have view with animator later then actor ")]
-    public sealed class OverrideAnimatorComponent : BaseComponent, IInitable, IHaveActor
+    public sealed class OverrideAnimatorComponent : BaseComponent, IInitable, IHaveActor, IValidate
     {
         [SerializeField] private OverrideAnimatonClip[] overrideAnimatonClips = new OverrideAnimatonClip[0];
 
@@ -46,6 +46,17 @@ namespace Components
             {
                 animatorHelper.SetOverride(animatorOverrideController, clipOverride.AnimatorStateIdentifier.Id, clipOverride.AnimationClip);
             }
+        }
+
+        public bool IsValid()
+        {
+            foreach (var a in overrideAnimatonClips)
+            {
+                if (a.AnimationClip == null)
+                    return false;
+            }
+
+            return true;
         }
     }
 }
