@@ -52,7 +52,7 @@ namespace Components
         {
             foreach (var a in overrideAnimatonClips)
             {
-                if (a.AnimationClip == null)
+                if (a.AnimationClip == null || a.AnimatorStateIdentifier == null)
                     return false;
             }
 
