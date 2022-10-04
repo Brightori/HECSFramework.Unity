@@ -141,7 +141,7 @@ namespace Systems
                 var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(bluePrint.UIActor, container);
                 uiActorFromPool.Init();
 
-                uiActorFromPool.GetUnityTransformComponent().Transform.SetParent(canvas);
+                uiActorFromPool.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
                 return uiActorFromPool;
             }
 
@@ -149,7 +149,7 @@ namespace Systems
             var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
 
             newUiActor.Init();
-            newUiActor.GetUnityTransformComponent().Transform.SetParent(canvas);
+            newUiActor.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
             return newUiActor;
         }
 
@@ -218,7 +218,7 @@ namespace Systems
         {
             if (EntityManager.TryGetEntityByComponents(out var canvas, ref mainCanvasTagComponentMask))
             {
-                if (!canvas.TryGetHecsComponent(HMasks.UnityTransformComponent, out mainCanvasTransform))
+                if (!canvas.TryGetHecsComponent(unityTransformMask, out mainCanvasTransform))
                     Debug.LogAssertion("��� ���������� � ���� �������");
             }
             else
