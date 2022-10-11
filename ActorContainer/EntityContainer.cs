@@ -251,7 +251,6 @@ namespace HECSFramework.Unity
         #region Editor
 
 #if UNITY_EDITOR
-#if DeveloperMode || ModifyMode
         [Button(ButtonSizes.Large)]
         private void AddComponent()
         {
@@ -338,7 +337,6 @@ namespace HECSFramework.Unity
         /// <param name="component"></param>
         public void RemoveComponentBluePrint<T>(T component) where T : IComponent => holder.RemoveComponentBluePrint(component);
 
-#endif
         private void SortComponents()
         {
             holder.components.Sort((a, b) =>
