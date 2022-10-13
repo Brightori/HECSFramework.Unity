@@ -32,19 +32,46 @@ namespace HECSFramework.Unity
 
         private int maxGeneration;
 
+        public override List<ComponentBluePrint> Components 
+        {
+            get
+            {
+                if (!isInited)
+                    InitActorReferenceContainer();
+
+                return componentsBluePrints;
+            }
+        }
+
+        public override List<SystemBaseBluePrint> Systems 
+        {
+            get
+            {
+                if (!isInited)
+                    InitActorReferenceContainer();
+
+                return systemBaseBluePrints;
+            }
+        }
+
         public override void Init(IEntity entity, bool pure = false)
         {
             if (!isInited)
             {
-                CollectComponentAndSystems(this, 0);
-                isInited = true;
-                ProcessGenerations();
+                InitActorReferenceContainer();
             }
 
             InitComponents(entity, componentsBluePrints, pure);
             InitSystems(entity, systemBaseBluePrints, pure);
 
             entity.AddOrReplaceComponent(new ActorContainerID { ID = name });
+        }
+
+        private void InitActorReferenceContainer()
+        {
+            CollectComponentAndSystems(this, 0);
+            isInited = true;
+            ProcessGenerations();
         }
 
         private void ProcessGenerations()

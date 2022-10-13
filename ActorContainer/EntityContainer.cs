@@ -19,8 +19,8 @@ namespace HECSFramework.Unity
         [SerializeField]
         protected ComponentsSystemsHolder holder = new ComponentsSystemsHolder();
 
-        public List<SystemBaseBluePrint> Systems => holder.systems;
-        public List<ComponentBluePrint> Components => holder.components;
+        public virtual List<SystemBaseBluePrint> Systems => holder.systems;
+        public virtual List<ComponentBluePrint> Components => holder.components;
 
         [SerializeField, HideInInspector]
         private int containerIndex;
@@ -365,7 +365,6 @@ namespace HECSFramework.Unity
             EditorUtility.SetDirty(this);
         }
 
-
         /// <summary>
         /// не использовать это вне эдитор скриптов, это функционал для редактора
         /// </summary>
@@ -389,9 +388,6 @@ namespace HECSFramework.Unity
             //holder.OnValidate(this);
 #endif
         }
-
-       
-
 #endif
         #endregion
     }
