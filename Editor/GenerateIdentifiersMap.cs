@@ -35,11 +35,13 @@ namespace HECSFramework.Unity
             foreach (var sorted in sort)
                 maps += GetIdentifiersMap(sorted.Key, sorted.Value);
 
-            var abilities = entityContainers.Where(x=> x.IsHaveComponent<AbilityTagComponent>()).ToList();
+            var abilities = entityContainers.Where(x => x.IsHaveComponent<AbilityTagComponent>()).ToList();
+            var names = identifiersContainers.Select(x => x.name).ToHashSet();
 
             maps += GetContainersMap(entityContainers);
             maps += GetAbilitiesMap(abilities);
             maps += GetNetworkContainersMap(entityContainers);
+            maps += GetIdentifierStringMap(names);
 
             SaveToFile(maps);
         }
@@ -118,6 +120,26 @@ namespace HECSFramework.Unity
             }
 
             return tree.ToString();
+        }
+
+        private static string GetIdentifierStringMap(HashSet<string> identifierNames)
+        {
+            var stringIdentifiersMap = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            stringIdentifiersMap.Add(new SimpleSyntax($"public static class IdentifierToStringMap" + CParse.Paragraph));
+
+            stringIdentifiersMap.Add(new LeftScopeSyntax());
+            stringIdentifiersMap.Add(body);
+            stringIdentifiersMap.Add(new RightScopeSyntax());
+
+            foreach (var identifier in identifierNames)
+            {
+                var name = identifier.Replace("Container", "");
+                body.Add(new TabSimpleSyntax(1, $"public const string {name} = {CParse.Quote}{name}{CParse.Quote};"));
+            }
+
+            return stringIdentifiersMap.ToString();
         }
 
         private static string GetIdentifiersMap(Type type, HashSet<IdentifierContainer> identifierContainers)
