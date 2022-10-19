@@ -12,8 +12,22 @@ public class ValidateWindow : OdinEditorWindow
     [MenuItem("HECS Options/Helpers/Validate window")]
     public static void GetValidateWindow()
     {
-        var entityContainers = new SOProvider<EntityContainer>();
-        var list = entityContainers.GetCollection().ToList();
+        var allObjects = new SOProvider<ScriptableObject>();
+        var list = allObjects.GetCollection().OfType<EntityContainer>().ToList();
+        var validation = allObjects.GetCollection().Where(x => !list.Contains(x));
+
+        foreach (var check in validation)
+        {
+            if (check is IValidate validate)
+            {
+                if (validate.IsValid())
+                    continue;
+                else
+                {
+                    Debug.LogError(check.name + " not valid");
+                }
+            }
+        }
 
         foreach (var container in list)
         {
