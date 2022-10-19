@@ -27,6 +27,8 @@ namespace HECSFramework.Unity
 
         public int ContainerIndex => containerIndex;
 
+        protected bool isEditorTimeChanged;
+
         public virtual void OnEnable()
         {
             holder.Parent = this;
@@ -103,7 +105,7 @@ namespace HECSFramework.Unity
         /// </summary>
         /// <param name="bluePrintTypeHashCode"></param>
         /// <returns></returns>
-        public bool IsHaveComponent(int bluePrintTypeHashCode)
+        public virtual bool IsHaveComponent(int bluePrintTypeHashCode)
         {
             return Components.Any(x => IndexGenerator.GetIndexForType(x.GetType()) == bluePrintTypeHashCode);
         }
@@ -186,7 +188,7 @@ namespace HECSFramework.Unity
 
         public IEnumerable<T> GetComponents<T>()
         {
-            foreach (var c in holder.components)
+            foreach (var c in Components)
             {
                 if (c.GetHECSComponent is T needed)
                     yield return needed;
@@ -222,25 +224,20 @@ namespace HECSFramework.Unity
             return list;
         }
 
-        public bool IsValid()
+        public virtual bool IsValid()
         {
 #if UNITY_EDITOR
-            foreach (var component in holder.components)
+
+            if (Components == null || Components.Any(x=> x == null))
             {
-                if (component == null)
-                {
-                    Debug.LogError($"we have null component on {name}", this);
-                    return false;
-                }
+                Debug.LogError($"we have null component on {name}", this);
+                return false;
             }
 
-            foreach (var sys in holder.systems)
+            if (Systems == null || Systems.Any(x=> x == null))
             {
-                if (sys == null)
-                {
-                    Debug.LogError($"we have null system on {name}", this);
-                    return false;
-                }
+                Debug.LogError($"we have null system on {name}", this);
+                return false;
             }
 #endif
 
@@ -357,12 +354,14 @@ namespace HECSFramework.Unity
             holder.components.Add(componentBluePrint);
             SortComponents();
             EditorUtility.SetDirty(this);
+            isEditorTimeChanged = true;
         }
 
         public void AddSystem(SystemBaseBluePrint systemBP)
         {
             holder.systems.Add(systemBP);
             EditorUtility.SetDirty(this);
+            isEditorTimeChanged = true;
         }
 
         /// <summary>
