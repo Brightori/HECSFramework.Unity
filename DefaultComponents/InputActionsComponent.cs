@@ -13,9 +13,9 @@ using UnityEngine.InputSystem;
 
 namespace Components
 {
-    [Documentation(Doc.Input, "Содержит информацию о настройках ввода Unity")]
+    [Documentation(Doc.HECS, Doc.Input, "this component provide input actions for InputSystem, u can take ")]
     [Serializable, BluePrint]
-    public class InputActionsComponent : BaseComponent
+    public class InputActionsComponent : BaseComponent, IWorldSingleComponent
     {
         [SerializeField] private InputActionAsset actions;
         [SerializeField, ListDrawerSettings(ShowPaging = false)]
@@ -27,6 +27,24 @@ namespace Components
         protected override void ConstructorCall()
         {
             InputActionSettings = new ReadonlyList<InputActionSettings>(inputActionSettings);
+        }
+
+        public bool TryGetInputAction(string name, out InputAction inputAction)
+        {
+            foreach (var a in actions.actionMaps)
+            {
+                foreach (var action in a.actions)
+                {
+                    if (action.name == name)
+                    {
+                        inputAction = action;
+                        return true;
+                    }
+                }
+            }
+
+            inputAction = null;
+            return false;
         }
 
         #region UnityEditor

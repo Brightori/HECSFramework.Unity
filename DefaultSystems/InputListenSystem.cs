@@ -11,6 +11,7 @@ namespace Systems
 {
     [Documentation(Doc.Input, "Система прослушивает юнити инпут и передаёт данные в хекс системы и компоненты.")]
     [Serializable, BluePrint]
+    [RequiredAtContainer(typeof(InputActionsComponent))]
     public class InputListenSystem : BaseSystem, IUpdatable
     {
         private List<UpdateableAction> actions = new List<UpdateableAction>();
@@ -72,7 +73,7 @@ namespace Systems
                     IEntity listener = collection.Data[i];
                     listener.Command(command);
                 }
-                w.Command(command);
+                //w.Command(command);
             }
         }
 
