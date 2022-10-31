@@ -187,7 +187,7 @@ namespace HECSFramework.Unity
 
         public override bool IsHaveComponent<T>()
         {
-            foreach (var component in Components)
+            foreach (var component in holder.components)
             {
                 if (component.GetHECSComponent is T)
                     return true;
@@ -198,7 +198,7 @@ namespace HECSFramework.Unity
 
         public override bool IsHaveComponent(int bluePrintTypeHashCode)
         {
-            return Components.Any(x => IndexGenerator.GetIndexForType(x.GetType()) == bluePrintTypeHashCode);
+            return holder.components.Any(x => IndexGenerator.GetIndexForType(x.GetType()) == bluePrintTypeHashCode);
         }
 
         public override bool TryGetComponent<T>(out T result)

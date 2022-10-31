@@ -7,6 +7,7 @@ using UnityEngine;
 namespace Components
 {
     [Serializable]
+    [RequiredAtContainer(typeof(Systems.AnimationDoneCheckOutSystem))]
     [Documentation(Doc.HECS, Doc.Animation, "This component holds needed animation info checkouts")]
     public sealed class AnimationCheckOutsHolderComponent : BaseComponent, IInitable, IValidate
     {

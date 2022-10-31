@@ -46,7 +46,7 @@ namespace HECSFramework.Unity
             return entity;
         }
 
-        public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null, Vector3 position = default, Transform transform = null)
+        public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.name;
@@ -56,7 +56,7 @@ namespace HECSFramework.Unity
 
             var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
             var prefab = await asynData.Task;
-            var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity, transform).GetOrAddMonoComponent<Actor>();
+            var actorPrfb = Object.Instantiate(prefab, position, rotation, transform).GetOrAddMonoComponent<Actor>();
 
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb);

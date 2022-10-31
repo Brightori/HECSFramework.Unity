@@ -46,8 +46,6 @@ namespace HECSFramework.Unity
                     return;
                 }
             }
-
-            HECSDebug.LogError($"you should setup event {AnimationEventID.name} to {AnimationClip.name} ");
         }
     }
 }
