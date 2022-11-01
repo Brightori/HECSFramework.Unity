@@ -50,6 +50,13 @@ namespace HECSFramework.Unity
             return false;
         }
 
+
+        /// <summary>
+        /// we check component only at this container, if u use actorreference container
+        /// u should use TryGet functionality
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public virtual bool IsHaveComponent<T>()
         {
             if (holder == null)
@@ -62,7 +69,8 @@ namespace HECSFramework.Unity
                 HECSDebug.LogError($"{name}.EntityContainer:components == null");
                 return false;
             }
-            return holder.components.Any(x =>
+            
+            return Components.Any(x =>
             {
                 if (x == null || x.GetHECSComponent == null)
                 {

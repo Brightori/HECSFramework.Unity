@@ -187,7 +187,7 @@ namespace HECSFramework.Unity
 
         public override bool IsHaveComponent<T>()
         {
-            foreach (var component in holder.components)
+            foreach (var component in Components)
             {
                 if (component.GetHECSComponent is T)
                     return true;
