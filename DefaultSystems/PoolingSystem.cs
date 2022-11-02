@@ -13,7 +13,7 @@ namespace Systems
     public partial class PoolingSystem : BaseSystem
     {
         public const int minPoolSize = 5;
-        public const int maxPoolSize = 50;
+        public const int maxPoolSize = 256;
 
         private Dictionary<string, HECSPool<GameObject>> pooledActors = new Dictionary<string, HECSPool<GameObject>>(16);
         private Dictionary<string, HECSPool<GameObject>> pooledGOs = new Dictionary<string, HECSPool<GameObject>>(16);
@@ -307,6 +307,25 @@ namespace Systems
                 }
             }
             MonoBehaviour.Destroy(gameObject);
+        }
+
+        public void ReleaseView(AssetReference assetReference, GameObject gameObject)
+        {
+            if (gameObject.TryGetComponent(out IPoolableView poolableView))
+                poolableView.Stop();
+
+            if (pooledGOs.ContainsKey(assetReference.AssetGUID))
+            {
+                pooledGOs[assetReference.AssetGUID].Release(gameObject);
+                gameObject.transform.SetParent(null);
+                gameObject.SetActive(false);
+                return;
+            }
+            else
+            {
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(assetReference.InstantiateAsync().Task));
+                pooledGOs[assetReference.AssetGUID].Release(gameObject);
+            }
         }
 
         public GameObject GetNewInstance(GameObject actor)
