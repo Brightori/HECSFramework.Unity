@@ -33,10 +33,12 @@ namespace Systems
         private HECSMask uiTagComponentMask = HMasks.GetMask<UITagComponent>();
         private HECSMask unityTransformMask = HMasks.GetMask<UnityTransformComponent>();
 
-        private Systems.PoolingSystem poolingSystem;
+        private PoolingSystem poolingSystem;
 
         private bool isReady;
         private bool isLoaded;
+
+        private List<UIBluePrint> spawnInProgress = new List<UIBluePrint>();
 
         public override void InitSystem()
         {

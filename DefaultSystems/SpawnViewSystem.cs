@@ -8,18 +8,28 @@ using UnityEngine;
 namespace Systems
 {
     [Serializable][Documentation(Doc.Visual, "this system spawn view to actor and report when spawn view complete")]
-    public sealed class SpawnViewSystem : BaseSystem 
+    public sealed class SpawnViewSystem : BaseSystem, IAfterEntityInit 
     {
         [Required]
         public ViewReferenceGameObjectComponent viewReferenceGameObject;
 
         [Required]
         public UnityTransformComponent unityTransform;
+        private GameObject pooling;
 
-        public async override void InitSystem()
+        public override void InitSystem()
         {
+            
+        }
 
-            var pooling = await Owner.World.GetSingleSystem<PoolingSystem>().GetViewFromPool(viewReferenceGameObject.ViewReference);
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+
+        public async void AfterEntityInit()
+        {
+            pooling = await Owner.World.GetSingleSystem<PoolingSystem>().GetViewFromPool(viewReferenceGameObject.ViewReference);
 
             pooling.transform.position = unityTransform.Transform.position;
             pooling.transform.rotation = unityTransform.Transform.rotation;

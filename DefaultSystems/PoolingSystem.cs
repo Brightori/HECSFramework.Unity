@@ -209,12 +209,6 @@ namespace Systems
                 var task = Addressables.LoadAssetAsync<GameObject>(assetReference).Task;
                 var objFromRef = await task;
                 var newView = MonoBehaviour.Instantiate(objFromRef);
-
-                if (pooledGOs.ContainsKey(key))
-                    return newView;
-
-                var newpool = new HECSPool<GameObject>(task, maxPoolSize);
-                pooledGOs.Add(key, newpool);
                 return newView;
             }
         }
