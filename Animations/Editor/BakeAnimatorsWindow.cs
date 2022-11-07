@@ -100,6 +100,28 @@ namespace HECSFramework.Unity
             PlayerPrefs.Save();
         }
 
+
+        [PropertySpace(20)]
+        [Button(ButtonSizes.Large)]
+        private void GatherAnimators()
+        {
+            var getAnimators = new SOProvider<AnimatorController>().GetCollection().ToHashSet();
+            var clearList = new List<AnimatorController>(32);
+
+            foreach (var ga in getAnimators)
+            {
+                if (clearList.Any(x=> x.name == ga.name))
+                {
+                    Debug.LogError($"we have animator controller with same name {ga.name}");
+                    continue;
+                }
+
+                clearList.Add(ga);
+            }
+
+            animators = clearList.ToArray();
+        }
+
         [PropertySpace(20)]
         [Button(ButtonSizes.Large)]
         private void GenerateAnimatorHelpers()
