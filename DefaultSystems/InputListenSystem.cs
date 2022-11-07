@@ -12,11 +12,13 @@ namespace Systems
     [Documentation(Doc.Input, "Система прослушивает юнити инпут и передаёт данные в хекс системы и компоненты.")]
     [Serializable, BluePrint]
     [RequiredAtContainer(typeof(InputActionsComponent))]
-    public class InputListenSystem : BaseSystem, IUpdatable
+    public class InputListenSystem : BaseSystem, IPriorityUpdatable
     {
         private List<UpdateableAction> actions = new List<UpdateableAction>();
         private ConcurrencyList<IEntity> inputListeners;
         private HECSMask InputListenerTagComponentMask = HMasks.GetMask<InputListenerTagComponent>();
+
+        public int Priority { get; } = -5;
 
         public override void InitSystem()
         {
@@ -83,7 +85,7 @@ namespace Systems
                 action.Dispose();
         }
 
-        public void UpdateLocal()
+        public void PriorityUpdateLocal()
         {
             foreach (var action in actions)
                 action.UpdateAction();
