@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.InputSystem;
 
 namespace Systems
 {
@@ -28,23 +29,15 @@ namespace Systems
         {
             var key = assetReference.AssetGUID;
 
+            if (pooledGOs.TryGetValue(assetReference.AssetGUID, out var viewPool))
+            {
+                var actor = await GetActorFromPool<T>(key, viewPool, entityContainer);
+                return actor;
+            }
+
             if (pooledActors.TryGetValue(key, out var pool))
             {
-                var view = await pool.Get();
-                view.SetActive(true);
-                T actor = null;
-
-                if (!view.TryGetComponent<T>(out var actorFromView))
-                {
-                    view.AddComponent(pooledActorsType[key]);
-                    actor = view.GetComponent<T>();
-                }
-                else
-                    actor = actorFromView;
-
-                if (entityContainer != null)
-                    entityContainer.Init(actor);
-
+                var actor = await GetActorFromPool<T>(key, pool, entityContainer);
                 return actor;
             }
             else
@@ -76,99 +69,56 @@ namespace Systems
             }
         }
 
-        public async Task<IActor> GetActorFromPool(ViewReferenceComponent viewReferenceComponent, bool setFromContainer = false)
+        private async ValueTask<T> GetActorFromPool<T>(string key, HECSPool<GameObject> pool, EntityContainer entityContainer) where T : Component, IActor
         {
-            var key = viewReferenceComponent.ViewReference.AssetGUID;
+            var view = await pool.Get();
+            view.SetActive(true);
+            T actor = null;
 
-            if (pooledActors.TryGetValue(key, out var pool))
+            if (!view.TryGetComponent<T>(out var actorFromView))
             {
-                var view = await pool.Get();
-                view.SetActive(true);
-                IActor actor = null;
-
-                if (!view.TryGetComponent<IActor>(out var actorFromView))
+                if (pooledActorsType.TryGetValue(key, out var type))
                 {
                     view.AddComponent(pooledActorsType[key]);
-                    actor = view.GetComponent<IActor>();
+                    actor = view.GetComponent<T>();
                 }
                 else
-                    actor = actorFromView;
-
-                if (setFromContainer)
                 {
-                    if (viewToContainer.TryGetValue(key, out var containerKey))
-                    {
-                        pooledContainers[containerKey].Init(actor);
-                    }
+                    var neededType = typeof(T);
+                    view.AddComponent(neededType);
+                    actor = view.GetComponent<T>();
+                    pooledActorsType.TryAdd(key, neededType);
                 }
-
-                return actor;
             }
             else
+                actor = actorFromView;
+
+            var startOnPool = view.GetComponentsInChildren<IStartOnPooling>();
+
+            foreach (var s in startOnPool)
             {
-                var task = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference).Task;
-                var objFromRef = await task;
-                var newActor = GetNewInstance(objFromRef).GetComponent<Actor>();
-
-                if (pooledActors.ContainsKey(viewReferenceComponent.ViewReference.AssetGUID))
-                {
-                    if (setFromContainer)
-                    {
-                        if (viewReferenceComponent.Owner.TryGetHecsComponent(ActorContainerIDMask, out ActorContainerID container))
-                        {
-                            var loadedContainer = await GetEntityContainerFromPool(container.ID);
-                            loadedContainer.Init(newActor);
-                        }
-                    }
-
-                    return newActor;
-                }
-
-                var newpool = new HECSPool<GameObject>(task, maxPoolSize);
-
-                pooledActorsType.Add(key, newActor.GetType());
-                pooledActors.Add(viewReferenceComponent.ViewReference.AssetGUID, newpool);
-
-                if (viewReferenceComponent.Owner.TryGetHecsComponent(ActorContainerIDMask, out ActorContainerID actorContainerID))
-                {
-                    var awaitContainer = await GetEntityContainerFromPool(actorContainerID.ID);
-
-                    if (!viewToContainer.ContainsKey(key))
-                        viewToContainer.Add(key, actorContainerID.ID);
-
-                    if (setFromContainer)
-                        awaitContainer.Init(newActor);
-                }
-
-                return newActor;
+                s.Start();
             }
+
+            if (entityContainer != null)
+                entityContainer.Init(actor);
+
+            return actor;
         }
 
-        public async Task<IActor> GetActorFromPool(EntityContainer entityContainer)
+        public async Task<Actor> GetActorFromPool(EntityContainer entityContainer)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var key = viewReferenceComponent.ViewReference.AssetGUID;
 
+            if (pooledGOs.TryGetValue(key, out var goPool))
+            {
+                return await GetActorFromPool<Actor>(key, goPool, entityContainer);
+            }
+
             if (pooledActors.TryGetValue(key, out var pool))
             {
-                var view = await pool.Get();
-                view.SetActive(true);
-                IActor actor = null;
-
-                if (!view.TryGetComponent<IActor>(out var actorFromView))
-                {
-                    view.AddComponent(pooledActorsType[key]);
-                    actor = view.GetComponent<IActor>();
-                    entityContainer.Init(actor);
-                }
-                else
-                {
-                    actor = actorFromView;
-                    entityContainer.Init(actor);
-                }
-
-
-                return actor;
+                return await GetActorFromPool<Actor>(key, pool, entityContainer);
             }
             else
             {
@@ -187,6 +137,22 @@ namespace Systems
                 pooledActorsType.Add(key, newActor.GetType());
                 pooledActors.Add(viewReferenceComponent.ViewReference.AssetGUID, newpool);
                 return newActor;
+            }
+        }
+
+        public async void Warmup(EntityContainer entityContainer, int count)
+        {
+            if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
+            {
+                var needed = await Addressables.InstantiateAsync(view.ViewReference).Task;
+
+                for (int i = 0; i < count; i++)
+                {
+                    var instance = MonoBehaviour.Instantiate(needed);
+                    ReleaseView(view.ViewReference, instance);
+                }
+
+                ReleaseView(view.ViewReference, needed);
             }
         }
 
@@ -258,11 +224,20 @@ namespace Systems
 
             if (actor.TryGetHecsComponent(viewRefMask, out ViewReferenceComponent viewReferenceComponent))
             {
-                if (pooledActors.ContainsKey(viewReferenceComponent.ViewReference.AssetGUID))
+                var key = viewReferenceComponent.ViewReference.AssetGUID;
+                var go = actor.gameObject;
+                MonoBehaviour.Destroy(actor);
+                go.SetActive(false);
+
+                if (pooledGOs.ContainsKey(key))
                 {
-                    pooledActors[viewReferenceComponent.ViewReference.AssetGUID].Release(actor.gameObject);
-                    actor.GameObject.SetActive(false);
-                    MonoBehaviour.Destroy(actor);
+                    pooledGOs[key].Release(go);
+                    return;
+                }
+
+                if (pooledActors.ContainsKey(key))
+                {
+                    pooledActors[viewReferenceComponent.ViewReference.AssetGUID].Release(go);
                     return;
                 }
             }
@@ -308,11 +283,12 @@ namespace Systems
             if (gameObject.TryGetComponent(out IPoolableView poolableView))
                 poolableView.Stop();
 
+            gameObject.SetActive(false);
+            gameObject.transform.SetParent(null);
+
             if (pooledGOs.ContainsKey(assetReference.AssetGUID))
             {
                 pooledGOs[assetReference.AssetGUID].Release(gameObject);
-                gameObject.transform.SetParent(null);
-                gameObject.SetActive(false);
                 return;
             }
             else
