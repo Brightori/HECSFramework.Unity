@@ -1,20 +1,21 @@
 ﻿using Commands;
+using HECSFramework.Core;
 using HECSFramework.Unity;
 using UnityEngine;
 
 namespace Components
 {
     [DisallowMultipleComponent]
-    public class CollisionProvider : MonoBehaviour, IHaveActor
+    public class CollisionProvider : MonoBehaviour, IHaveActor, IStartOnPooling
     {
         public IActor Actor { get; set; }
 
-        private void Start()
+        public void Start()
         {
-            if (Actor == null)
+            if (!Actor.IsAlive() || Actor.GameObject.ToString() == "null")
                 Actor = GetComponent<IActor>();
 
-            if (Actor == null)
+            if (!Actor.IsAlive() || Actor.GameObject.ToString() == "null")
                 Actor = GetComponentInParent<IActor>();
         }
 
