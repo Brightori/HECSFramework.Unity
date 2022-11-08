@@ -14,7 +14,7 @@ namespace Systems
     public partial class PoolingSystem : BaseSystem
     {
         public const int minPoolSize = 5;
-        public const int maxPoolSize = 256;
+        public const int maxPoolSize = 512;
 
         private Dictionary<string, HECSPool<GameObject>> pooledActors = new Dictionary<string, HECSPool<GameObject>>(16);
         private Dictionary<string, HECSPool<GameObject>> pooledGOs = new Dictionary<string, HECSPool<GameObject>>(16);
@@ -227,6 +227,7 @@ namespace Systems
                 var key = viewReferenceComponent.ViewReference.AssetGUID;
                 var go = actor.gameObject;
                 MonoBehaviour.Destroy(actor);
+                go.transform.SetParent(null);
                 go.SetActive(false);
 
                 if (pooledGOs.ContainsKey(key))
