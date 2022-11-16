@@ -249,6 +249,9 @@ namespace Systems
                     case UIGroupCommand groupUI:
                         CommandGlobalReact(groupUI);
                         break;
+                    case ShowUIOnAdditionalCommand additionalCanvasUI:
+                        CommandGlobalReact(additionalCanvasUI);
+                        break;
                 }
             }
         }
