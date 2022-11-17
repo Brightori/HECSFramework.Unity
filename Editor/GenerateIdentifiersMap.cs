@@ -32,6 +32,8 @@ namespace HECSFramework.Unity
             var composite = new TreeSyntaxNode();
             string maps = string.Empty;
 
+            maps += new UsingSyntax("System.Collections.Generic",1).ToString();
+
             foreach (var sorted in sort)
                 maps += GetIdentifiersMap(sorted.Key, sorted.Value);
 
@@ -87,6 +89,7 @@ namespace HECSFramework.Unity
             tree.Add(new SimpleSyntax($"public static class AbilitiesMap" + CParse.Paragraph));
 
             tree.Add(new LeftScopeSyntax());
+            tree.Add(GetDictionary("AbilitiesToIdentifiersMap", entityContainers));
             tree.Add(body);
             tree.Add(new RightScopeSyntax());
 
@@ -97,6 +100,24 @@ namespace HECSFramework.Unity
             }
 
             return tree.ToString();
+        }
+
+        private static ISyntax GetDictionary(string name, List<EntityContainer> containers)
+        {
+            var tree = new TreeSyntaxNode();
+            var dicBody = new TreeSyntaxNode();
+
+            tree.Add(new TabSimpleSyntax(1, $"public static readonly Dictionary<string, int> {name} = new Dictionary<string, int>"));
+            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(dicBody);
+            tree.Add(new RightScopeSyntax(1, true));
+
+            foreach (var c in containers)
+            {
+                dicBody.Add(new TabSimpleSyntax(2, $"{CParse.LeftScope} {CParse.Quote}{c.name}{CParse.Quote}, {c.ContainerIndex} {CParse.RightScope},"));
+            }
+
+            return tree;
         }
 
         private static string GetNetworkContainersMap(List<EntityContainer> entityContainers)
