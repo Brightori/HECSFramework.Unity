@@ -249,6 +249,9 @@ namespace Systems
                     case UIGroupCommand groupUI:
                         CommandGlobalReact(groupUI);
                         break;
+                    case ShowUIOnAdditionalCommand additionalCanvasUI:
+                        CommandGlobalReact(additionalCanvasUI);
+                        break;
                 }
             }
         }
@@ -347,6 +350,12 @@ namespace Systems
 
         public void CommandGlobalReact(ShowUIOnAdditionalCommand command)
         {
+            if (!isLoaded || !isReady)
+            {
+                commandsQueue.Enqueue(command);
+                return;
+            }
+
             if (!command.MultyView)
             {
                 foreach (var ui in uiCurrents)
