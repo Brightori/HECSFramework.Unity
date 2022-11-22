@@ -110,7 +110,7 @@ namespace HECSFramework.Unity
 
             foreach (var ga in getAnimators)
             {
-                if (clearList.Any(x=> x.name == ga.name))
+                if (clearList.Any(x => x.name == ga.name))
                 {
                     Debug.LogError($"we have animator controller with same name {ga.name}");
                     continue;
@@ -177,11 +177,22 @@ namespace HECSFramework.Unity
 
             var animatorStates = new TreeSyntaxNode();
             var tree = new TreeSyntaxNode();
+            var bodyOfDic = new TreeSyntaxNode();
             var parametersMapBody = new TreeSyntaxNode();
 
-            tree.Add(new UsingSyntax("UnityEngine", 2));
-            tree.Add(new TabSimpleSyntax(0, "public static class AnimParametersMap"));
+            tree.Add(new UsingSyntax("System.Collections.Generic", 2));
+            tree.Add(new TabSimpleSyntax(0, "public static partial class AnimParametersMap"));
             tree.Add(new LeftScopeSyntax());
+
+            tree.Add(new TabSimpleSyntax(1, "static AnimParametersMap()"));
+            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(new TabSimpleSyntax(2, "AnimParameters = new Dictionary<string, int>"));
+            tree.Add(new LeftScopeSyntax(2));
+            tree.Add(bodyOfDic);
+            tree.Add(new RightScopeSyntax(2, true));
+            tree.Add(new RightScopeSyntax(1));
+
+
             tree.Add(parametersMapBody);
             tree.Add(new RightScopeSyntax());
 
@@ -196,6 +207,7 @@ namespace HECSFramework.Unity
                 {
                     GenerateAnimationParameterIdentifier(p.name);
                     parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {p.name} = {Animator.StringToHash(p.name)};"));
+                    bodyOfDic.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope}{CParse.Quote}{p.name}{CParse.Quote}, {Animator.StringToHash(p.name)}{CParse.RightScope},"));
                 }
             }
 
@@ -221,7 +233,7 @@ namespace HECSFramework.Unity
             var body = new TreeSyntaxNode();
 
             tree.Add(new UsingSyntax("System"));
-            tree.Add(new UsingSyntax("HECSFramework.Serialize",1));
+            tree.Add(new UsingSyntax("HECSFramework.Serialize", 1));
             tree.Add(new NameSpaceSyntax("Commands"));
             tree.Add(new LeftScopeSyntax());
             tree.Add(body);
@@ -256,7 +268,7 @@ namespace HECSFramework.Unity
                 {
                     case AnimatorControllerParameterType.Float:
                         fields.Add(new TabSimpleSyntax(2, $"public {nameof(FloatId)} {p.name};"));
-                      methodBody.Add(new TabSimpleSyntax(3, $"animatorState.SetFloat({p.name}.Id, {p.name}.Value);"));
+                        methodBody.Add(new TabSimpleSyntax(3, $"animatorState.SetFloat({p.name}.Id, {p.name}.Value);"));
                         break;
                     case AnimatorControllerParameterType.Int:
                         fields.Add(new TabSimpleSyntax(2, $"public {nameof(IntId)} {p.name};"));

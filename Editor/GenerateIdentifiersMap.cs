@@ -86,10 +86,13 @@ namespace HECSFramework.Unity
             var tree = new TreeSyntaxNode();
             var body = new TreeSyntaxNode();
 
-            tree.Add(new SimpleSyntax($"public static class AbilitiesMap" + CParse.Paragraph));
+            tree.Add(new SimpleSyntax($"public static partial class AbilitiesMap" + CParse.Paragraph));
 
             tree.Add(new LeftScopeSyntax());
+            tree.Add(new TabSimpleSyntax(1, "static AbilitiesMap()"));
+            tree.Add(new LeftScopeSyntax(1));
             tree.Add(GetDictionary("AbilitiesToIdentifiersMap", entityContainers));
+            tree.Add(new RightScopeSyntax(1));
             tree.Add(body);
             tree.Add(new RightScopeSyntax());
 
@@ -107,14 +110,14 @@ namespace HECSFramework.Unity
             var tree = new TreeSyntaxNode();
             var dicBody = new TreeSyntaxNode();
 
-            tree.Add(new TabSimpleSyntax(1, $"public static readonly Dictionary<string, int> {name} = new Dictionary<string, int>"));
-            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(new TabSimpleSyntax(2, $"{name} = new Dictionary<string, int>"));
+            tree.Add(new LeftScopeSyntax(2));
             tree.Add(dicBody);
-            tree.Add(new RightScopeSyntax(1, true));
+            tree.Add(new RightScopeSyntax(2, true));
 
             foreach (var c in containers)
             {
-                dicBody.Add(new TabSimpleSyntax(2, $"{CParse.LeftScope} {CParse.Quote}{c.name}{CParse.Quote}, {c.ContainerIndex} {CParse.RightScope},"));
+                dicBody.Add(new TabSimpleSyntax(3, $"{CParse.LeftScope} {CParse.Quote}{c.name}{CParse.Quote}, {c.ContainerIndex} {CParse.RightScope},"));
             }
 
             return tree;
