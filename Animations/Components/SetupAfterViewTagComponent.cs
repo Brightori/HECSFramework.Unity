@@ -9,8 +9,3 @@ namespace Components
     {
     }
 }
-
-
-namespace Components
-{
-}
