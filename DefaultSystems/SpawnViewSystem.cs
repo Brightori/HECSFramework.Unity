@@ -44,6 +44,7 @@ namespace Systems
             }
 
             Owner.Command(new ViewReadyCommand());
+            Owner.AddHecsComponent(new ViewReadyTagComponent());
         }
     }
 }
