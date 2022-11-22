@@ -32,7 +32,7 @@ namespace HECSFramework.Unity
             var composite = new TreeSyntaxNode();
             string maps = string.Empty;
 
-            maps += new UsingSyntax("System.Collections.Generic",1).ToString();
+            maps += new UsingSyntax("System.Collections.Generic", 1).ToString();
 
             foreach (var sorted in sort)
                 maps += GetIdentifiersMap(sorted.Key, sorted.Value);
@@ -66,14 +66,21 @@ namespace HECSFramework.Unity
             var tree = new TreeSyntaxNode();
             var body = new TreeSyntaxNode();
 
-            tree.Add(new SimpleSyntax($"public static class EntityContainersMap" + CParse.Paragraph));
+            tree.Add(new SimpleSyntax($"public static partial class EntityContainersMap" + CParse.Paragraph));
 
             tree.Add(new LeftScopeSyntax());
+
+            tree.Add(new TabSimpleSyntax(1, "static EntityContainersMap()"));
+            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(GetIntToStringDictionary("EntityContainersIDtoString", entityContainers, out var dicBody));
+            tree.Add(new RightScopeSyntax(1));
+
             tree.Add(body);
             tree.Add(new RightScopeSyntax());
 
             foreach (var e in entityContainers)
             {
+                dicBody.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope} {e.ContainerIndex}, {CParse.Quote}{e.name}{CParse.Quote} {CParse.RightScope},"));
                 body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
                 body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
             }
@@ -103,6 +110,20 @@ namespace HECSFramework.Unity
             }
 
             return tree.ToString();
+        }
+
+        private static ISyntax GetIntToStringDictionary(string name, List<EntityContainer> containers, out ISyntax body)
+        {
+            var tree = new TreeSyntaxNode();
+            var dicBody = new TreeSyntaxNode();
+
+            tree.Add(new TabSimpleSyntax(2, $"{name} = new Dictionary<int, string>"));
+            tree.Add(new LeftScopeSyntax(2));
+            tree.Add(dicBody);
+            tree.Add(new RightScopeSyntax(2, true));
+
+            body = dicBody;
+            return tree;
         }
 
         private static ISyntax GetDictionary(string name, List<EntityContainer> containers)
