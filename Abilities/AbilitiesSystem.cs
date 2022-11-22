@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using Components;
+﻿using Components;
 using HECSFramework.Core;
-using UnityEngine;
 using HECSFramework.Unity;
 
 namespace Systems

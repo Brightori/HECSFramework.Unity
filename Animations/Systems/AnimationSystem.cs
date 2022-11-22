@@ -33,18 +33,12 @@ namespace Systems
         {
             AnimatorStateComponent.Animator.SetInteger(command.Index, command.Value);
         }
-
-        public void CommandReact(ViewReadyCommand command)
-        {
-            AnimatorStateComponent.SetupAnimatorState();
-        }
     }
 
     public interface IAnimationSystem : ISystem,
           IReactCommand<BoolAnimationCommand>,
         IReactCommand<FloatAnimationCommand>,
         IReactCommand<IntAnimationCommand>,
-        IReactCommand<TriggerAnimationCommand>,
-        IReactCommand<ViewReadyCommand>
+        IReactCommand<TriggerAnimationCommand>
     { }
 }

@@ -119,7 +119,6 @@ namespace HECSFramework.Unity
                 EditorUtility.SetDirty(parent);
             }
         }
-
     }
     
     [Serializable]
