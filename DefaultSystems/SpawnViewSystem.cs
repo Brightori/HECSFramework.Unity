@@ -45,6 +45,21 @@ namespace Systems
 
             Owner.Command(new ViewReadyCommand());
             Owner.AddHecsComponent(new ViewReadyTagComponent());
+
+            var initWithView = Owner.GetComponentsByType<IInitAferView>();
+
+            foreach (var iv in initWithView)
+            {
+                iv.InitAferView();
+            }
+
+            foreach (var s in Owner.GetAllSystems)
+            {
+                if (s is IInitAferView initAferView)
+                {
+                    initAferView.InitAferView();
+                }
+            }
         }
     }
 }

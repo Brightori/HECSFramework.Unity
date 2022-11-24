@@ -7,7 +7,7 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Animation, "System accept commands and set values in AnimationStateComponent by index")]
-    public sealed class AnimationSystem : BaseSystem,IAnimationSystem
+    public sealed class AnimationSystem : BaseSystem, IAnimationSystem
     {
         [Required] public AnimatorStateComponent AnimatorStateComponent;
 
