@@ -1,12 +1,11 @@
-﻿using Components;
-using HECSFramework.Core;
-using HECSFramework.Unity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Components;
+using HECSFramework.Core;
+using HECSFramework.Unity;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.InputSystem;
 
 namespace Systems
 {
@@ -144,19 +143,17 @@ namespace Systems
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
             {
-                var needed = await Addressables.InstantiateAsync(view.ViewReference).Task;
+                var needed = await Addressables.LoadAssetAsync<GameObject>(view.ViewReference).Task;
 
                 for (int i = 0; i < count; i++)
                 {
                     var instance = MonoBehaviour.Instantiate(needed);
                     ReleaseView(view.ViewReference, instance);
                 }
-
-                ReleaseView(view.ViewReference, needed);
             }
         }
 
-        public async Task<GameObject> GetViewFromPool(AssetReference assetReference)
+        public async ValueTask<GameObject> GetViewFromPool(AssetReference assetReference)
         {
             var key = assetReference.AssetGUID;
 

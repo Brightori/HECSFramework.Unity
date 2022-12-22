@@ -71,7 +71,6 @@ namespace Systems
             if (actor.ContainsMask(ref PoolableTagComponentMask))
             {
                 Owner.World.GetSingleSystem<PoolingSystem>().Release(actor);
-                actor.EntityDestroy();
             }
             else
             {

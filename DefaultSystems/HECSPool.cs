@@ -22,7 +22,7 @@ public class HECSPool<T> : IDisposable where T : UnityEngine.Object
         queue.Clear();
     }
 
-    public async Task<T> Get()
+    public async ValueTask<T> Get()
     {
         if (queue.Count == 0)
         {

@@ -171,6 +171,7 @@ namespace HECSFramework.Unity
         {
             var stringIdentifiersMap = new TreeSyntaxNode();
             var body = new TreeSyntaxNode();
+            var dictionaryIntToString = new TreeSyntaxNode();
 
             stringIdentifiersMap.Add(new SimpleSyntax($"public static class IdentifierToStringMap" + CParse.Paragraph));
 
@@ -178,10 +179,17 @@ namespace HECSFramework.Unity
             stringIdentifiersMap.Add(body);
             stringIdentifiersMap.Add(new RightScopeSyntax());
 
+            //dictionary
+            body.Add(new TabSimpleSyntax(1, "public static readonly Dictionary<int, string> IntToString = new Dictionary<int, string>"));
+            body.Add(new LeftScopeSyntax(1));
+            body.Add(dictionaryIntToString);
+            body.Add(new RightScopeSyntax(1, true));
+
             foreach (var identifier in identifierNames)
             {
                 var name = identifier.Replace("Container", "");
                 body.Add(new TabSimpleSyntax(1, $"public const string {name} = {CParse.Quote}{name}{CParse.Quote};"));
+                dictionaryIntToString.Add(new TabSimpleSyntax(2, $"{CParse.LeftScope} {IndexGenerator.GetIndexForType(name)}, {CParse.Quote}{name}{CParse.Quote}{CParse.RightScope},"));
             }
 
             return stringIdentifiersMap.ToString();
