@@ -4,13 +4,14 @@ using UnityEngine;
 
 namespace HECSFramework.Unity
 {
-    public partial interface IActor : IEntity
+    public partial interface IActor : IEntity, IHECSEnable, IHECSDisable
     {
         bool TryGetComponent<T>(out T component, bool lookInChildsToo = false);
         bool TryGetComponents<T>(out T[] components);
         void SetWorld(World world = null);
         void InjectContainer(EntityContainer container, bool isAdditive = false);
-        
+
+        ActorContainer ActorContainer { get; }
         GameObject GameObject { get; }
     }
 

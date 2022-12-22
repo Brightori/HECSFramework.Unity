@@ -5,12 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Systems;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace HECSFramework.Unity
 {
     [DefaultExecutionOrder(-100)]
-    public partial class Actor : MonoBehaviour, IActor
+    public partial class Actor : MonoBehaviour, IActor, IHECSDisable, IHECSEnable
     {
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
@@ -316,6 +317,45 @@ namespace HECSFramework.Unity
         public void Inject(List<IComponent> components, List<ISystem> systems, bool isAdditive = false, IEntity owner = null)
         {
             entity.Inject(components, systems, isAdditive, this);
+        }
+
+        public void HECSDisable()
+        {
+            foreach (var ci in entity.ComponentsMask.CurrentIndexes)
+            {
+                TypesMap.RegisterComponent(ci, entity, false);
+            }
+            
+            foreach (var s  in entity.GetAllSystems)
+            {
+                if (s is IHECSDisable disable)
+                {
+                    disable.HECSDisable();
+                }
+            }
+
+            entity.Pause();
+            entity.World.RegisterEntity(this, false);
+        }
+
+        public void HECSEnable()
+        {
+            entity.UnPause();
+
+            entity.World.RegisterEntity(this, true);
+
+            foreach (var ci in entity.ComponentsMask.CurrentIndexes)
+            {
+                TypesMap.RegisterComponent(ci, entity, true);
+            }
+
+            foreach (var s in entity.GetAllSystems)
+            {
+                if (s is IHECSEnable enable)
+                {
+                    enable.HECSEnable();
+                }
+            }
         }
     }
 }

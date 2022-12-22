@@ -27,7 +27,15 @@ namespace HECSFramework.Unity
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }
-        
+
+        public static async ValueTask<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Vector3 position, Quaternion rotation, Transform parent)
+        {
+            var asynData = viewReferenceComponent.ViewReference.InstantiateAsync(position, rotation, parent);
+            var actorPrfb = await asynData.Task;
+            Addressables.Release(asynData);
+            return actorPrfb;
+        }
+
         public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0)
         {
             var entity = new Entity(entityContainer.name, worldIndex);
@@ -61,6 +69,7 @@ namespace HECSFramework.Unity
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb);
 
+            Addressables.Release(asynData);
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }
