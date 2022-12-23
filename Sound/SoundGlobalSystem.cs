@@ -14,11 +14,11 @@ namespace Systems
     [Documentation(Doc.Audio, Doc.Global, Doc.HECS, "Default sound solution for HECS, its all about 2d sound on this moment")]
     public class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IReactEntity,
         IReactGlobalCommand<PlaySoundCommand>,
-        IReactGlobalCommand<StopSoundCommand>
+        IReactGlobalCommand<StopSoundCommand>,
+        IReactGlobalCommand<UpdateSoundOptionsCommand>
     {
         [SerializeField] private AudioMixerGroup audioMixerGroup;
-
-        [Required]
+        
         public SoundVolumeComponent volumeComponent;
 
         private List<SoundSourceContainer> soundSources = new List<SoundSourceContainer>(32);
@@ -28,6 +28,8 @@ namespace Systems
 
         public override void InitSystem()
         {
+            volumeComponent = EntityManager.GetSingleComponent<SoundVolumeComponent>();
+            
             Actor.TryGetComponents<AudioSource>(out var soundSources);
 
             if (soundSources != null)
@@ -54,6 +56,9 @@ namespace Systems
 
         private void PlaySound(PlaySoundCommand playAudioCommand)
         {
+            if (!volumeComponent.IsSoundOn)
+                return;
+
             if (playAudioCommand.Clip == null)
                 return;
 
@@ -198,6 +203,11 @@ namespace Systems
             }
 
             DOTween.KillAll();
+        }
+
+        public void CommandGlobalReact(UpdateSoundOptionsCommand command)
+        {
+            volumeComponent.IsSoundOn = command.IsSoundOn;
         }
     }
 
