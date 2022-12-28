@@ -132,7 +132,7 @@ namespace HECSFramework.Unity
             {
                 for (int i = 0; i < ComponentsMask.CurrentIndexes.Count; i++)
                 {
-                    var c =  entity.GetAllComponents[ComponentsMask.CurrentIndexes[i]];
+                    var c = entity.GetAllComponents[ComponentsMask.CurrentIndexes[i]];
 
                     if (c.IsRegistered)
                         continue;
@@ -162,11 +162,7 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            if (EntityManager.IsAlive && this.IsAlive() && gameObject != null)
-            {
-                entity.HecsDestroy();
-                MonoBehaviour.Destroy(gameObject);
-            }
+            entity.HecsDestroy();
         }
 
         public bool Equals(IEntity other) => entity.Equals(other);
@@ -296,7 +292,7 @@ namespace HECSFramework.Unity
 
             if (entity == null)
                 CreateEntity(world);
-         
+
             entity.SetWorld(world);
         }
 
@@ -309,7 +305,7 @@ namespace HECSFramework.Unity
         {
             var components = container.GetComponentsInstances();
             var systems = container.GetSystemsInstances();
-            
+
             entity.Inject(components, systems, isAdditive, this);
         }
 
@@ -324,8 +320,8 @@ namespace HECSFramework.Unity
             {
                 TypesMap.RegisterComponent(ci, entity, false);
             }
-            
-            foreach (var s  in entity.GetAllSystems)
+
+            foreach (var s in entity.GetAllSystems)
             {
                 if (s is IHECSDisable disable)
                 {

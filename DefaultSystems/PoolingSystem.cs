@@ -147,9 +147,11 @@ namespace Systems
 
                 for (int i = 0; i < count; i++)
                 {
-                    var instance = MonoBehaviour.Instantiate(needed);
-                    ReleaseView(view.ViewReference, instance);
+                    var instance = MonoBehaviour.Instantiate(needed.gameObject);
+                    ReleaseView(view.ViewReference, instance.gameObject);
                 }
+
+                needed.gameObject.SetActive(false);
             }
         }
 
@@ -224,6 +226,7 @@ namespace Systems
                 var key = viewReferenceComponent.ViewReference.AssetGUID;
                 var go = actor.gameObject;
                 MonoBehaviour.Destroy(actor);
+                actor.Dispose();
                 go.transform.SetParent(null);
                 go.SetActive(false);
 
