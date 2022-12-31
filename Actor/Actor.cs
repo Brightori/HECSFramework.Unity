@@ -15,7 +15,7 @@ namespace HECSFramework.Unity
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
 
-        private Entity entity;
+        private Entity entity = new Entity();
         public GameObject GameObject => gameObject;
         public EntityLocalCommandService EntityCommandService => entity.EntityCommandService;
         public int WorldId => entity.WorldId;
@@ -80,7 +80,8 @@ namespace HECSFramework.Unity
             if (entityCreated)
                 return;
 
-            entity = new Entity(actorInitModule.ID, actorInitModule.WorldIndex);
+            entity.SetID(actorInitModule.ID);
+            entity.SetWorld(actorInitModule.WorldIndex);
             entity.SetGuid(actorInitModule.Guid);
             entityCreated = true;
         }
@@ -90,7 +91,8 @@ namespace HECSFramework.Unity
             if (entityCreated)
                 return;
 
-            entity = new Entity(actorInitModule.ID, world);
+            entity.SetID(actorInitModule.ID);
+            entity.SetWorld(world);
             entity.SetGuid(actorInitModule.Guid);
             entityCreated = true;
         }

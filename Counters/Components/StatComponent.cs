@@ -15,6 +15,6 @@ namespace Components
         public float GetBaseValue => startValue;
 
         [ShowInInspector] //this property for debing|show at inspector
-        public float ShowCurrentValue => modifiersContainer != null ? modifiersContainer.CurrentValue : startValue;
+        public float ShowCurrentValue => Value;
     }
 }
