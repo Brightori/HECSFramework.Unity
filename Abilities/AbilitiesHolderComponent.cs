@@ -12,10 +12,19 @@ namespace Components
         [ValueDropdown("GetAbilities", IsUniqueList = true)]
         public EntityContainer[] AbilitiesContainers = new EntityContainer[0];
 
-
         private IEnumerable GetAbilities()
         {
             return new SOProvider<EntityContainer>().GetCollection().Where(x => x.IsHaveComponent<AbilityTagComponent>());
+        }
+
+        public void LoadDefaultAbilities()
+        {
+            foreach (var ability in AbilitiesContainers)
+            {
+                var newAbility = ability.GetEntity(needInit: false);
+                newAbility.GetOrAddComponent<AbilityOwnerComponent>().AbilityOwner = Owner;
+                AddAbility(newAbility, true);
+            }
         }
     }
 }

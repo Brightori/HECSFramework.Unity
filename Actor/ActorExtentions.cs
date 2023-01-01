@@ -36,10 +36,11 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0)
+        public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0, bool needInit = true)
         {
             var entity = new Entity(entityContainer.name, worldIndex);
-            entityContainer.Init(entity);
+            if (needInit)
+                entityContainer.Init(entity);
             entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.name;
             entity.GenerateGuid();
             return entity;
