@@ -311,6 +311,17 @@ namespace HECSFramework.Unity
             entity.Inject(components, systems, isAdditive, this);
         }
 
+        public void InjectContainer(EntityContainer container, bool isAdditive = false, params IComponent[] additionalComponents)
+        {
+            var components = container.GetComponentsInstances();
+            var systems = container.GetSystemsInstances();
+
+            foreach (var additional in additionalComponents)
+                components.Add(additional);
+
+            entity.Inject(components, systems, isAdditive, this);
+        }
+
         public void Inject(List<IComponent> components, List<ISystem> systems, bool isAdditive = false, IEntity owner = null)
         {
             entity.Inject(components, systems, isAdditive, this);
@@ -353,6 +364,21 @@ namespace HECSFramework.Unity
                     enable.HECSEnable();
                 }
             }
+        }
+
+        public Entity ReplaceEntity(Entity entity)
+        {
+            if (entity.IsInited)
+                throw new Exception("entity for replace should be not inited");
+
+            entity.SetWorld(this.entity.World);
+            entity.SetGuid(this.entity.GUID);
+
+            Dispose();
+            this.entity = entity;
+            entity.ProcessSystemsAndComponentsWithActor(this);
+            
+            return entity;
         }
     }
 }

@@ -10,6 +10,8 @@ namespace HECSFramework.Unity
         bool TryGetComponents<T>(out T[] components);
         void SetWorld(World world = null);
         void InjectContainer(EntityContainer container, bool isAdditive = false);
+        void InjectContainer(EntityContainer container, bool isAdditive = false, params IComponent[] components);
+        Entity ReplaceEntity(Entity entity);
 
         ActorContainer ActorContainer { get; }
         GameObject GameObject { get; }
