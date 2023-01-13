@@ -15,7 +15,7 @@ namespace Systems
     public class InputListenSystem : BaseSystem, IPriorityUpdatable
     {
         private List<UpdateableAction> actions = new List<UpdateableAction>();
-        private ConcurrencyList<IEntity> inputListeners;
+        private HECSList<IEntity> inputListeners;
         private HECSMask InputListenerTagComponentMask = HMasks.GetMask<InputListenerTagComponent>();
 
         public int Priority { get; } = -5;

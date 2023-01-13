@@ -17,50 +17,15 @@ namespace HECSFramework.Unity
 
         private Entity entity = new Entity();
         public GameObject GameObject => gameObject;
-        public EntityLocalCommandService EntityCommandService => entity.EntityCommandService;
-        public int WorldId => entity.WorldId;
-        public World World => entity.World;
-        public Guid GUID => entity.GUID;
-        public List<ISystem> GetAllSystems => entity.GetAllSystems;
-        public ComponentContext ComponentContext => entity.ComponentContext;
-        public IComponent[] GetAllComponents => entity.GetAllComponents;
-
-        public string ID => entity.ID;
-        public bool IsInited => entity != null && entity.IsInited;
-        public bool IsAlive => entity != null && entity.IsAlive;
-        public bool IsPaused => entity != null && entity.IsPaused;
-        private bool entityCreated;
-
+       
         public string ContainerID => entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
 
-        public HECSMultiMask ComponentsMask => entity.ComponentsMask;
-
-        public LocalComponentListenersService RegisterComponentListenersService => entity.RegisterComponentListenersService;
 
         private HECSMask actorContainerMask = HMasks.GetMask<ActorContainerID>();
 
-        public T AddHecsComponent<T>(T component, IEntity owner, bool silently = false) where T : IComponent
-        {
-            if (!entityCreated)
-                CreateEntity();
-
-            return entity.AddHecsComponent(component, this, silently);
-        }
-
-        public void AddHecsSystem<T>(T system, IEntity owner = null) where T : ISystem
-        {
-            this.entity.AddHecsSystem(system, this);
-        }
-
-        public void ResetActor()
-        {
-            entity = new Entity(gameObject.name);
-            entity.SetGuid(Guid.NewGuid());
-        }
-
+      
         public void Command<T>(T command) where T : struct, ICommand => entity.Command(command);
-        public bool ContainsMask(ref HECSMask mask) => entity.ContainsMask(ref mask);
 
         private void Awake()
         {

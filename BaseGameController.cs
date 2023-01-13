@@ -26,9 +26,9 @@ namespace HECSFramework.Unity
         private IEntity sceneManager;
         private IEntity inputManager;
 
-        private ConcurrencyList<World> worlds;
-        private ConcurrencyList<World> waitForStart = new ConcurrencyList<World>();
-        private ConcurrencyList<World> waitForLateStart = new ConcurrencyList<World>();
+        private HECSList<World> worlds;
+        private HECSList<World> waitForStart = new HECSList<World>();
+        private HECSList<World> waitForLateStart = new HECSList<World>();
 
         private void Awake()
         {

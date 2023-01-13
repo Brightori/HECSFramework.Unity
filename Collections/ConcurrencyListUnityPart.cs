@@ -5,7 +5,7 @@ namespace HECSFramework.Core
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed partial class ConcurrencyList<T> 
+    public sealed partial class HECSList<T> 
     {
     }
 }
