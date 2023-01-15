@@ -20,8 +20,8 @@ namespace Systems
 
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
 
-        private ConcurrencyList<IEntity> uiCurrents;
-        private ConcurrencyList<IEntity> additionalCanvases;
+        private HECSList<IEntity> uiCurrents;
+        private HECSList<IEntity> additionalCanvases;
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();

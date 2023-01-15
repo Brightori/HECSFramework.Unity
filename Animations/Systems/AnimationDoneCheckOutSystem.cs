@@ -15,8 +15,8 @@ namespace Systems
         [Required]
         public AnimationCheckOutsHolderComponent animationCheckOutsHolder;
 
-        private ConcurrencyList<AnimationDoneCheckOut> animationDoneCheckOuts = new ConcurrencyList<AnimationDoneCheckOut>(8);
-        private ConcurrencyList<AnimationCycleCheckout> animationCycleDoneCheckOuts = new ConcurrencyList<AnimationCycleCheckout>(8);
+        private HECSList<AnimationDoneCheckOut> animationDoneCheckOuts = new HECSList<AnimationDoneCheckOut>(8);
+        private HECSList<AnimationCycleCheckout> animationCycleDoneCheckOuts = new HECSList<AnimationCycleCheckout>(8);
         private Remover<AnimationDoneCheckOut> animationDoneCheckOutsRemover;
 
         public void CommandReact(AnimationEventCommand command)
