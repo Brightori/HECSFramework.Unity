@@ -36,19 +36,19 @@ namespace HECSFramework.Unity
 
                 foreach (var a in actors)
                 {
-                    if (a.IsInited)
+                    if (a.Entity.IsInited)
                     {
                         HECSDebug.LogError("Actors on scene when we load it to world, should not be inited, remove init on start from them");
                         continue;
                     }
 
-                    a.Init(world.Index, true);
+                    a.Entity.Init(world);
                     actorsList.Add(a);
                 }
 
                 foreach (var a in actors)
                 {
-                    foreach (var s in a.GetAllSystems)
+                    foreach (var s in a.Entity.GetAllSystems)
                     {
                         if (s is IStartOnScene startOnScene)
                         {

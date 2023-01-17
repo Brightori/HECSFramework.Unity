@@ -55,7 +55,7 @@ namespace HECSFramework.Unity
             InitComponents(entity, componentsBluePrints, pure);
             InitSystems(entity, systemBaseBluePrints, pure);
 
-            entity.AddOrReplaceComponent(new ActorContainerID { ID = name });
+            entity.GetOrAddComponent<ActorContainerID>().ID = name;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

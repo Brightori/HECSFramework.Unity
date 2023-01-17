@@ -20,7 +20,7 @@ namespace Components
             if (Actor != null)
                 RectTransform = Actor.GameObject.GetComponent<RectTransform>();
             else
-                Actor.RemoveHecsComponent(this);
+                Actor.Entity.RemoveComponent(this);
         }
     }
 }

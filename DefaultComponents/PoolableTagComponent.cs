@@ -8,8 +8,6 @@ namespace Components
         private IStartOnPooling[] startOnPoolings = new IStartOnPooling[0];
         private IStopOnPooling[] stopOnPoolings = new IStopOnPooling[0];
 
-        private HECSMask afterview = HMasks.GetMask<SetupAfterViewTagComponent>();
-
         private void GatherPoolables()
         {
             var actor = Owner.AsActor();
@@ -35,7 +33,7 @@ namespace Components
 
         public void AfterEntityInit()
         {
-            if (!Owner.ContainsMask(ref afterview))
+            if (!Owner.ContainsMask<SetupAfterViewTagComponent>())
                 GatherPoolables();
         }
 

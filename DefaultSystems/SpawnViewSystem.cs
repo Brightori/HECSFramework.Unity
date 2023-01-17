@@ -44,7 +44,7 @@ namespace Systems
             }
 
             Owner.Command(new ViewReadyCommand());
-            Owner.AddHecsComponent(new ViewReadyTagComponent());
+            Owner.AddComponent(new ViewReadyTagComponent());
 
             var initWithView = Owner.GetComponentsByType<IInitAferView>();
 

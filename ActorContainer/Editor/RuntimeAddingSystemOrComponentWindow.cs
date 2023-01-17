@@ -61,14 +61,13 @@ namespace HECSFramework.HECS.Unity.ActorContainer
             {
                 var typeIndex = IndexGenerator.GetIndexForType(neededType);
                 var component = TypesMap.GetComponentFromFactory(typeIndex);
-                var componentsMask = component.ComponentsMask;
 
                 foreach (var entity in entities)
                 {
 
-                    if(entity.ContainsMask(ref componentsMask))
+                    if(entity.ContainsMask(typeIndex))
                         continue;
-                    entity.AddHecsComponent(component);
+                    entity.AddComponent(component);
                 }
                 
                 Name = component.GetType().Name;

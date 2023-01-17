@@ -20,7 +20,7 @@ namespace Components
             if (Actor != null)
                 Transform = Actor.GameObject.GetComponent<Transform>();
             else
-                Actor.RemoveHecsComponent(this);
+                Actor.Entity.RemoveComponent(this);
         }
     }
 }

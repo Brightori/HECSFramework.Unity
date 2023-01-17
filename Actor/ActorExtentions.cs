@@ -14,9 +14,14 @@ namespace HECSFramework.Unity
         private static HECSMask containerMask = HMasks.GetMask<ActorContainerID>();
         private static HECSMask viewReferenceMask = HMasks.GetMask<ActorContainerID>();
 
+        public static bool IsAlive(this IActor actor)
+        {
+            return actor != null && actor.Entity.IsAlive();
+        }
+
         public static IActor AsActor(this IEntity entity)
         {
-            return entity as IActor;
+            return entity.GetComponent<ActorProviderComponent>().Actor;
         }
 
         public static async ValueTask<IActor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<IActor> callBack = null)
@@ -36,21 +41,12 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static IEntity GetEntity(this EntityContainer entityContainer, int worldIndex = 0, bool needInit = true)
+        public static IEntity GetEntity(this EntityContainer entityContainer, World world = null , bool needInit = true)
         {
-            var entity = new Entity(entityContainer.name, worldIndex);
+            var entity = new Entity(world, entityContainer.name);
             if (needInit)
                 entityContainer.Init(entity);
             entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.name;
-            entity.GenerateGuid();
-            return entity;
-        }
-        
-        public static EntityModel GetEntityModel(this EntityContainer entityContainer, int worldIndex = 0)
-        {
-            var entity = new EntityModel(worldIndex, entityContainer.name);
-            entityContainer.Init(entity);
-            entity.GetOrAddComponent<ActorContainerID>(containerMask) .ID = entityContainer.name;
             entity.GenerateGuid();
             return entity;
         }
@@ -68,7 +64,7 @@ namespace HECSFramework.Unity
             var actorPrfb = Object.Instantiate(prefab, position, rotation, transform).GetOrAddMonoComponent<Actor>();
 
             if (needLoadContainer)
-                entityContainer.Init(actorPrfb);
+                entityContainer.Init(actorPrfb.Entity);
 
             Addressables.Release(asynData);
             callBack?.Invoke(actorPrfb);
@@ -87,12 +83,12 @@ namespace HECSFramework.Unity
             var prefab = await asynData.Task;
             var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity).GetComponent<IActor>();
 
-            actorPrfb.SetWorld(world);
+            actorPrfb.Entity.SetWorld(world);
 
             if (needLoadContainer)
-                entityContainer.Init(actorPrfb);
+                entityContainer.Init(actorPrfb.Entity);
 
-            actorPrfb.RemoveHecsComponentsAndSystems<Exluding>();
+            actorPrfb.Entity.RemoveHecsComponentsAndSystems<Exluding>();
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
@@ -101,20 +97,16 @@ namespace HECSFramework.Unity
 #if UNITY_EDITOR
         public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
         {
-            var entityModel = new EntityModel(0, entityContainer.name);
-            entityContainer.Init(entityModel);
-            var unpack = new UnpackContainer(entityContainer);
-            var viewReferenceComponent = entityModel.GetHECSComponent<ViewReferenceComponent>(ref viewReferenceMask);
-            var actorID = entityModel.GetHECSComponent<ActorContainerID>(ref containerMask);
+            var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
 
             if (viewReferenceComponent == null)
-                throw new Exception("нет вью рефа у " + actorID.ID);
+                throw new Exception("нет вью рефа у " + entityContainer.name);
 
             var prefab = (GameObject)viewReferenceComponent.ViewReference.editorAsset;
             var actorPrfb = Object.Instantiate(prefab).GetComponent<IActor>();
 
             if (needLoadContainer)
-                entityContainer.Init(actorPrfb);
+                entityContainer.Init(actorPrfb.Entity);
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
@@ -137,10 +129,9 @@ namespace HECSFramework.Unity
 
         public static void RemoveHecsComponentsAndSystems<T>(this IEntity entity)
         {
-            foreach (var c in entity.GetAllComponents)
+            foreach (var c in entity.GetComponentsByType<T>())
             {
-                if (c is T)
-                { entity.RemoveHecsComponent(c); }
+                entity.RemoveComponent(TypesMap.GetComponentInfo(c as IComponent).ComponentsMask.Index);
             }
 
             foreach (var s in entity.GetAllSystems.ToArray())

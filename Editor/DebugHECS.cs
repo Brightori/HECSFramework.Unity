@@ -34,8 +34,7 @@ public class DebugHECS : OdinEditorWindow
         if (EntityManager.Default == null)
             return;
 
-        if (worldIndex < EntityManager.Worlds.Count&& Entities.Count != EntityManager.Worlds.Data[worldIndex].EntitiesCount)
-            RedrawWindow();
+        RedrawWindow();
         Repaint();
     }
 
@@ -61,7 +60,7 @@ public class DebugHECS : OdinEditorWindow
             drawEntity.Guid = e.GUID.ToString();
             drawEntity.ContainerID = e.ContainerID;
 
-            foreach (var c in e.GetAllComponents)
+            foreach (var c in e.GetComponentsByType<IComponent>())
             {
                 if (c == null)
                     continue;

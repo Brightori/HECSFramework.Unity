@@ -82,12 +82,12 @@ namespace HECSFramework.Unity
             sceneManagerContainer?.Init(sceneManager);
             inputManagerContainer?.Init(inputManager);
 
-            player.Init();
-            uiManager.Init();
-            sceneManager.Init();
-            gameLogic.Init();
+            player.Init(EntityManager.Default);
+            uiManager.Init(EntityManager.Default);
+            sceneManager.Init(EntityManager.Default);
+            gameLogic.Init(EntityManager.Default);
             player.GenerateGuid();
-            inputManager.Init();
+            inputManager.Init(EntityManager.Default);
         }
 
         public abstract void BaseAwake();

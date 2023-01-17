@@ -1,7 +1,6 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 using HECSFramework.Unity;
-using HECSFramework.Unity.Helpers;
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,14 +9,14 @@ namespace Components
     [Serializable, BluePrint]
     public sealed class NavMeshAgentComponent : BaseComponent, IHaveActor, IInitable, IDisposable
     {
-        private LazyMonoBehComponent<NavMeshAgent> navmeshAgent;
-        public NavMeshAgent NavMeshAgent => navmeshAgent.GetComponent();
+        private NavMeshAgent navmeshAgent;
+        public NavMeshAgent NavMeshAgent => navmeshAgent;
 
         public IActor Actor { get; set; }
      
         public void Init()
         {
-            navmeshAgent = new LazyMonoBehComponent<NavMeshAgent>(Owner);
+            Actor.TryGetComponent(out navmeshAgent);
         }
 
         public void SetDestination(Vector3 destination)
@@ -33,7 +32,7 @@ namespace Components
      
         public void Dispose()
         {
-            navmeshAgent.Dispose();
+            navmeshAgent = null;
         }
     }
 }

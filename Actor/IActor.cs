@@ -16,6 +16,9 @@ namespace HECSFramework.Unity
 
         public void Init(World world = null);
         void Command<T>(T command) where T : struct, ICommand;
+
+        void DestroyActorDisposeEntity();
+        void RemoveActorToPool();
     }
 
     public interface IHaveActor : INotCore

@@ -123,7 +123,7 @@ namespace HECSFramework.Unity
 
         public virtual void Init(IEntity entity, bool pure = false)
         {
-            entity.AddHecsComponent(new ActorContainerID { ID = name });
+            entity.AddComponent(new ActorContainerID { ID = name });
             InitComponents(entity, holder.components, pure);
             InitSystems(entity, holder.systems, pure);
         }
@@ -171,7 +171,7 @@ namespace HECSFramework.Unity
                 if (!pure && unpackComponent is IHaveActor && !(entity is IActor actor))
                     continue;
 
-                entity.AddHecsComponent(unpackComponent, entity);
+                entity.AddComponent(unpackComponent);
             }
         }
 

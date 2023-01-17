@@ -12,58 +12,58 @@ namespace Components
 
         public void Start()
         {
-            if (!Actor.IsAlive() || Actor.GameObject.ToString() == "null")
+            if (Actor != null|| Actor.Entity.IsAlive())
                 Actor = GetComponent<IActor>();
 
-            if (!Actor.IsAlive() || Actor.GameObject.ToString() == "null")
+            if (Actor != null || Actor.Entity.IsAlive())
                 Actor = GetComponentInParent<IActor>();
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new CollisionCommand { Collision = collision });
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new Collision2dCommand { Collision = collision });
         }
 
         private void OnCollisionExit(Collision collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new CollisionExitCommand { Collision = collision });
         }
 
         private void OnCollisionExit2D(Collision2D collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new Collision2dExitCommand { Collision = collision });
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new TriggerEnterCommand { Collider = other });
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new Trigger2dEnterCommand { Collider = collision });
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new TriggerExitCommand { Collider = other });
         }
 
         private void OnTriggerExit2D(Collider2D collision)
         {
-            if (Actor.IsAlive)
+            if (Actor.IsAlive())
                 Actor.Command(new Trigger2dExitCommand { Collider = collision });
         }
     }

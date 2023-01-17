@@ -22,13 +22,14 @@ namespace Systems
 
         public override void InitSystem()
         {
-            inputListeners = EntityManager.Filter(InputListenerTagComponentMask);
+            //todo filter
+            //inputListeners = EntityManager.Filter(InputListenerTagComponentMask);
             LinkActions();
         }
 
         private void LinkActions()
         {
-            var actionsComponent = Owner.GetHECSComponent<InputActionsComponent>();
+            var actionsComponent = Owner.GetComponent<InputActionsComponent>();
             var defaultActionMap = actionsComponent.Actions.actionMaps[0];
             defaultActionMap.Enable();
 
@@ -68,14 +69,14 @@ namespace Systems
 
             foreach (var w in EntityManager.Worlds)
             {
-                var collection = w.Filter(InputListenerTagComponentMask);
-                var lenght = collection.Count;
-                for (int i = 0; i < lenght; i++)
-                {
-                    IEntity listener = collection.Data[i];
-                    listener.Command(command);
-                }
-                //w.Command(command);
+                //todo filter
+                //var collection = w.Filter(InputListenerTagComponentMask);
+                //var lenght = collection.Count;
+                //for (int i = 0; i < lenght; i++)
+                //{
+                //    IEntity listener = collection.Data[i];
+                //    listener.Command(command);
+                //}
             }
         }
 

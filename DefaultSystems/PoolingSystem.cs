@@ -49,7 +49,7 @@ namespace Systems
                 if (pooledActors.ContainsKey(assetReference.AssetGUID))
                 {
                     if (entityContainer != null)
-                        entityContainer.Init(newActor);
+                        entityContainer.Init(newActor.Entity);
 
                     return newActor;
                 }
@@ -61,7 +61,7 @@ namespace Systems
 
                 if (entityContainer != null)
                 {
-                    entityContainer.Init(newActor);
+                    entityContainer.Init(newActor.Entity);
                 }
 
                 return newActor;
@@ -100,7 +100,7 @@ namespace Systems
             }
 
             if (entityContainer != null)
-                entityContainer.Init(actor);
+                entityContainer.Init(actor.Entity);
 
             return actor;
         }
@@ -124,7 +124,7 @@ namespace Systems
                 var task = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference).Task;
                 var objFromRef = await task;
                 var newActor = GetNewInstance(objFromRef).GetComponent<Actor>();
-                entityContainer.Init(newActor);
+                entityContainer.Init(newActor.Entity);
 
                 if (pooledActors.ContainsKey(viewReferenceComponent.ViewReference.AssetGUID))
                 {
@@ -221,7 +221,7 @@ namespace Systems
                 ReleaseView(pview);
             }
 
-            if (actor.TryGetHecsComponent(viewRefMask, out ViewReferenceComponent viewReferenceComponent))
+            if (actor.TryGetComponent(out ViewReferenceComponent viewReferenceComponent))
             {
                 var key = viewReferenceComponent.ViewReference.AssetGUID;
                 var go = actor.gameObject;

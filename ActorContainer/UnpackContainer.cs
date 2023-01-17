@@ -18,7 +18,7 @@ namespace HECSFramework.Unity
             Systems = new List<ISystem>(entityContainer.Systems.Count);
 
             FillFromReferenceContainer(ref Components, entityContainer);
-            
+
             foreach (var c in entityContainer.Components)
             {
                 if (c != null)
@@ -60,18 +60,15 @@ namespace HECSFramework.Unity
 
             foreach (var c in Components)
             {
-                if (TypesMap.GetComponentInfo(c.GetTypeHashCode, out var mask))
+                if (!entity.ContainsMask(c.GetTypeHashCode))
                 {
-                    if (entity.GetAllComponents[mask.ComponentsMask.Index] == null)
-                    {
-                        entity.AddHecsComponent(c);
-                    }
+                    entity.AddComponent(c);
                 }
             }
 
             foreach (var s in Systems)
             {
-                if (entity.GetAllSystems.Any(x=> x.GetTypeHashCode == s.GetTypeHashCode))
+                if (entity.GetAllSystems.Any(x => x.GetTypeHashCode == s.GetTypeHashCode))
                     continue;
 
                 entity.AddHecsSystem(s);
@@ -80,12 +77,12 @@ namespace HECSFramework.Unity
 
         public T GetComponent<T>() where T : IComponent
         {
-            return (T)Components.FirstOrDefault(x=> x is T);
-        }  
-        
+            return (T)Components.FirstOrDefault(x => x is T);
+        }
+
         public T GetSystem<T>() where T : ISystem
         {
-            return (T)Systems.FirstOrDefault(x=> x is T);
+            return (T)Systems.FirstOrDefault(x => x is T);
         }
 
         private void CheckRefContainer(EntityContainer entityContainer)
@@ -126,6 +123,6 @@ namespace HECSFramework.Unity
 
             source.Add(MonoBehaviour.Instantiate(element).GetHECSComponent);
         }
-    
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Components;
 using HECSFramework.Core;
 using Sirenix.OdinInspector;
 using Systems;
@@ -27,6 +28,7 @@ namespace HECSFramework.Unity
         {
             entity = new Entity(EntityManager.Worlds.Data[actorInitModule.WorldIndex], gameObject.name);
             entity.SetGuid(actorInitModule.Guid);
+            entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
 
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
             {
@@ -60,7 +62,7 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            entity.HecsDestroy();
+            entity.Dispose();
         }
 
         public bool Equals(IEntity other) => entity.Equals(other);
@@ -71,15 +73,10 @@ namespace HECSFramework.Unity
             actorInitModule.SetGuid(entity.GUID);
         }
 
-        public void HecsDestroy()
-        {
-            entity.World.GetSingleSystem<DestroyEntityWorldSystem>().ProcessDeathOfActor(this);
-        }
-
         private void OnDestroy()
         {
             if (entity.IsAlive)
-                entity.HecsDestroy();
+                entity.Dispose();
         }
 
         public bool TryGetComponent<T>(out T component, bool lookInChildsToo = false)
@@ -105,9 +102,6 @@ namespace HECSFramework.Unity
             components = GetComponentsInChildren<T>(true);
             return components != null && components.Length > 0;
         }
-
-       
-        public bool ContainsMask<T>() where T : IComponent => entity.ContainsMask<T>();
 
         public override int GetHashCode()
         {
@@ -142,6 +136,16 @@ namespace HECSFramework.Unity
         {
             actorInitModule.SetID(gameObject.name);
             actorInitModule.SetGuid(Guid.NewGuid());
+        }
+
+        public void DestroyActorDisposeEntity()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveActorToPool()
+        {
+            throw new NotImplementedException();
         }
     }
 }

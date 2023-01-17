@@ -6,7 +6,7 @@ namespace Components
 {
     [Serializable, RequiredAtContainer(typeof(UnityTransformComponent))]
     [Documentation(Doc.UI, Doc.Tag, "This component marks main canvas for placing ui")]
-    public class MainCanvasTagComponent : BaseComponent, IAfterEntityInit
+    public class MainCanvasTagComponent : BaseComponent, IAfterEntityInit, IWorldSingleComponent
     {
         public void AfterEntityInit()
         {
