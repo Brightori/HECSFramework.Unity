@@ -160,7 +160,7 @@ namespace Systems
             }
         }
 
-        public void EntityReact(IEntity entity, bool isAdded)
+        public void EntityReact(Entity entity, bool isAdded)
         {
             if (!isAdded)
                 StopAllFromSource(entity.GUID);

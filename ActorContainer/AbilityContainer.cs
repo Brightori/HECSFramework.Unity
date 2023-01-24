@@ -10,7 +10,7 @@ namespace HECSFramework.Unity
     [CreateAssetMenu(fileName = "AbilityContainer", menuName = "Ability Container")]
     public class AbilityContainer : EntityContainer 
     {
-        public override void Init(IEntity entity, bool pure = false)
+        public override void Init(Entity entity, bool pure = false)
         {
             base.Init(entity);
             entity.GetOrAddComponent<AbilityTagComponent>();

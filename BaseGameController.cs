@@ -20,11 +20,11 @@ namespace HECSFramework.Unity
         private EntityManager entityManager;
         private GlobalUpdateSystem updateSystem;
 
-        private IEntity gameLogic;
-        private IEntity player;
-        private IEntity uiManager;
-        private IEntity sceneManager;
-        private IEntity inputManager;
+        private Entity gameLogic;
+        private Entity player;
+        private Entity uiManager;
+        private Entity sceneManager;
+        private Entity inputManager;
 
         private HECSList<World> worlds;
         private HECSList<World> waitForStart = new HECSList<World>();

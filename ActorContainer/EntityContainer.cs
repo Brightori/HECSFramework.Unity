@@ -121,7 +121,7 @@ namespace HECSFramework.Unity
         public bool IsHaveSystem(SystemBaseBluePrint systemBaseBluePrint) =>
             holder.systems.Any(x => x.GetSystem.GetTypeHashCode == systemBaseBluePrint.GetSystem.GetTypeHashCode);
 
-        public virtual void Init(IEntity entity, bool pure = false)
+        public virtual void Init(Entity entity, bool pure = false)
         {
             entity.AddComponent(new ActorContainerID { ID = name });
             InitComponents(entity, holder.components, pure);
@@ -156,7 +156,7 @@ namespace HECSFramework.Unity
             return false;
         }
 
-        protected void InitComponents(IEntity entity, List<ComponentBluePrint> components, bool pure = false)
+        protected void InitComponents(Entity entity, List<ComponentBluePrint> components, bool pure = false)
         {
             foreach (var component in components)
             {
@@ -168,14 +168,14 @@ namespace HECSFramework.Unity
 
                 var unpackComponent = component.GetComponentInstance();
 
-                if (!pure && unpackComponent is IHaveActor && !(entity is IActor actor))
+                if (!pure && unpackComponent is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
                     continue;
 
                 entity.AddComponent(unpackComponent);
             }
         }
 
-        protected void InitSystems(IEntity entity, List<SystemBaseBluePrint> systems, bool pure = false)
+        protected void InitSystems(Entity entity, List<SystemBaseBluePrint> systems, bool pure = false)
         {
             foreach (var system in systems)
             {
@@ -187,10 +187,10 @@ namespace HECSFramework.Unity
 
                 var unpackSys = system.GetSystemInstance();
 
-                if (!pure && unpackSys is IHaveActor && !(entity is IActor actor))
+                if (!pure && unpackSys is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
                     continue;
 
-                entity.AddHecsSystem(unpackSys, entity);
+                entity.AddHecsSystem(unpackSys);
             }
         }
 

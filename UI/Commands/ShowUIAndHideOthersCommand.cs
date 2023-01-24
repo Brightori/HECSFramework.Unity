@@ -8,6 +8,6 @@ namespace Commands
 	public struct ShowUIAndHideOthersCommand : IGlobalCommand
 	{
 		public int UIActorType;
-		public Action<IEntity> OnUILoad;
+		public Action<Entity> OnUILoad;
 	}
 }

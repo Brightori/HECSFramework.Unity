@@ -19,7 +19,7 @@ namespace HECSFramework.Unity
             return actor != null && actor.Entity.IsAlive();
         }
 
-        public static IActor AsActor(this IEntity entity)
+        public static IActor AsActor(this Entity entity)
         {
             return entity.GetComponent<ActorProviderComponent>().Actor;
         }
@@ -41,7 +41,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static IEntity GetEntity(this EntityContainer entityContainer, World world = null , bool needInit = true)
+        public static Entity GetEntity(this EntityContainer entityContainer, World world = null, bool needInit = true)
         {
             var entity = new Entity(world, entityContainer.name);
             if (needInit)
@@ -51,7 +51,7 @@ namespace HECSFramework.Unity
             return entity;
         }
 
-        public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
+        public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, bool needLoadContainer = true, Action<IActor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.name;
@@ -95,7 +95,7 @@ namespace HECSFramework.Unity
         }
 
 #if UNITY_EDITOR
-        public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true,  Action<IActor> callBack = null)
+        public static IActor GetActorEditor(this EntityContainer entityContainer, bool needLoadContainer = true, Action<IActor> callBack = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
 
@@ -112,7 +112,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 #endif
-        
+
         public static T GetComponentInstance<T>(this EntityContainer entityContainer) where T : class, IComponent, new()
         {
             foreach (var componentBluePrint in entityContainer.Components)
@@ -125,16 +125,16 @@ namespace HECSFramework.Unity
             throw new ArgumentOutOfRangeException();
         }
 
-        
 
-        public static void RemoveHecsComponentsAndSystems<T>(this IEntity entity)
+
+        public static void RemoveHecsComponentsAndSystems<T>(this Entity entity)
         {
             foreach (var c in entity.GetComponentsByType<T>())
             {
                 entity.RemoveComponent(TypesMap.GetComponentInfo(c as IComponent).ComponentsMask.Index);
             }
 
-            foreach (var s in entity.GetAllSystems.ToArray())
+            foreach (var s in entity.Systems.ToArray())
             {
                 if (s is T)
                 { entity.RemoveHecsSystem(s); }

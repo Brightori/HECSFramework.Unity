@@ -9,6 +9,6 @@ namespace HECSFramework.Unity
 {
     public interface IPredicateEntityContainer
     {
-        bool IsReady(EntityContainer target, IEntity owner = null);
+        bool IsReady(EntityContainer target, Entity owner = null);
     }
 }

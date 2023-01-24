@@ -48,7 +48,7 @@ namespace HECSFramework.Unity
 
                 foreach (var a in actors)
                 {
-                    foreach (var s in a.Entity.GetAllSystems)
+                    foreach (var s in a.Entity.Systems)
                     {
                         if (s is IStartOnScene startOnScene)
                         {

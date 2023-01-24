@@ -53,7 +53,7 @@ namespace HECSFramework.Unity
             }
         }
 
-        public void InitEntity(IEntity entity)
+        public void InitEntity(Entity entity)
         {
             if (entity.IsInited)
                 throw new Exception("entity was alrdy inited " + entity.ID);
@@ -68,7 +68,7 @@ namespace HECSFramework.Unity
 
             foreach (var s in Systems)
             {
-                if (entity.GetAllSystems.Any(x => x.GetTypeHashCode == s.GetTypeHashCode))
+                if (entity.Systems.Any(x => x.GetTypeHashCode == s.GetTypeHashCode))
                     continue;
 
                 entity.AddHecsSystem(s);

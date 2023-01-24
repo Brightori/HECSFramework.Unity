@@ -6,7 +6,7 @@ namespace HECSFramework.Core
 {
     public static partial class DataHelper
     {
-        public static bool FillEntitiesList<T>(T[] containers, ref List<IEntity> entities, IEntity owner, int worldIndex = 0) where T: EntityContainer 
+        public static bool FillEntitiesList<T>(T[] containers, ref List<Entity> entities, Entity owner, int worldIndex = 0) where T: EntityContainer 
         {
             if (entities.Count > 0)
                 return false;
@@ -28,7 +28,7 @@ namespace HECSFramework.Core
             return true;
         }  
         
-        public static void FillEntitiesList<T>(List<T> containers, ref List<IEntity> entities, IEntity owner, int worldIndex = 0) where T: EntityContainer 
+        public static void FillEntitiesList<T>(List<T> containers, ref List<Entity> entities, Entity owner, int worldIndex = 0) where T: EntityContainer 
         {
             if (entities.Count > 0)
                 return;
@@ -49,9 +49,9 @@ namespace HECSFramework.Core
             }
         } 
         
-        public static void FillEntitiesList<T>(T[] containers, ref IEntity[] entities, IEntity owner, int worldIndex = 0) where T: EntityContainer 
+        public static void FillEntitiesList<T>(T[] containers, ref Entity[] entities, Entity owner, int worldIndex = 0) where T: EntityContainer 
         {
-            entities = new IEntity[containers.Length];
+            entities = new Entity[containers.Length];
 
             for (int i = 0; i < containers.Length; i++)
             {

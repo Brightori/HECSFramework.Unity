@@ -9,7 +9,7 @@ namespace HECSFramework.Unity
         bool TryGetComponent<T>(out T component, bool lookInChildsToo = false);
         bool TryGetComponents<T>(out T[] components);
 
-        IEntity Entity { get; }
+        Entity Entity { get; }
 
         ActorContainer ActorContainer { get; }
         GameObject GameObject { get; }

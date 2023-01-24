@@ -6,7 +6,7 @@ namespace Commands
     public struct ShowUICommand : ICommand, IGlobalCommand
     {
         public int UIViewType;
-        public Action<IEntity> OnUILoad;
+        public Action<Entity> OnUILoad;
         public bool MultyView;
     }
 
@@ -14,7 +14,7 @@ namespace Commands
     {
         public int AdditionalCanvasID;
         public int UIViewType;
-        public Action<IEntity> OnUILoad;
+        public Action<Entity> OnUILoad;
         public bool MultyView;
     }
 }

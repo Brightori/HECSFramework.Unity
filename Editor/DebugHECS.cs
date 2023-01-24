@@ -68,7 +68,7 @@ public class DebugHECS : OdinEditorWindow
                 drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
             }
 
-            foreach (var s in e.GetAllSystems)
+            foreach (var s in e.Systems)
             {
                 drawEntity.drawSystems.Add(new DrawSystem { Name = s.GetType().Name });
             }

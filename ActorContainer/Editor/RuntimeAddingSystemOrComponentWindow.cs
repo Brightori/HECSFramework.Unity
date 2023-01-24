@@ -12,7 +12,7 @@ namespace HECSFramework.HECS.Unity.ActorContainer
         [Searchable, HideReferenceObjectPicker]
         public List<BaseNode> bluePrints = new(64);
 
-        public void Init(List<IEntity> entities, TypeOfBluePrint type)
+        public void Init(List<Entity> entities, TypeOfBluePrint type)
         {
             bluePrints.Clear();
             var bluePrintProvider = new BluePrintsProvider();
@@ -36,9 +36,9 @@ namespace HECSFramework.HECS.Unity.ActorContainer
             public string Name;
 
             protected Type neededType;
-            protected List<IEntity> entities;
+            protected List<Entity> entities;
 
-            public BaseNode(string name, Type neededType, List<IEntity> entities)
+            public BaseNode(string name, Type neededType, List<Entity> entities)
             {
                 Name = name;
                 this.neededType = neededType;
@@ -51,7 +51,7 @@ namespace HECSFramework.HECS.Unity.ActorContainer
         [Serializable]
         public class ComponentNode : BaseNode
         {
-            public ComponentNode(string name, Type neededComponent, List<IEntity> entities) : base(
+            public ComponentNode(string name, Type neededComponent, List<Entity> entities) : base(
                 name, neededComponent, entities)
             {
             }
@@ -77,7 +77,7 @@ namespace HECSFramework.HECS.Unity.ActorContainer
         [Serializable]
         public class SystemNode : BaseNode
         {
-            public SystemNode(string name, Type neededComponent, List<IEntity> entities) : base(name,
+            public SystemNode(string name, Type neededComponent, List<Entity> entities) : base(name,
                 neededComponent, entities)
             {
             }

@@ -48,7 +48,7 @@ namespace HECSFramework.Unity
             }
         }
 
-        public override void Init(IEntity entity, bool pure = false)
+        public override void Init(Entity entity, bool pure = false)
         {
             InitActorReferenceContainer();
 

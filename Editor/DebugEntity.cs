@@ -66,9 +66,9 @@ namespace HECSFramework.Unity.Editor
         public bool IsInited;
         public bool IsPaused;
 
-        private readonly IEntity entity;
+        private readonly Entity entity;
 
-        public ActorPresentation(IEntity entity)
+        public ActorPresentation(Entity entity)
         {
             this.entity = entity;
             Guid = entity.GUID;
@@ -89,7 +89,7 @@ namespace HECSFramework.Unity.Editor
         private void UpdateSystems()
         {
             Systems.Clear();
-            foreach (var s in entity.GetAllSystems)
+            foreach (var s in entity.Systems)
             {
                 if (s != null)
                     Systems.Add(s);
@@ -108,7 +108,7 @@ namespace HECSFramework.Unity.Editor
         private void HandleAddingComponent(List<IComponent> list)
         {
             var window = EditorWindow.GetWindow<RuntimeAddingSystemOrComponentWindow>();
-            window.Init(new List<IEntity> { entity }, TypeOfBluePrint.Component);
+            window.Init(new List<Entity> { entity }, TypeOfBluePrint.Component);
             UpdateComponents();
         }
         private void HandleRemovingComponent(List<IComponent> list, IComponent componentToRemove)
@@ -124,7 +124,7 @@ namespace HECSFramework.Unity.Editor
         private void HandleAddingSystem(List<ISystem> list)
         {
             var window = EditorWindow.GetWindow<RuntimeAddingSystemOrComponentWindow>();
-            window.Init(new List<IEntity> { entity }, TypeOfBluePrint.System);
+            window.Init(new List<Entity> { entity }, TypeOfBluePrint.System);
             UpdateSystems();
         }
     }

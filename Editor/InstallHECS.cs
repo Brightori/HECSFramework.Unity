@@ -206,7 +206,7 @@ namespace Predicates
     [Serializable][Documentation(Doc.NONE, """")]
     public sealed class #SCRIPTNAME# : IPredicate
     {
-        public bool IsReady(IEntity target, IEntity owner = null)
+        public bool IsReady(Entity target, Entity owner = null)
         {
             return false;
         }
@@ -378,7 +378,7 @@ namespace HECSFrameWork.Components
             template.Add(new TabSimpleSyntax(1, "public class GameController : BaseGameController"));
             template.Add(new LeftScopeSyntax(1));
             template.Add(new TabSimpleSyntax(2, "[SerializeField] private ActorContainer[] additionalGlobalEntities = default;"));
-            template.Add(new TabSimpleSyntax(2, "private List<IEntity> additionalEntities = new List<IEntity>(8);"));
+            template.Add(new TabSimpleSyntax(2, "private List<Entity> additionalEntities = new List<Entity>(8);"));
             template.Add(new ParagraphSyntax());
             template.Add(new TabSimpleSyntax(2, "public override void BaseAwake()"));
             template.Add(new LeftScopeSyntax(2));

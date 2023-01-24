@@ -53,7 +53,7 @@ namespace Systems
                 iv.InitAferView();
             }
 
-            foreach (var s in Owner.GetAllSystems)
+            foreach (var s in Owner.Systems)
             {
                 if (s is IInitAferView initAferView)
                 {

@@ -9,13 +9,13 @@ namespace HECSFramework.Core
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public partial class World
     {
-        partial void ComponentAdditionalProcessing(IComponent component, IEntity owner)
+        partial void ComponentAdditionalProcessing(IComponent component, Entity owner)
         {
             if (component is IHaveActor haveActor)
                 haveActor.Actor = owner.GetComponent<ActorProviderComponent>().Actor;
         }
 
-        partial void SystemAdditionalProcessing(ISystem system, IEntity owner)
+        partial void SystemAdditionalProcessing(ISystem system, Entity owner)
         {
             if (system is IHaveActor haveActor)
                 haveActor.Actor = owner.GetComponent<ActorProviderComponent>().Actor;

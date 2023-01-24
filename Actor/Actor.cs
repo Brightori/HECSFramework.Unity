@@ -20,7 +20,7 @@ namespace HECSFramework.Unity
         public string ContainerID => entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
 
-        public IEntity Entity => entity;
+        public Entity Entity => entity;
 
         public void Command<T>(T command) where T : struct, ICommand => entity.Command(command);
 
@@ -65,7 +65,7 @@ namespace HECSFramework.Unity
             entity.Dispose();
         }
 
-        public bool Equals(IEntity other) => entity.Equals(other);
+        public bool Equals(Entity other) => entity.Equals(other);
 
         public void GenerateGuid()
         {

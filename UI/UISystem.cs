@@ -20,8 +20,8 @@ namespace Systems
 
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
 
-        private HECSList<IEntity> uiCurrents;
-        private HECSList<IEntity> additionalCanvases;
+        private HECSList<Entity> uiCurrents;
+        private HECSList<Entity> additionalCanvases;
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
@@ -93,12 +93,12 @@ namespace Systems
             SpawnUIFromBluePrint(spawn, command.OnUILoad, mainCanvasTransform.Transform);
         }
 
-        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<IEntity> action, Transform transform)
+        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<Entity> action, Transform transform)
         {
             Addressables.InstantiateAsync(spawn.UIActor, transform).Completed += a => LoadUI(a, action);
         }
 
-        public async Task<IEntity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
+        public async Task<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
         {
             while (!isReady)
                 await Task.Delay(50);
@@ -152,7 +152,7 @@ namespace Systems
             return uIBluePrints.FirstOrDefault(x => x.UIType.Id == uiType);
         }
 
-        private bool TryGetFromCurrentUI(int uiType, out IEntity uiEntity)
+        private bool TryGetFromCurrentUI(int uiType, out Entity uiEntity)
         {
             uiEntity = null;
 
@@ -173,7 +173,7 @@ namespace Systems
             return false;
         }
 
-        private void LoadUI(AsyncOperationHandle<GameObject> obj, Action<IEntity> onUILoad)
+        private void LoadUI(AsyncOperationHandle<GameObject> obj, Action<Entity> onUILoad)
         {
             if (obj.Result.TryGetComponent<UIActor>(out var actor))
             {
@@ -286,7 +286,7 @@ namespace Systems
                 return;
             }
 
-            IEntity[] array = uiCurrents.Data;
+            Entity[] array = uiCurrents.Data;
             var count = uiCurrents.Count;
 
             for (int i = 0; i < count; i++)
@@ -307,7 +307,7 @@ namespace Systems
                 return;
             }
 
-            IEntity[] array = uiCurrents.Data;
+            Entity[] array = uiCurrents.Data;
             var count = uiCurrents.Count;
 
             for (int i = 0; i < count; i++)
