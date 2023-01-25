@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using HECSFramework.Core;
+using HECSFramework.Core.Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
@@ -26,6 +27,11 @@ namespace HECSFramework.Unity
                 return;
 
             inAction = true;
+
+            if (actorContainer is ActorReferenceContainer referenceContainer)
+            {
+                ReflectionHelpers.SetPrivateFieldValue(referenceContainer, "isInited", false);
+            }
 
             foreach (var componentBP in presetContainer.ComponentsBluePrints)
             {

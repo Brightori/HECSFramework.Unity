@@ -32,6 +32,9 @@ namespace HECSFramework.Unity
         private const char Split = '|';
         private const string AnimParametersMap = "AnimParametersMap.cs";
 
+        private HashSet<string> animParameters = new HashSet<string>(16);
+        private HashSet<string> animStates = new HashSet<string>(16);
+
 
         [OnValueChanged("UpdateAnimators")]
         public AnimatorController[] animators = new AnimatorController[0];
@@ -264,6 +267,11 @@ namespace HECSFramework.Unity
 
             foreach (var p in animator.parameters)
             {
+                //if (animParameters.Contains(p.name))
+                //    continue;
+
+                //animParameters.Add(p.name);
+
                 switch (p.type)
                 {
                     case AnimatorControllerParameterType.Float:
@@ -444,7 +452,7 @@ namespace HECSFramework.Unity
 
                     foreach (var c in blendTree.children)
                     {
-                        var name = animatorState.name + "_BlendTree_" + c.motion.name;
+                        var name = animatorState.name.Replace(" ", "_") + "_" + c.motion.name;
                         var blendTreeStatefilePath = StateBluePrintsPath + name + ".asset";
 
                         if (!File.Exists(Application.dataPath + blendTreeStatefilePath))
