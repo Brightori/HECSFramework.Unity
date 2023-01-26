@@ -17,6 +17,7 @@ namespace HECSFramework.Unity
         public void Init(World world = null);
         void Command<T>(T command) where T : struct, ICommand;
 
+        Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false);
         void DestroyActorDisposeEntity();
         void RemoveActorToPool();
     }

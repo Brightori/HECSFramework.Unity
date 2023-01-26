@@ -136,5 +136,10 @@ namespace HECSFramework.Unity
         {
             throw new NotImplementedException();
         }
+
+        public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
