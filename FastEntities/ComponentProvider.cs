@@ -8,7 +8,7 @@ namespace HECSFramework.Unity
         public abstract void AddComponent(FastEntity fastEntity);
     }
 
-    public class FastComponentMonoProvider<T> : FastComponentMonoProvider where T :struct, IData
+    public class FastComponentMonoProvider<T> : FastComponentMonoProvider where T :struct, IFastComponent
     {
         public T Component;
 

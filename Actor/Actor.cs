@@ -26,32 +26,21 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
-            entity = new Entity(EntityManager.Worlds.Data[actorInitModule.WorldIndex], gameObject.name);
-            entity.SetGuid(actorInitModule.Guid);
-            entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
-
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
-            {
-                if (actorContainer != null && !entity.IsInited)
-                    actorContainer.Init(this.entity);
-            }
+                Init();
         }
 
-        public void InitWithContainer()
+        public void Init()
         {
-            Awake();
-            Init();
+            Init(EntityManager.Default);
+            actorContainer.Init(entity);
         }
 
-        public void Init(World world = null)
+        public void Init(World world)
         {
-            entity.Init(world);
-        }
-
-        public void InitWithContainer(ActorContainer entityContainer)
-        {
-            actorContainer = entityContainer;
-            InitWithContainer();
+            entity = world.PullEntity(gameObject.name);
+            entity.GUID = actorInitModule.Guid;
+            entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
         }
 
         protected virtual void Start()
