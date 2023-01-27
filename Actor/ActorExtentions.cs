@@ -11,9 +11,6 @@ namespace HECSFramework.Unity
 {
     public static partial class ActorExtentions
     {
-        private static HECSMask containerMask = HMasks.GetMask<ActorContainerID>();
-        private static HECSMask viewReferenceMask = HMasks.GetMask<ActorContainerID>();
-
         public static bool IsAlive(this IActor actor)
         {
             return actor != null && actor.Entity.IsAlive();

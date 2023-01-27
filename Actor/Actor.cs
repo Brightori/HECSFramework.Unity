@@ -127,7 +127,7 @@ namespace HECSFramework.Unity
             actorInitModule.SetGuid(Guid.NewGuid());
         }
 
-        public void DestroyActorDisposeEntity()
+        public void HecsDestroy()
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,4 @@
 ﻿using HECSFramework.Core;
-using TMPro;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -18,7 +17,15 @@ namespace HECSFramework.Unity
         void Command<T>(T command) where T : struct, ICommand;
 
         Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false);
-        void DestroyActorDisposeEntity();
+        
+        /// <summary>
+        /// Destroy actor and dispose entity
+        /// </summary>
+        void HecsDestroy();
+        
+        /// <summary>
+        /// we process this case by entity
+        /// </summary>
         void RemoveActorToPool();
     }
 
