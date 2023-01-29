@@ -26,27 +26,30 @@ namespace HECSFramework.Unity
 
         private void Awake()
         {
-            if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
-                Init();
+            if (actorInitModule.InitActorMode == InitActorMode.InitOnAwake)
+                Init(EntityManager.Worlds.Data[actorInitModule.WorldIndex], true, true);
         }
 
-        public void Init()
+        public void Init(World world = null, bool initEntity = true, bool initWithContainer = false)
         {
-            Init(EntityManager.Default);
-            actorContainer.Init(entity);
-        }
+            if (world == null)
+                world = EntityManager.Default;
 
-        public void Init(World world)
-        {
-            entity = world.PullEntity(gameObject.name);
+            entity = world.GetEntityFromPool(gameObject.name);
             entity.GUID = actorInitModule.Guid;
             entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+
+            if (initWithContainer)
+                actorContainer.Init(entity);
+
+            if (initEntity)
+                entity.Init();
         }
 
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
-                Init();
+                Init(EntityManager.Worlds.Data[actorInitModule.WorldIndex], true, true);
         }
 
         public void Dispose()
@@ -102,6 +105,39 @@ namespace HECSFramework.Unity
             return entity.Equals(other);
         }
 
+       
+
+        protected virtual void Reset()
+        {
+            actorInitModule.SetID(gameObject.name);
+            actorInitModule.SetGuid(Guid.NewGuid());
+        }
+
+        public void HecsDestroy()
+        {
+            entity.Dispose();
+            Destroy(gameObject);
+        }
+
+        public void RemoveActorToPool()
+        {
+            entity.World.GetSingleSystem<PoolingSystem>().ReturnActorToPool(this);
+        }
+
+        public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)
+        {
+            if (isAdditive)
+                container.Init(entity);
+            else
+            {
+                entity.Dispose();
+                entity = world.GetEntityFromPool(gameObject.name);
+                container.Init(entity);
+            }
+
+            return entity;
+        }
+
         public void InjectContainer(EntityContainer container, bool isAdditive = false)
         {
             var components = container.GetComponentsInstances();
@@ -119,27 +155,6 @@ namespace HECSFramework.Unity
                 components.Add(additional);
 
             entity.Inject(components, systems, isAdditive);
-        }
-
-        protected virtual void Reset()
-        {
-            actorInitModule.SetID(gameObject.name);
-            actorInitModule.SetGuid(Guid.NewGuid());
-        }
-
-        public void HecsDestroy()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveActorToPool()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)
-        {
-            throw new NotImplementedException();
         }
     }
 }

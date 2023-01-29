@@ -246,6 +246,12 @@ namespace Systems
             MonoBehaviour.Destroy(actor.gameObject);
         }
 
+
+        public void ReturnActorToPool(Actor actor)
+        {
+            throw new NotImplementedException();
+        }
+
         public void ReleaseView(IPoolableView poolableView)
         {
             poolableView.Stop();

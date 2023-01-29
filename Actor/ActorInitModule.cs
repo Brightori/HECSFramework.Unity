@@ -69,6 +69,7 @@ namespace HECSFramework.Unity
     {
         Default = 0,
         InitOnStart = 1,
+        InitOnAwake = 3,
         TryToLoadOrInitOnStart = 2,
     }
 
