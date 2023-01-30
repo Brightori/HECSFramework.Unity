@@ -4,6 +4,7 @@ using System.Linq;
 using Components;
 using HECSFramework.Core;
 using NUnit.Framework;
+using Systems;
 using UnityEngine.TestTools;
 
 public class TestsHecs
@@ -75,5 +76,30 @@ public class TestsHecs
             e.HecsDestroy();
 
         Assert.IsTrue(list.All(x => x.IsAlive == false && x.Components.Count == 0 && x.Systems.Count == 0));
+    }
+
+    [Test]
+    public void TestReactiveComponents()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.Init();
+        check.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        var system = check.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(
+               system.GenericGlobalAdd
+            && system.GenericGlobalRemove
+            && system.GenericLocalAdd
+            && system.GenericLocalRemove
+            && system.ReactGlobalAdd
+            && system.ReactGlobalRemove
+            && system.ReactComponentLocalAdd
+            && system.ReactComponentLocalRemove);
     }
 }

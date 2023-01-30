@@ -12,13 +12,13 @@ namespace HECSFramework.Core
         partial void ComponentAdditionalProcessing(IComponent component, Entity owner)
         {
             if (component is IHaveActor haveActor)
-                haveActor.Actor = owner.GetOrAddComponent<ActorProviderComponent>().Actor;
+                haveActor.Actor = owner.GetComponent<ActorProviderComponent>().Actor;
         }
 
         partial void SystemAdditionalProcessing(ISystem system, Entity owner)
         {
             if (system is IHaveActor haveActor)
-                haveActor.Actor = owner.GetOrAddComponent<ActorProviderComponent>().Actor;
+                haveActor.Actor = owner.GetComponent<ActorProviderComponent>().Actor;
         }
     }
 }
