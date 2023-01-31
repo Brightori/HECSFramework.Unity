@@ -1,0 +1,112 @@
+﻿using Components;
+using HECSFramework.Core;
+using NUnit.Framework;
+using Systems;
+
+public class ReactComponentTests
+{
+    [Test]
+    public void ReactGenericComponentGlobal()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.Init();
+        check.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveComponent<TestReactComponent>();
+        var system = check.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(system.GenericGlobalAdd && system.GenericGlobalRemove);
+    }
+
+    [Test]
+    public void ReactGenericComponentLocal()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.Init();
+        check.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveComponent<TestReactComponent>();
+        var system = check.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(system.GenericLocalAdd && system.GenericLocalRemove);
+    }
+
+    [Test]
+    public void ReactComponentGlobal()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        var check2 = new Entity("Test");
+        
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.Init();
+        
+        check2.Init();
+        check2.AddHecsSystem(new StressTestReactsSystem());
+
+        check.AddComponent(new TestReactComponent());
+        check2.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveComponent<TestReactComponent>();
+        check2.RemoveComponent<TestReactComponent>();
+        
+        var system = check.GetSystem<StressTestReactsSystem>();
+        var system2 = check2.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(system.ReactGlobalAdd && system.ReactGlobalRemove && system2.ReactGlobalAdd && system2.ReactGlobalRemove);
+    }
+
+    [Test]
+    public void ReactComponentGlobalWithRemovingListener()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        var sys = new StressTestReactsSystem();
+        check.AddHecsSystem(sys);
+        check.Init();
+
+        check.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveHecsSystem(sys);
+        check.RemoveComponent<TestReactComponent>();
+
+        var checkDeletedSys = check.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(checkDeletedSys == null && sys.ReactGlobalAdd && !sys.ReactGlobalRemove);
+    }
+
+
+    [Test]
+    public void ReactComponentLocal()
+    {
+        EntityManager.RecreateInstance();
+        var check = new Entity("Test");
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.Init();
+        check.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveComponent<TestReactComponent>();
+        var system = check.GetSystem<StressTestReactsSystem>();
+
+        Assert.IsTrue(system.ReactComponentLocalAdd && system.ReactComponentLocalRemove);
+    }
+}

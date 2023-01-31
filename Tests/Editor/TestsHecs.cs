@@ -1,15 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Components;
 using HECSFramework.Core;
 using NUnit.Framework;
 using Systems;
-using UnityEngine.TestTools;
 
-public class TestsHecs
+public class EntityTests
 {
-    // A Test behaves as an ordinary method
     [Test]
     public void CreateEntity()
     {
@@ -20,6 +17,23 @@ public class TestsHecs
         entity.Init();
 
         Assert.IsTrue(entity.GetComponent<ActorContainerID>().ID == "test" && entity.IsAlive && entity.IsInited && entity.IsDirty);
+    }
+
+    [Test]
+    public void ReactEntity()
+    {
+        EntityManager.RecreateInstance();
+        var entity = new Entity();
+        entity.AddHecsSystem(new StressTestReactsSystem());
+        entity.Init();
+
+        var entity2 = new Entity();
+        entity2.Init();
+        entity2.HecsDestroy();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        var sys = entity.GetSystem<StressTestReactsSystem>();
+        Assert.IsTrue(sys.EntityAdded && sys.EntityRemoved);
     }
 
     [Test]
@@ -79,27 +93,19 @@ public class TestsHecs
     }
 
     [Test]
-    public void TestReactiveComponents()
+    public void Migration()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
+        EntityManager.AddWorld();
+        var check = new Entity("ReactEntity");
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
-        check.AddComponent(new TestReactComponent());
 
-        EntityManager.Default.GlobalUpdateSystem.Update();
-        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+        var check2 = new Entity("MigrateEntity");
+        check2.AddComponent(new TestReactComponent());
+        check2.Init();
 
-        var system = check.GetSystem<StressTestReactsSystem>();
-
-        Assert.IsTrue(
-               system.GenericGlobalAdd
-            && system.GenericGlobalRemove
-            && system.GenericLocalAdd
-            && system.GenericLocalRemove
-            && system.ReactGlobalAdd
-            && system.ReactGlobalRemove
-            && system.ReactComponentLocalAdd
-            && system.ReactComponentLocalRemove);
+        EntityManager.Worlds.Data[1].MigrateEntityToWorld(check2);
+        Assert.IsTrue(check2.WorldId == 1 && check.GetSystem<StressTestReactsSystem>().ReactGlobalRemove == true);
     }
 }

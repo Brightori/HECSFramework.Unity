@@ -6,7 +6,8 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
-    public sealed class StressTestReactsSystem : BaseSystem, IReactGenericLocalComponent<ICounter>, IReactGenericGlobalComponent<ICounter>, IReactComponentGlobal<TestReactComponent>, IReactComponentLocal<TestReactComponent>
+    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity,
+        IReactGenericLocalComponent<ICounter>, IReactGenericGlobalComponent<ICounter>, IReactComponentGlobal<TestReactComponent>, IReactComponentLocal<TestReactComponent>
     {
         public bool ReactGlobalAdd;
         public bool ReactGlobalRemove;
@@ -20,17 +21,20 @@ namespace Systems
         public bool GenericLocalAdd;
         public bool GenericLocalRemove;
 
+        public bool EntityAdded;
+        public bool EntityRemoved;
+
         public Guid ListenerGuid => SystemGuid;
 
         public void ComponentReact(TestReactComponent component, bool isAdded)
         {
-            if (component == null || !component.IsAlive)
+            if (component == null)
                 throw new Exception("Component null or not alive");
 
             if (isAdded)
-                ReactGlobalAdd = true;
+                ReactComponentLocalAdd = true;
             else
-                ReactGlobalRemove = true;
+                ReactComponentLocalRemove = true;
         }
 
         public void ComponentReact(ICounter component, bool isAdded)
@@ -46,7 +50,7 @@ namespace Systems
 
         public void ComponentReactGlobal(TestReactComponent component, bool isAdded)
         {
-            if (component == null || !component.IsAlive)
+            if (component == null)
                 throw new Exception("Component null or not alive");
 
             if (isAdded)
@@ -64,6 +68,14 @@ namespace Systems
                 GenericLocalAdd = true;
             else
                 GenericLocalRemove = true;
+        }
+
+        public void EntityReact(Entity entity, bool isAdded)
+        {
+            if (isAdded)
+                EntityAdded = true;
+            else
+                EntityRemoved = true;
         }
 
         public override void InitSystem()
