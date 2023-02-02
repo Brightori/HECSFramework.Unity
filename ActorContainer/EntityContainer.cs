@@ -166,12 +166,10 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                var unpackComponent = component.GetComponentInstance();
-
-                if (!pure && unpackComponent is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
+                if (!pure && component.GetHECSComponent is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
                     continue;
 
-                entity.AddComponent(unpackComponent);
+                component.LoadFromData(component.GetOrAddComponent(entity));
             }
         }
 
@@ -185,12 +183,10 @@ namespace HECSFramework.Unity
                     continue;
                 }
 
-                var unpackSys = system.GetSystemInstance();
-
-                if (!pure && unpackSys is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
+                if (!pure && system.GetSystem is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
                     continue;
 
-                entity.AddHecsSystem(unpackSys);
+                entity.AddHecsSystem(entity.World.GetSystemFromPool(system.GetTypeIndex()));
             }
         }
 

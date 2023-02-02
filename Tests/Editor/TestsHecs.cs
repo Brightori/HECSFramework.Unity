@@ -9,9 +9,6 @@ using UnityEditor;
 
 public class EntityTests
 {
-   
-
-
     [Test]
     public void CreateEntity()
     {

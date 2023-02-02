@@ -19,7 +19,7 @@ namespace Systems
         {
             foreach (var abilityContainer in abilitiesHolderComponent.AbilitiesContainers)
             {
-                var newAbil = abilityContainer.GetEntity();
+                var newAbil = abilityContainer.GetEntity(world: Owner.World);
                 newAbil.GetOrAddComponent<AbilityOwnerComponent>().AbilityOwner = Owner;
                 abilitiesHolderComponent.AddAbility(newAbil);
             }

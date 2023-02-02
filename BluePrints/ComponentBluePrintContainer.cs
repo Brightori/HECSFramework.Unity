@@ -14,6 +14,9 @@ namespace HECSFramework.Unity
         public virtual bool IsOverride { get; set; }
         public virtual bool IsColorNeeded { get; set; }
 
+        private string data;
+        private bool dataReady;
+
         public override bool Equals(object obj)
         {
             if (obj is ComponentBluePrint print) 
@@ -36,6 +39,20 @@ namespace HECSFramework.Unity
         {
             return HashCode.Combine(base.GetHashCode(), GetHECSComponent);
         }
+
+        public void LoadFromData(IComponent component)
+        {
+            if (dataReady)
+                JsonUtility.FromJsonOverwrite(data, component);
+            else
+            {
+                data = JsonUtility.ToJson(this.GetHECSComponent);
+                dataReady = true;
+                JsonUtility.FromJsonOverwrite(data, component);
+            }
+        }
+
+        public abstract IComponent GetOrAddComponent(Entity entity); 
     }
     
     public class ComponentBluePrintContainer<T> : ComponentBluePrint, IEditorInit where T : class, IComponent, new()
@@ -92,6 +109,11 @@ namespace HECSFramework.Unity
 
         void IEditorInit.Init()
             => component = new T();
+
+        public override IComponent GetOrAddComponent(Entity entity)
+        {
+            return entity.GetOrAddComponent<T>();
+        }
     }
 
     public interface IEditorInit

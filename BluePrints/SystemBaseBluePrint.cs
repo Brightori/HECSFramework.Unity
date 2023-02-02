@@ -1,5 +1,4 @@
 ﻿using HECSFramework.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -13,11 +12,20 @@ namespace HECSFramework.Unity
 
         public abstract ISystem GetSystem { get; }
 
+        private int TypeIndex = 0;
+
         public ISystem GetSystemInstance()
         {
             var t = Instantiate(this);
             return t.GetSystem;
         }
 
+        public int GetTypeIndex()
+        {
+            if (TypeIndex == 0)
+                TypeIndex = IndexGenerator.GetIndexForType(GetSystem.GetType());
+
+            return TypeIndex;
+        }
     }
 }

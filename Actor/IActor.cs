@@ -13,7 +13,7 @@ namespace HECSFramework.Unity
         ActorContainer ActorContainer { get; }
         GameObject GameObject { get; }
 
-        public void Init(World world = null, bool initEntity = true, bool initWithContainer = false);
+        public void Init(World world = null, bool initEntity = false, bool initWithContainer = false);
         void Command<T>(T command) where T : struct, ICommand;
 
         Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false);
