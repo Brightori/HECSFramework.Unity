@@ -1,4 +1,5 @@
 using System;
+using Commands;
 using Components;
 using HECSFramework.Core;
 
@@ -6,8 +7,11 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
-    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity,
-        IReactGenericLocalComponent<ICounter>, IReactGenericGlobalComponent<ICounter>, IReactComponentGlobal<TestReactComponent>, IReactComponentLocal<TestReactComponent>
+    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IReactCommand<StressTestLocalCommand>, IReactGlobalCommand<StressTestGlobalCommand>,
+        IReactGenericLocalComponent<ICounter>, 
+        IReactGenericGlobalComponent<ICounter>, 
+        IReactComponentGlobal<TestReactComponent>, 
+        IReactComponentLocal<TestReactComponent>
     {
         public bool ReactGlobalAdd;
         public bool ReactGlobalRemove;
@@ -24,7 +28,20 @@ namespace Systems
         public bool EntityAdded;
         public bool EntityRemoved;
 
+        public bool GlobalReact;
+        public bool LocalReact;
+
         public Guid ListenerGuid => SystemGuid;
+
+        public void CommandGlobalReact(StressTestGlobalCommand command)
+        {
+            GlobalReact = true;
+        }
+
+        public void CommandReact(StressTestLocalCommand command)
+        {
+            LocalReact = true;
+        }
 
         public void ComponentReact(TestReactComponent component, bool isAdded)
         {
@@ -89,5 +106,16 @@ namespace Components
     public sealed class TestReactComponent : BaseComponent, ICounter
     {
         public int Id { get; }
+    }
+}
+
+namespace Commands
+{
+    public struct StressTestGlobalCommand : IGlobalCommand
+    {
+    }
+
+    public struct StressTestLocalCommand : ICommand
+    {
     }
 }
