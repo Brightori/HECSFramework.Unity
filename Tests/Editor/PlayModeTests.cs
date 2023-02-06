@@ -7,6 +7,7 @@ using Sirenix.OdinInspector.Editor;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class PlayModeTests : OdinEditorWindow
 {
@@ -57,30 +58,24 @@ public class PlayModeTests : OdinEditorWindow
             && !checkComponent.IsAlive);
     }
 
-    [Button]
-    public async void CreateFromContainerTest()
+    public void CreateFromContainerTest(IActor actor)
     {
-        if (!CheckContainer())
-            return;
-
-        var actor = await EntityContainer.GetActor(needLoadContainer: false);
         actor.Init(initEntity: false);
         EntityContainer.Init(actor.Entity);
         actor.Entity.Init();
     }
 
     [Button]
-    public void SpawnAndRemove500Actors()
+    public async void SpawnAndRemove500Actors()
     {
         if (!CheckContainer())
             return;
 
-        for (int i = 0; i < 500; i++)
-        {
-            CreateFromContainerTest();
-        }
 
-        UniTask.Delay(2000);
+        await SpawnActors(500);
+  
+        await UniTask.Delay(2000);
+
         var filter = EntityManager.Default.GetFilter<CheckTwoComponent>();
         filter.ForceUpdateFilter();
 
@@ -90,16 +85,24 @@ public class PlayModeTests : OdinEditorWindow
         }
     }
 
+    private async UniTask SpawnActors(int Count)
+    {
+        var actor = await Addressables.LoadAssetAsync<GameObject>(EntityContainer.GetComponent<ViewReferenceComponent>().ViewReference).Task;
+
+        for (int i = 0; i < Count; i++)
+        {
+            var newActor = Instantiate(actor).GetComponent<Actor>();
+            CreateFromContainerTest(newActor);
+        }
+    }
+
     [Button]
-    public void Spawn5000Actors()
+    public async void Spawn5000Actors()
     {
         if (!CheckContainer())
             return;
 
-        for (int i = 0; i < 5000; i++)
-        {
-            CreateFromContainerTest();
-        }
+        await SpawnActors(5000);
     }
 
 
