@@ -107,7 +107,7 @@ public class EntityTests
         check2.AddComponent(new TestReactComponent());
         check2.Init();
 
-        EntityManager.Worlds.Data[1].MigrateEntityToWorld(check2);
+        EntityManager.Worlds[1].MigrateEntityToWorld(check2);
         Assert.IsTrue(check2.WorldId == 1 && check.GetSystem<StressTestReactsSystem>().ReactGlobalRemove == true);
     }
 }

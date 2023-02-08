@@ -27,7 +27,7 @@ namespace HECSFramework.Unity
         private void Awake()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnAwake)
-                Init(EntityManager.Worlds.Data[actorInitModule.WorldIndex], true, true);
+                Init(EntityManager.Worlds[actorInitModule.WorldIndex], true, true);
         }
 
         public void Init(World world = null, bool initEntity = true, bool initWithContainer = false)
@@ -49,7 +49,7 @@ namespace HECSFramework.Unity
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
-                Init(EntityManager.Worlds.Data[actorInitModule.WorldIndex], true, true);
+                Init(EntityManager.Worlds[actorInitModule.WorldIndex], true, true);
         }
 
         public void Dispose()
@@ -67,7 +67,7 @@ namespace HECSFramework.Unity
 
         private void OnDestroy()
         {
-            if (entity.IsAlive)
+            if (entity.IsAlive && EntityManager.IsAlive)
                 entity.Dispose();
         }
 

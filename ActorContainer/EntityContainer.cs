@@ -27,6 +27,21 @@ namespace HECSFramework.Unity
 
         public int ContainerIndex => containerIndex;
 
+        public string CachedName 
+        {
+
+            get 
+            { 
+                if (string.IsNullOrEmpty(cachedName))
+                    cachedName = name;
+
+                return cachedName;
+            }
+        }
+
+        [NonSerialized]
+        private string cachedName;
+
         protected bool isEditorTimeChanged;
 
         public virtual void OnEnable()
@@ -123,7 +138,7 @@ namespace HECSFramework.Unity
 
         public virtual void Init(Entity entity, bool pure = false)
         {
-            entity.AddComponent(new ActorContainerID { ID = name });
+            entity.AddComponent(new ActorContainerID { ID = CachedName });
             InitComponents(entity, holder.components, pure);
             InitSystems(entity, holder.systems, pure);
         }

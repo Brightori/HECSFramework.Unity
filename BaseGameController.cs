@@ -26,7 +26,7 @@ namespace HECSFramework.Unity
         private Entity sceneManager;
         private Entity inputManager;
 
-        private HECSList<World> worlds;
+        private World[] worlds;
         private HECSList<World> waitForStart = new HECSList<World>();
         private HECSList<World> waitForLateStart = new HECSList<World>();
 
@@ -40,7 +40,7 @@ namespace HECSFramework.Unity
             updateSystem = EntityManager.Default.GlobalUpdateSystem;
 
             foreach (var w in EntityManager.Worlds)
-                w.GlobalUpdateSystem.InitCustomUpdate(this);
+                w?.GlobalUpdateSystem.InitCustomUpdate(this);
 
             worlds = EntityManager.Worlds;
 
@@ -100,7 +100,7 @@ namespace HECSFramework.Unity
             BaseStart();
 
             foreach (var w in EntityManager.Worlds)
-                w.GlobalUpdateSystem.Start();
+                w?.GlobalUpdateSystem.Start();
         }
 
         public void LateStart()
@@ -109,7 +109,7 @@ namespace HECSFramework.Unity
                 startSystem.StartGame();
 
             foreach (var w in EntityManager.Worlds)
-                w.GlobalUpdateSystem.LateStart();
+                w?.GlobalUpdateSystem.LateStart();
         }
 
         private void Update()
@@ -134,29 +134,29 @@ namespace HECSFramework.Unity
                 }
             }
 
-            for (int i = 0; i < worlds.Count; i++)
+            for (int i = 0; i < worlds.Length; i++)
             {
-                worlds.Data[i].GlobalUpdateSystem.Update();
-                worlds.Data[i].GlobalUpdateSystem.UpdateDelta(Time.deltaTime);
+                worlds[i]?.GlobalUpdateSystem.Update();
+                worlds[i]?.GlobalUpdateSystem.UpdateDelta(Time.deltaTime);
             }
         }
 
         private void LateUpdate()
         {
-            var worldsCount = worlds.Count;
+            var worldsCount = worlds.Length;
             for (int i = 0; i < worldsCount; i++)
             {
-                worlds.Data[i].GlobalUpdateSystem.LateUpdate();
-                worlds.Data[i].GlobalUpdateSystem.FinishUpdate?.Invoke();
+                worlds[i]?.GlobalUpdateSystem.LateUpdate();
+                worlds[i]?.GlobalUpdateSystem.FinishUpdate?.Invoke();
             }
         }
 
         private void FixedUpdate()
         {
-            var worldsCount = worlds.Count;
+            var worldsCount = worlds.Length;
             for (int i = 0; i < worldsCount; i++)
             {
-                worlds.Data[i].GlobalUpdateSystem.FixedUpdate();
+                worlds[i]?.GlobalUpdateSystem.FixedUpdate();
             }
         }
 

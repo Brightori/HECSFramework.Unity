@@ -46,10 +46,13 @@ public class DebugHECS : OdinEditorWindow
         if (!EntityManager.IsAlive)
             return;
 
-        if (worldIndex >= EntityManager.Worlds.Count)
+        if (worldIndex >= EntityManager.Worlds.Length)
             return;
 
-        foreach (var e in EntityManager.Worlds.Data[worldIndex].Entities)
+        if (EntityManager.Worlds[worldIndex] == null)
+            return;
+
+        foreach (var e in EntityManager.Worlds[worldIndex].Entities)
         {
             if (e == null)
                 continue;

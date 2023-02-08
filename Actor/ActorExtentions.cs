@@ -40,10 +40,10 @@ namespace HECSFramework.Unity
 
         public static Entity GetEntity(this EntityContainer entityContainer, World world = null, bool needInit = true)
         {
-            var entity = world.GetEntityFromPool(entityContainer.name);
+            var entity = world.GetEntityFromPool(entityContainer.CachedName);
             if (needInit)
                 entityContainer.Init(entity);
-            entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.name;
+            entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.CachedName;
             entity.GenerateGuid();
             return entity;
         }
@@ -51,7 +51,7 @@ namespace HECSFramework.Unity
         public static async ValueTask<IActor> GetActor(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<IActor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            var actorID = entityContainer.name;
+            var actorID = entityContainer.CachedName;
 
             if (viewReferenceComponent == null)
                 throw new Exception("нет вью рефа у " + actorID);
@@ -74,7 +74,7 @@ namespace HECSFramework.Unity
         public static async ValueTask<IActor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<IActor> callBack = null, Vector3 position = new Vector3())
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            var actorID = entityContainer.name;
+            var actorID = entityContainer.CachedName;
 
             if (viewReferenceComponent == null)
                 throw new Exception("нет вью рефа у " + actorID);
