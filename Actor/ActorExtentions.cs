@@ -69,8 +69,9 @@ namespace HECSFramework.Unity
 
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb);
-
-            Addressables.Release(asynData);
+            
+            //todo переделать на экстеншены с сервисом
+            //Addressables.Release(asynData);
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }

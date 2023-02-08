@@ -9,7 +9,7 @@ namespace Components
 {
     public sealed partial class AbilitiesHolderComponent : BaseComponent
     {
-        [ValueDropdown("GetAbilities", IsUniqueList = true)]
+        [ValueDropdown("GetAbilities")]
         public EntityContainer[] AbilitiesContainers = new EntityContainer[0];
 
         private IEnumerable GetAbilities()
