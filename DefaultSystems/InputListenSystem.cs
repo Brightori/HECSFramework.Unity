@@ -15,15 +15,11 @@ namespace Systems
     public class InputListenSystem : BaseSystem, IPriorityUpdatable
     {
         private List<UpdateableAction> actions = new List<UpdateableAction>();
-        private HECSList<Entity> inputListeners;
-        private HECSMask InputListenerTagComponentMask = HMasks.GetMask<InputListenerTagComponent>();
 
         public int Priority { get; } = -5;
 
         public override void InitSystem()
         {
-            //todo filter
-            //inputListeners = EntityManager.Filter(InputListenerTagComponentMask);
             LinkActions();
         }
 
@@ -69,14 +65,15 @@ namespace Systems
 
             foreach (var w in EntityManager.Worlds)
             {
-                //todo filter
-                //var collection = w.Filter(InputListenerTagComponentMask);
-                //var lenght = collection.Count;
-                //for (int i = 0; i < lenght; i++)
-                //{
-                //    Entity listener = collection.Data[i];
-                //    listener.Command(command);
-                //}
+                if (w == null)
+                    continue;
+
+                var collection = w.GetFilter<InputListenerTagComponent>();
+
+                foreach (var listener in collection)
+                {
+                    listener.Command(command);
+                }
             }
         }
 
