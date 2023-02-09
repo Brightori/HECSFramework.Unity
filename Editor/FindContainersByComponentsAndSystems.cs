@@ -38,12 +38,12 @@ namespace HECSFramework.Unity.Editor
 
         private IEnumerable<Type> ComponentsShow()
         {
-            return bluePrintsProvider.Components.Select(x => x.Value);
+            return bluePrintsProvider.Components.Select(x => x.Key);
         }
 
         private IEnumerable<Type> SystemsShow()
         {
-            return bluePrintsProvider.Systems.Select(x => x.Value);
+            return bluePrintsProvider.Systems.Select(x => x.Key);
         }
 
         private void UpdateFindedContainers()
@@ -63,7 +63,7 @@ namespace HECSFramework.Unity.Editor
                         if (c == null)
                             continue;
 
-                        if (e.Components.Any(x => x.GetType() == c))
+                        if (e.Components.Any(x => x.GetHECSComponent.GetType() == c))
                             continue;
 
                         needed = false;
@@ -73,7 +73,7 @@ namespace HECSFramework.Unity.Editor
                 if (systems.Count != 0)
                     foreach (var s in systems)
                     {
-                        if (e.Systems.Any(x => x.GetType() == s))
+                        if (e.Systems.Any(x => x.GetSystem.GetType() == s))
                             continue;
 
                         needed = false;
