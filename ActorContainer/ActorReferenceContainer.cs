@@ -19,6 +19,7 @@ namespace HECSFramework.Unity
     public abstract class ReferenceContainerBase<U> : ActorContainer, IReferenceContainer where U : EntityContainer
     {
         [PropertyOrder(-9)]
+        [OnValueChanged("RemoveReferences")]
         public U[] References = new U[0];
 
         [NonSerialized]
@@ -108,6 +109,11 @@ namespace HECSFramework.Unity
             }
 
             return false;
+        }
+
+        private void RemoveReferences()
+        {
+            isInited = false;
         }
 
         private bool IsAlrdyContainsComponent(ComponentBluePrint componentBluePrint)

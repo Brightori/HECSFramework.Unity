@@ -65,7 +65,7 @@ public class DocumentationWindow : OdinEditorWindow
     protected override void OnGUI()
     {
         GUILayout.BeginHorizontal();
-        scrollPosButtons = EditorGUILayout.BeginScrollView(scrollPosButtons, GUILayout.MaxWidth(200f), GUILayout.Width(120f), GUILayout.MinWidth(60f));
+        scrollPosButtons = EditorGUILayout.BeginScrollView(scrollPosButtons, GUILayout.MaxWidth(400f), GUILayout.Width(150f), GUILayout.MinWidth(60f));
         DrawButtons();
         GUILayout.EndScrollView();
         GUI.backgroundColor = defaultColor;
