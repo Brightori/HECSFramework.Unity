@@ -7,7 +7,9 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
-    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IReactCommand<StressTestLocalCommand>, IReactGlobalCommand<StressTestGlobalCommand>,
+    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, 
+        IReactCommand<StressTestLocalCommand>, 
+        IReactGlobalCommand<StressTestGlobalCommand>,
         IReactGenericLocalComponent<ICounter>, 
         IReactGenericGlobalComponent<ICounter>, 
         IReactComponentGlobal<TestReactComponent>, 
@@ -29,18 +31,22 @@ namespace Systems
         public bool EntityRemoved;
 
         public bool GlobalReact;
+        public bool GlobalReactRemoved = true;
         public bool LocalReact;
+        public bool LocalReactRemoved = true;
 
         public Guid ListenerGuid => SystemGuid;
 
         public void CommandGlobalReact(StressTestGlobalCommand command)
         {
-            GlobalReact = true;
+            GlobalReact = command.Param;
+            GlobalReactRemoved = command.Param;
         }
 
         public void CommandReact(StressTestLocalCommand command)
         {
-            LocalReact = true;
+            LocalReact = command.Param;
+            LocalReactRemoved = command.Param;
         }
 
         public void ComponentReact(TestReactComponent component, bool isAdded)
@@ -113,9 +119,11 @@ namespace Commands
 {
     public struct StressTestGlobalCommand : IGlobalCommand
     {
+        public bool Param;
     }
 
     public struct StressTestLocalCommand : ICommand
     {
+        public bool Param;
     }
 }
