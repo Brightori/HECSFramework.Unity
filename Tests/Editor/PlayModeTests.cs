@@ -2,9 +2,9 @@ using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -24,7 +24,7 @@ public class PlayModeTests : OdinEditorWindow
     public void InitActorTest()
     {
         var check = new GameObject();
-        var actor = check.GetOrAddComponent<Actor>();
+        var actor = check.GetOrAddMonoComponent<Actor>();
         actor.Init();
         actor.Entity.AddComponent(new TestComponent());
         actor.Entity.Init();
@@ -38,7 +38,7 @@ public class PlayModeTests : OdinEditorWindow
     public async void DestroyActorTest()
     {
         var check = new GameObject();
-        var actor = check.GetOrAddComponent<Actor>();
+        var actor = check.GetOrAddMonoComponent<Actor>();
         actor.Init();
         actor.Entity.AddComponent(new TestComponent());
         actor.Entity.Init();
