@@ -35,7 +35,7 @@ internal class CommandsTests
 
         EntityManager.Command(new StressTestGlobalCommand { Param = true });
         entity.RemoveHecsSystem<StressTestReactsSystem>();
-        entity.Command(new StressTestGlobalCommand { Param = false });
+        EntityManager.Command(new StressTestGlobalCommand { Param = false });
 
         Assert.IsTrue(sys.GlobalReact && sys.GlobalReactRemoved);
     }
