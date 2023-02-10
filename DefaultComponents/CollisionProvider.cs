@@ -12,10 +12,10 @@ namespace Components
 
         public void Start()
         {
-            if (Actor != null|| Actor.Entity.IsAlive())
+            if (Actor == null)
                 Actor = GetComponent<IActor>();
 
-            if (Actor != null || Actor.Entity.IsAlive())
+            if (Actor == null)
                 Actor = GetComponentInParent<IActor>();
         }
 
