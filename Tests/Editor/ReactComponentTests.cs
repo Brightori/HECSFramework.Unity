@@ -109,4 +109,34 @@ public class ReactComponentTests
 
         Assert.IsTrue(system.ReactComponentLocalAdd && system.ReactComponentLocalRemove);
     }
+
+    [Test]
+    public void AddComponentBeforeInitEntity()
+    {
+        EntityManager.RecreateInstance();
+        var entity = new Entity();
+        entity.AddComponent(new TestComponent());
+        entity.AddComponent(new TestReactComponent());
+        entity.Init();
+
+        EntityManager.Default.TryGetSingleComponent(out TestComponent testReactComponent);
+        var boolCheckLocal = entity.TryGetComponent(out TestComponent testComponent);
+
+        Assert.IsTrue(testReactComponent != null &&  boolCheckLocal && testComponent.InitCount == 1);
+    }
+
+    [Test]
+    public void AddComponentAfterInitEntity()
+    {
+        EntityManager.RecreateInstance();
+        var entity = new Entity();
+        entity.Init();
+        entity.AddComponent(new TestComponent());
+        entity.AddComponent(new TestReactComponent());
+
+        EntityManager.Default.TryGetSingleComponent(out TestComponent testReactComponent);
+        var boolCheckLocal = entity.TryGetComponent(out TestComponent testComponent);
+
+        Assert.IsTrue(testReactComponent != null && boolCheckLocal && testComponent.InitCount == 1);
+    }
 }
