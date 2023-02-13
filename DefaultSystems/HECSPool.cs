@@ -16,6 +16,11 @@ public class HECSPool<T> : IDisposable where T : UnityEngine.Object
         getNewPooledObject = getObject;
     }
 
+    public void SetMaxCount(int maxCount)
+    {
+        this.maxCount = maxCount;
+    }
+
     public void Dispose()
     {
         getNewPooledObject = null;

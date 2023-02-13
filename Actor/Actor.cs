@@ -32,6 +32,13 @@ namespace HECSFramework.Unity
                 Init(EntityManager.Worlds[actorInitModule.WorldIndex], true, true);
         }
 
+
+        /// <summary>
+        /// standart init method, we init actor and entity by default, without container
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="initEntity"></param>
+        /// <param name="initWithContainer"></param>
         public void Init(World world = null, bool initEntity = true, bool initWithContainer = false)
         {
             if (world == null)
@@ -56,6 +63,24 @@ namespace HECSFramework.Unity
             }
         }
 
+        /// <summary>
+        /// additional method to init actor 
+        /// </summary>
+        /// <param name="world"></param>
+        public void InitActorWithoutEntity(World world = null)
+        {
+            Init(world, false, false);
+        }
+
+        /// <summary>
+        /// here we init actor, entity, and entity container 
+        /// </summary>
+        /// <param name="world"></param>
+        public void InitWithContainer(World world = null)
+        {
+            Init(world, true, true);
+        }
+
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
@@ -68,6 +93,9 @@ namespace HECSFramework.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetHECSComponent<T>(out T component) 
             where T : IComponent, new() => Entity.TryGetComponent(out component);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T GetOrAddHECSComponent<T>() where T: IComponent, new() => Entity.GetOrAddComponent<T>();
 
         public void Dispose()
         {
@@ -133,12 +161,13 @@ namespace HECSFramework.Unity
         public void HecsDestroy()
         {
             Entity.Dispose();
+            Entity = null;
             Destroy(gameObject);
         }
 
         public void RemoveActorToPool()
         {
-            Entity.World.GetSingleSystem<PoolingSystem>().ReturnActorToPool(this);
+            Entity.World.GetSingleSystem<PoolingSystem>().Release(this);
         }
 
         public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)

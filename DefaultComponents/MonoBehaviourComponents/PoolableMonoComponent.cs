@@ -12,6 +12,8 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 
     public GameObject View => gameObject;
 
+    public AssetReference AssetRef => AssetReference;
+
     public void Stop()
     {
         var needForStop = GetComponentsInChildren<IStopOnPooling>();
@@ -43,6 +45,7 @@ public interface IPoolableView
 {
     string AddressableKey { get; }
     GameObject View { get; }
+    AssetReference AssetRef { get; }
     void Stop();
     void Start();
 }
