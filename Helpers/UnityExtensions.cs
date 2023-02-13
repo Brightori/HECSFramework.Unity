@@ -13,11 +13,11 @@ namespace Helpers
         public static Vector3 AsV3(this Vector2 source, float height = 0)
             => new Vector3(source.x, height, source.y);
         
-        public static bool TryGetActorFromCollision(this Component component, out IActor actor)
+        public static bool TryGetActorFromCollision(this Component component, out Actor actor)
         {
             actor = null;
 
-            if (component.TryGetComponent(out IActor needed))
+            if (component.TryGetComponent(out Actor needed))
             {
                 actor = needed;
                 return true;

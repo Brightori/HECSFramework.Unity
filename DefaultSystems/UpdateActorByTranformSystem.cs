@@ -9,7 +9,7 @@ namespace Systems
     [Serializable][Documentation(Doc.GameLogic, Doc.HECS, Doc.Actor, "System for update actor position from transform component")]
     public sealed class UpdateActorByTranformSystem : BaseSystem, IHaveActor
     {
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
         public int Priority { get; } = -100;
 
         [Required]

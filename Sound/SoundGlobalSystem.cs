@@ -24,7 +24,7 @@ namespace Systems
         private List<SoundSourceContainer> soundSources = new List<SoundSourceContainer>(32);
 
 
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
 
         public override void InitSystem()
         {

@@ -24,7 +24,7 @@ namespace Systems
         private HECSMask viewRefMask = HMasks.GetMask<ViewReferenceComponent>();
         private HECSMask ActorContainerIDMask = HMasks.GetMask<ActorContainerID>();
 
-        public async Task<T> GetActorFromPool<T>(AssetReference assetReference, EntityContainer entityContainer = null) where T : Component, IActor
+        public async Task<T> GetActorFromPool<T>(AssetReference assetReference, EntityContainer entityContainer = null) where T : Actor
         {
             var key = assetReference.AssetGUID;
 
@@ -68,7 +68,7 @@ namespace Systems
             }
         }
 
-        private async ValueTask<T> GetActorFromPool<T>(string key, HECSPool<GameObject> pool, EntityContainer entityContainer) where T : Component, IActor
+        private async ValueTask<T> GetActorFromPool<T>(string key, HECSPool<GameObject> pool, EntityContainer entityContainer) where T : Actor
         {
             var view = await pool.Get();
             view.SetActive(true);

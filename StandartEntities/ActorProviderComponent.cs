@@ -6,6 +6,6 @@ namespace Components
     [Documentation(Doc.HECS, "this component provide Actor from actor monobehaviour to systems and components")]
     public sealed class ActorProviderComponent : BaseComponent
     {
-        public IActor Actor;
+        public Actor Actor;
     }
 }

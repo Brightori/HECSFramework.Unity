@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
@@ -10,22 +11,19 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [DefaultExecutionOrder(-100)]
-    public partial class Actor : MonoBehaviour, IActor
+    public partial class Actor : MonoBehaviour
     {
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
-
-        [NonSerialized]
-        private Entity entity;
         
         public GameObject GameObject => gameObject;
-
-        public string ContainerID => entity.ContainerID;
+        public string ContainerID => Entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
 
-        public Entity Entity => entity;
+        [NonSerialized]
+        public Entity Entity;
 
-        public void Command<T>(T command) where T : struct, ICommand => entity.Command(command);
+        public void Command<T>(T command) where T : struct, ICommand => Entity.Command(command);
         
 
         private void Awake()
@@ -39,22 +37,22 @@ namespace HECSFramework.Unity
             if (world == null)
                 world = EntityManager.Default;
 
-            if (entity == null)
+            if (Entity == null)
             {
-                entity = world.GetEntityFromPool(gameObject.name);
-                entity.GUID = actorInitModule.Guid;
-                entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+                Entity = world.GetEntityFromPool(gameObject.name);
+                Entity.GUID = actorInitModule.Guid;
+                Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
             }
           
-            if (!entity.IsInited)
+            if (!Entity.IsInited)
             {
                 if (initWithContainer)
                 {
-                    actorContainer.Init(entity);
+                    actorContainer.Init(Entity);
                 }
 
                 if (initEntity)
-                    entity.Init();
+                    Entity.Init();
             }
         }
 
@@ -64,28 +62,35 @@ namespace HECSFramework.Unity
                 Init(EntityManager.Worlds[actorInitModule.WorldIndex], true, true);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T GetHECSComponent<T>() where T : IComponent, new() => Entity.GetComponent<T>();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetHECSComponent<T>(out T component) 
+            where T : IComponent, new() => Entity.TryGetComponent(out component);
+
         public void Dispose()
         {
-            entity.Dispose();
+            Entity.Dispose();
         }
 
-        public bool Equals(Entity other) => entity.Equals(other);
+        public bool Equals(Entity other) => Entity.Equals(other);
 
         public void GenerateGuid()
         {
-            entity.GenerateGuid();
-            actorInitModule.SetGuid(entity.GUID);
+            Entity.GenerateGuid();
+            actorInitModule.SetGuid(Entity.GUID);
         }
 
         private void OnDestroy()
         {
-            if (entity.IsAlive && EntityManager.IsAlive)
-                entity.Dispose();
+            if (Entity.IsAlive && EntityManager.IsAlive)
+                Entity.Dispose();
         }
 
         public bool TryGetComponent<T>(out T component, bool lookInChildsToo = false)
         {
-            if (!entity.IsAlive())
+            if (!Entity.IsAlive())
             {
                 component = default;
                 return false;
@@ -109,12 +114,12 @@ namespace HECSFramework.Unity
 
         public override int GetHashCode()
         {
-            return entity != null ? entity.GetHashCode() : gameObject.GetHashCode();
+            return Entity != null ? Entity.GetHashCode() : gameObject.GetHashCode();
         }
 
         public override bool Equals(object other)
         {
-            return entity.Equals(other);
+            return Entity.Equals(other);
         }
 
        
@@ -127,27 +132,27 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
-            entity.Dispose();
+            Entity.Dispose();
             Destroy(gameObject);
         }
 
         public void RemoveActorToPool()
         {
-            entity.World.GetSingleSystem<PoolingSystem>().ReturnActorToPool(this);
+            Entity.World.GetSingleSystem<PoolingSystem>().ReturnActorToPool(this);
         }
 
         public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)
         {
             if (isAdditive)
-                container.Init(entity);
+                container.Init(Entity);
             else
             {
-                entity.Dispose();
-                entity = world.GetEntityFromPool(gameObject.name);
-                container.Init(entity);
+                Entity.Dispose();
+                Entity = world.GetEntityFromPool(gameObject.name);
+                container.Init(Entity);
             }
 
-            return entity;
+            return Entity;
         }
 
         public void InjectContainer(EntityContainer container, bool isAdditive = false)
@@ -155,7 +160,7 @@ namespace HECSFramework.Unity
             var components = container.GetComponentsInstances();
             var systems = container.GetSystemsInstances();
 
-            entity.Inject(components, systems, isAdditive);
+            Entity.Inject(components, systems, isAdditive);
         }
 
         public void InjectContainer(EntityContainer container, bool isAdditive = false, params IComponent[] additionalComponents)
@@ -166,7 +171,7 @@ namespace HECSFramework.Unity
             foreach (var additional in additionalComponents)
                 components.Add(additional);
 
-            entity.Inject(components, systems, isAdditive);
+            Entity.Inject(components, systems, isAdditive);
         }
     }
 }

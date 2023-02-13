@@ -10,7 +10,7 @@ namespace Systems
     [Documentation(Doc.GameLogic, Doc.Actor, Doc.HECS,  "This system update transform component from actor's transform")]
     public sealed class UpdateTranformFromActorSystem : BaseSystem, IHaveActor, IPriorityUpdatable
     {
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
         public int Priority { get; } = -100;
 
         [Required]

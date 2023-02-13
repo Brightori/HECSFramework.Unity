@@ -12,7 +12,7 @@ namespace Components
         private NavMeshAgent navmeshAgent;
         public NavMeshAgent NavMeshAgent => navmeshAgent;
 
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
      
         public void Init()
         {

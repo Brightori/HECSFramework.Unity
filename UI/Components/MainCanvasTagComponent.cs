@@ -11,7 +11,7 @@ namespace Components
     [Documentation(Doc.UI, Doc.Tag, "This component marks main canvas for placing ui")]
     public class MainCanvasTagComponent : BaseComponent, IWorldSingleComponent, IHaveActor
     {
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
 
         public List<Actor> AdditionalCanvases = new List<Actor>(3);
 

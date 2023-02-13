@@ -58,7 +58,7 @@ public class PlayModeTests : OdinEditorWindow
             && !checkComponent.IsAlive);
     }
 
-    public void CreateFromContainerTest(IActor actor)
+    public void CreateFromContainerTest(Actor actor)
     {
         actor.Init(initEntity: false);
         EntityContainer.Init(actor.Entity);

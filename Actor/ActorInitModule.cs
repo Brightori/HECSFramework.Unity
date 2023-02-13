@@ -14,14 +14,14 @@ namespace HECSFramework.Unity
 
         [SerializeField] private int worldIndex = 0;
         [SerializeField, ReadOnly] private string iD;
-        private IActor entity;
+        private Actor entity;
 
         public string ID => iD;
         public InitActorMode InitActorMode => initActorMode;
         public int WorldIndex => worldIndex;
         public GuidGenerationRule GuidRule => guidRule;
 
-        public void InitModule(IActor actor)
+        public void InitModule(Actor actor)
         {
             if (string.IsNullOrEmpty(iD))
                 iD = actor.GameObject.name;

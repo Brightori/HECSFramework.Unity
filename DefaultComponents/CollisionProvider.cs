@@ -8,15 +8,15 @@ namespace Components
     [DisallowMultipleComponent]
     public class CollisionProvider : MonoBehaviour, IHaveActor, IStartOnPooling
     {
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
 
         public void Start()
         {
             if (Actor == null)
-                Actor = GetComponent<IActor>();
+                Actor = GetComponent<Actor>();
 
             if (Actor == null)
-                Actor = GetComponentInParent<IActor>();
+                Actor = GetComponentInParent<Actor>();
         }
 
         private void OnCollisionEnter(Collision collision)

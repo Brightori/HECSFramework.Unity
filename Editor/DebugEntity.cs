@@ -13,7 +13,7 @@ namespace HECSFramework.Unity.Editor
     public class ShowComponentsAndSystems : OdinEditorWindow
     {
         [ShowInInspector]
-        private IActor select;
+        private Actor select;
 
         [OdinSerialize]
         private ActorPresentation ActorPresentation;
@@ -38,7 +38,7 @@ namespace HECSFramework.Unity.Editor
         [Button("Pick up from selected actor")]
         private void PickUpActor()
         {
-            select = Selection.activeGameObject.GetComponent<IActor>();
+            select = Selection.activeGameObject.GetComponent<Actor>();
 
             if (select == null)
             {

@@ -15,7 +15,7 @@ namespace Components
         private AnimatorOverrideController animatorOverrideController;
         private AnimatorHelper animatorHelper;
 
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
 
         public void Init()
         {

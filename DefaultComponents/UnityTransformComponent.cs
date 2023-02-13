@@ -10,7 +10,7 @@ namespace Components
     [Documentation(Doc.HECS, Doc.Actor, "This component provide access to unity transform, if this entity not actor, this component remove self")]
     public sealed class UnityTransformComponent : BaseComponent, IHaveActor, IInitable
     {
-        public IActor Actor { get; set; }
+        public Actor Actor { get; set; }
         
         [ReadOnly]
         public Transform Transform;
