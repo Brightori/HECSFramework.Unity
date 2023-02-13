@@ -2,6 +2,7 @@
 using System.Linq;
 using Components;
 using HECSFramework.Core;
+using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Systems;
 using UnityEngine;
@@ -14,7 +15,9 @@ namespace HECSFramework.Unity
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
 
+        [NonSerialized]
         private Entity entity;
+        
         public GameObject GameObject => gameObject;
 
         public string ContainerID => entity.ContainerID;
@@ -23,6 +26,7 @@ namespace HECSFramework.Unity
         public Entity Entity => entity;
 
         public void Command<T>(T command) where T : struct, ICommand => entity.Command(command);
+        
 
         private void Awake()
         {
@@ -35,15 +39,23 @@ namespace HECSFramework.Unity
             if (world == null)
                 world = EntityManager.Default;
 
-            entity = world.GetEntityFromPool(gameObject.name);
-            entity.GUID = actorInitModule.Guid;
-            entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+            if (entity == null)
+            {
+                entity = world.GetEntityFromPool(gameObject.name);
+                entity.GUID = actorInitModule.Guid;
+                entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+            }
+          
+            if (!entity.IsInited)
+            {
+                if (initWithContainer)
+                {
+                    actorContainer.Init(entity);
+                }
 
-            if (initWithContainer)
-                actorContainer.Init(entity);
-
-            if (initEntity)
-                entity.Init();
+                if (initEntity)
+                    entity.Init();
+            }
         }
 
         protected virtual void Start()

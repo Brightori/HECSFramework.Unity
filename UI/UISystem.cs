@@ -20,8 +20,8 @@ namespace Systems
 
         private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
 
-        private HECSList<Entity> uiCurrents;
-        private HECSList<Entity> additionalCanvases;
+        private EntitiesFilter uiCurrents;
+        private EntitiesFilter additionalCanvases;
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
@@ -34,9 +34,8 @@ namespace Systems
 
         public override void InitSystem()
         {
-            //todo filter here
-            //uiCurrents = EntityManager.Filter(new FilterMask(uiTagMask));
-            //additionalCanvases = EntityManager.Filter(new FilterMask(additionalCanvasMask));
+            uiCurrents = Owner.World.GetFilter<UITagComponent>();
+            additionalCanvases = Owner.World.GetFilter<AdditionalCanvasTagComponent>();
             Addressables.LoadAssetsAsync<UIBluePrint>(UIBluePrints, null).Completed += LoadReact;
         }
 
@@ -261,9 +260,9 @@ namespace Systems
 
         private void HideAllExcept(int uIActorType)
         {
-            foreach (var e in uiCurrents.Data)
+            foreach (var e in uiCurrents)
             {
-                if (e == null || !e.IsAlive) continue;
+                if (!e.IsAlive()) continue;
 
                 if (e.GetComponent<UITagComponent>().ViewType.Id == uIActorType) continue;
                 e.Command(new HideUICommand());
@@ -286,12 +285,9 @@ namespace Systems
                 return;
             }
 
-            Entity[] array = uiCurrents.Data;
-            var count = uiCurrents.Count;
-
-            for (int i = 0; i < count; i++)
+            foreach (var ui in uiCurrents)
             {
-                if (array[i].TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
+                if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
                 {
                     if (uIGroupTagComponent.IsHaveGroupIndex(command.UIGroup))
                         uIGroupTagComponent.Owner.Command(new HideUICommand());
@@ -307,20 +303,19 @@ namespace Systems
                 return;
             }
 
-            Entity[] array = uiCurrents.Data;
-            var count = uiCurrents.Count;
+            uiCurrents.ForceUpdateFilter();
 
-            for (int i = 0; i < count; i++)
+            foreach (var ui in uiCurrents)
             {
-                if (array[i].TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
+                if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
                 {
                     if (uIGroupTagComponent.IsHaveGroupIndex(command.UIGroup))
                         continue;
                     else
-                        array[i].Command(new HideUICommand());
+                        ui.Command(new HideUICommand());
                 }
                 else
-                    array[i].Command(new HideUICommand());
+                    ui.Command(new HideUICommand());
             }
 
             for (int i = 0; i < uIBluePrints.Count; i++)
@@ -328,7 +323,7 @@ namespace Systems
                 try
                 {
                     if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
-                    && !uiCurrents.Any(x => x.GetComponent<UITagComponent>().ViewType.Id == uIBluePrints[i].UIType.Id))
+                    && !IsCurrentUIContainsId(uIBluePrints[i].UIType.Id))
                     {
                         SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI, mainCanvasTransform.Transform);
                     }
@@ -338,6 +333,17 @@ namespace Systems
                     Debug.LogException(ex);
                 }
             }
+        }
+
+        private bool IsCurrentUIContainsId(int id)
+        {
+            foreach (var ui in uiCurrents)
+            {
+                if (ui.GetComponent<UITagComponent>().ViewType.Id == id)
+                    return true;
+            }
+
+            return false;
         }
 
         public void CommandGlobalReact(ShowUIOnAdditionalCommand command)

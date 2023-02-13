@@ -92,6 +92,8 @@ namespace Systems
             else
                 actor = actorFromView;
 
+
+            actor.Init();
             var startOnPool = view.GetComponentsInChildren<IStartOnPooling>();
 
             foreach (var s in startOnPool)
@@ -124,6 +126,7 @@ namespace Systems
                 var task = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference).Task;
                 var objFromRef = await task;
                 var newActor = GetNewInstance(objFromRef).GetComponent<Actor>();
+                newActor.Init();
                 entityContainer.Init(newActor.Entity);
 
                 if (pooledActors.ContainsKey(viewReferenceComponent.ViewReference.AssetGUID))

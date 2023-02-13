@@ -54,7 +54,7 @@ public class DebugHECS : OdinEditorWindow
 
         foreach (var e in EntityManager.Worlds[worldIndex].Entities)
         {
-            if (e == null)
+            if (e == null || !e.IsAlive || !e.IsInited)
                 continue;
 
             var drawEntity = new DrawEntity();

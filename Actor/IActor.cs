@@ -28,12 +28,18 @@ namespace HECSFramework.Unity
         /// </summary>
         void RemoveActorToPool();
     }
+}
 
+namespace HECSFramework.Unity
+{
     public interface IHaveActor : INotCore
     {
         IActor Actor { get; set; }
     }
+}
 
+namespace HECSFramework.Core
+{
     public interface IInitAferView
     {
         void InitAferView();

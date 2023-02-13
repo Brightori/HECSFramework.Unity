@@ -6,7 +6,7 @@ using Components;
 
 namespace Systems
 {
-	[Serializable][Documentation(Doc.GameLogic, Doc.HECS, Doc.Actor, "System for update actor position from transform component")]
+    [Serializable][Documentation(Doc.GameLogic, Doc.HECS, Doc.Actor, "System for update actor position from transform component")]
     public sealed class UpdateActorByTranformSystem : BaseSystem, IHaveActor
     {
         public IActor Actor { get; set; }

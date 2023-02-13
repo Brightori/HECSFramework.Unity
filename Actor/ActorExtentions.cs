@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Components;
 using HECSFramework.Core;
+using HECSFramework.Unity;
 using Helpers;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -62,11 +63,11 @@ namespace HECSFramework.Unity
 
             if (needLoadContainer)
             {
-                actorPrfb.Init(world);
+                actorPrfb.Init(world, initEntity: false);
                 entityContainer.Init(actorPrfb.Entity);
             }
 
-            Addressables.Release(asynData);
+            //Addressables.Release(asynData);
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }

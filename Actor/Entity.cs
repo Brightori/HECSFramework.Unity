@@ -1,4 +1,6 @@
-﻿using Unity.IL2CPP.CompilerServices;
+﻿using Components;
+using HECSFramework.Unity;
+using Unity.IL2CPP.CompilerServices;
 
 namespace HECSFramework.Core
 {
