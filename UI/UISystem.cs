@@ -175,7 +175,7 @@ namespace Systems
         {
             if (obj.Result.TryGetComponent<UIActor>(out var actor))
             {
-                actor.Init();
+                actor.InitWithContainer();
                 actor.Command(new ShowUICommand());
                 onUILoad?.Invoke(actor.Entity);
             }
