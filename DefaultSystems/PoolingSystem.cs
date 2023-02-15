@@ -25,6 +25,10 @@ namespace Systems
             var view =  await GetViewFromPool(assetReference);
             var actor = view.GetOrAddMonoComponent<Actor>();
 
+            if (actor.TryGetComponents(out IHaveActor[] needActors))
+                foreach (var need in needActors)
+                    need.Actor = actor;
+
             if (init)
                 actor.Init(world);
 
@@ -34,7 +38,15 @@ namespace Systems
         public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T: Actor
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            return await GetActorFromPool<T>(viewReferenceComponent.ViewReference);
+            var view =  await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
+
+            if (init)
+            {
+                view.InitActorWithoutEntity(world);
+                entityContainer.Init(view.Entity);
+            }
+
+            return view;
         }
 
         public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference)
@@ -52,10 +64,8 @@ namespace Systems
             else
             {
                 //todo мы должны туть брать из пула, а не возвращать независимую копию
-                var task = Addressables.LoadAssetAsync<GameObject>(assetReference).Task;
-                var objFromRef = await task;
-                var newView = MonoBehaviour.Instantiate(objFromRef);
-                return newView;
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(Addressables.LoadAssetAsync<GameObject>(assetReference).Task, maxPoolSize));
+                return await pooledGOs[assetReference.AssetGUID].Get();
             }
         }
 

@@ -131,10 +131,9 @@ namespace Systems
             if (ispoolable)
             {
                 var container = await poolingSystem.GetEntityContainerFromPool(bluePrint.Container);
-                var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(bluePrint.UIActor, container);
-                uiActorFromPool.Init();
-
-                uiActorFromPool.GetComponent<UnityTransformComponent>().Transform.SetParent(canvas);
+                var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(container);
+                uiActorFromPool.Entity.Init();
+                uiActorFromPool.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
                 return uiActorFromPool.Entity;
             }
 
@@ -142,7 +141,7 @@ namespace Systems
             var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
 
             newUiActor.Init();
-            newUiActor.GetComponent<UnityTransformComponent>().Transform.SetParent(canvas);
+            newUiActor.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
             return newUiActor.Entity;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class HECSPool<T> : IDisposable where T : UnityEngine.Object
@@ -27,7 +28,7 @@ public class HECSPool<T> : IDisposable where T : UnityEngine.Object
         queue.Clear();
     }
 
-    public async ValueTask<T> Get()
+    public async UniTask<T> Get()
     {
         if (queue.Count == 0)
         {

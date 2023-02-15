@@ -81,6 +81,11 @@ namespace HECSFramework.Unity
             Init(world, true, true);
         }
 
+        public void InitEntity()
+        {
+            Entity.Init();
+        }
+
         protected virtual void Start()
         {
             if (actorInitModule.InitActorMode == InitActorMode.InitOnStart)
@@ -100,6 +105,7 @@ namespace HECSFramework.Unity
         public void Dispose()
         {
             Entity.Dispose();
+            Entity = null;
         }
 
         public bool Equals(Entity other) => Entity.Equals(other);
@@ -112,7 +118,7 @@ namespace HECSFramework.Unity
 
         private void OnDestroy()
         {
-            if (Entity.IsAlive && EntityManager.IsAlive)
+            if (Entity.IsAlive() && EntityManager.IsAlive)
                 Entity.Dispose();
         }
 
