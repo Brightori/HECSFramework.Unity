@@ -43,7 +43,6 @@ namespace Systems
                 inject.Actor = Owner.AsActor();
             }
 
-            Owner.Command(new ViewReadyCommand());
             Owner.AddComponent(new ViewReadyTagComponent());
 
             var initWithView = Owner.GetComponentsByType<IInitAferView>();

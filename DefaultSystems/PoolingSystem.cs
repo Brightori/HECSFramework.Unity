@@ -24,6 +24,12 @@ namespace Systems
         {
             var view =  await GetViewFromPool(assetReference);
             var actor = view.GetOrAddMonoComponent<Actor>();
+            
+            if (actor.Entity != null)
+            {
+                actor.Entity.Dispose();
+                actor.Entity = null;
+            }
 
             if (actor.TryGetComponents(out IHaveActor[] needActors))
                 foreach (var need in needActors)

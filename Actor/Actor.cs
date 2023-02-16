@@ -174,6 +174,8 @@ namespace HECSFramework.Unity
         public void RemoveActorToPool()
         {
             Entity.World.GetSingleSystem<PoolingSystem>().Release(this);
+            Entity?.Dispose();
+            Entity = null;
         }
 
         public Entity InjectContainer(EntityContainer container, World world, bool isAdditive = false)

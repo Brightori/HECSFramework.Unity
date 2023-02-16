@@ -19,7 +19,7 @@ public class UtilsTests
 
         for (int i = 0; i < 4; i++)
         {
-            list.RemoveSwap(list.Data[8], out _);
+            list.RemoveSwap(list.Data[8]);
         }
 
         bool badRow = false;
