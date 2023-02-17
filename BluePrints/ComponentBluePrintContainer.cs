@@ -14,7 +14,10 @@ namespace HECSFramework.Unity
         public virtual bool IsOverride { get; set; }
         public virtual bool IsColorNeeded { get; set; }
 
+        [NonSerialized]
         private string data;
+
+        [NonSerialized]
         private bool dataReady;
 
         public override bool Equals(object obj)
