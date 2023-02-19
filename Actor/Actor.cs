@@ -7,15 +7,16 @@ using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Systems;
 using UnityEngine;
+using UnityEngine.SearchService;
 
 namespace HECSFramework.Unity
 {
     [DefaultExecutionOrder(-100)]
-    public partial class Actor : MonoBehaviour
+    public partial class Actor : MonoBehaviour, IEquatable<Actor>
     {
         [SerializeField, BoxGroup("Init")] private ActorInitModule actorInitModule = new ActorInitModule();
         [SerializeField, BoxGroup("Init")] private ActorContainer actorContainer;
-        
+
         public GameObject GameObject => gameObject;
         public string ContainerID => Entity.ContainerID;
         public ActorContainer ActorContainer => actorContainer;
@@ -24,7 +25,7 @@ namespace HECSFramework.Unity
         public Entity Entity;
 
         public void Command<T>(T command) where T : struct, ICommand => Entity.Command(command);
-        
+
 
         private void Awake()
         {
@@ -48,9 +49,11 @@ namespace HECSFramework.Unity
             {
                 Entity = world.GetEntityFromPool(gameObject.name);
                 Entity.GUID = actorInitModule.Guid;
-                Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
             }
-          
+            
+            Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+            Entity.GetOrAddComponent<UnityTransformComponent>();
+
             if (!Entity.IsInited)
             {
                 if (initWithContainer)
@@ -96,11 +99,11 @@ namespace HECSFramework.Unity
         public T GetHECSComponent<T>() where T : IComponent, new() => Entity.GetComponent<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetHECSComponent<T>(out T component) 
+        public bool TryGetHECSComponent<T>(out T component)
             where T : IComponent, new() => Entity.TryGetComponent(out component);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetOrAddHECSComponent<T>() where T: IComponent, new() => Entity.GetOrAddComponent<T>();
+        public T GetOrAddHECSComponent<T>() where T : IComponent, new() => Entity.GetOrAddComponent<T>();
 
         public void Dispose()
         {
@@ -148,15 +151,13 @@ namespace HECSFramework.Unity
 
         public override int GetHashCode()
         {
-            return Entity != null ? Entity.GetHashCode() : gameObject.GetHashCode();
+            return Entity != null ? Entity.Index : gameObject.GetHashCode();
         }
 
         public override bool Equals(object other)
         {
             return Entity.Equals(other);
         }
-
-       
 
         protected virtual void Reset()
         {
@@ -209,6 +210,16 @@ namespace HECSFramework.Unity
                 components.Add(additional);
 
             Entity.Inject(components, systems, isAdditive);
+        }
+
+        /// <summary>
+        /// we think both actor should be live in one world, otherwise u should check index of world too
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(Actor other)
+        {
+            return other.Entity.ID == Entity.ID;
         }
     }
 }
