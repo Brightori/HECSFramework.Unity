@@ -47,6 +47,7 @@ namespace HECSFramework.Unity.Editor
             }
 
             ActorPresentation = new ActorPresentation(select.Entity);
+            ActorPresentation.UpdateIfo();
         }
     }
 
@@ -55,6 +56,7 @@ namespace HECSFramework.Unity.Editor
     {
         public Guid Guid;
         public string ContainerID;
+        public int EntityIndex;
 
         [ListDrawerSettings(Expanded = true, ShowPaging = false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
         public List<IComponent> Components;
@@ -73,6 +75,7 @@ namespace HECSFramework.Unity.Editor
             this.entity = entity;
             Guid = entity.GUID;
             ContainerID = entity.ContainerID;
+            EntityIndex = entity.Index;
 
             IsAlive = entity.IsAlive;
             IsInited = entity.IsInited;
@@ -80,9 +83,11 @@ namespace HECSFramework.Unity.Editor
 
             Components = new List<IComponent>(16);
             Systems = new List<ISystem>(16);
+        }
 
+        public void UpdateIfo()
+        {
             UpdateComponents();
-
             UpdateSystems();
         }
 
