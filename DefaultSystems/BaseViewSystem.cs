@@ -13,5 +13,7 @@ namespace Systems
         {
             isReady = true;
         }
+
+        protected abstract void InitAfterViewLocal();
     }
 }
