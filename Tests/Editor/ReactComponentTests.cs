@@ -117,9 +117,10 @@ public class ReactComponentTests
         var entity = new Entity();
         entity.AddComponent(new TestComponent());
         entity.AddComponent(new TestReactComponent());
+        entity.AddComponent(new TestWorldSingleComponent());
         entity.Init();
 
-        EntityManager.Default.TryGetSingleComponent(out TestComponent testReactComponent);
+        EntityManager.Default.TryGetSingleComponent(out TestWorldSingleComponent testReactComponent);
         var boolCheckLocal = entity.TryGetComponent(out TestComponent testComponent);
 
         Assert.IsTrue(testReactComponent != null &&  boolCheckLocal && testComponent.InitCount == 1);
@@ -133,8 +134,9 @@ public class ReactComponentTests
         entity.Init();
         entity.AddComponent(new TestComponent());
         entity.AddComponent(new TestReactComponent());
+        entity.AddComponent(new TestWorldSingleComponent());
 
-        EntityManager.Default.TryGetSingleComponent(out TestComponent testReactComponent);
+        EntityManager.Default.TryGetSingleComponent(out TestWorldSingleComponent testReactComponent);
         var boolCheckLocal = entity.TryGetComponent(out TestComponent testComponent);
 
         Assert.IsTrue(testReactComponent != null && boolCheckLocal && testComponent.InitCount == 1);
