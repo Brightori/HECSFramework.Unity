@@ -9,7 +9,7 @@ public class ReactComponentTests
     public void ReactGenericComponentGlobal()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
+        var check = Entity.Get("Test");
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
         check.AddComponent(new TestReactComponent());
@@ -27,7 +27,7 @@ public class ReactComponentTests
     public void ReactGenericComponentLocal()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
+        var check = Entity.Get("Test");
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
         check.AddComponent(new TestReactComponent());
@@ -45,9 +45,9 @@ public class ReactComponentTests
     public void ReactComponentGlobal()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
-        var check2 = new Entity("Test");
-        
+        var check = Entity.Get("Test");
+        var check2 = Entity.Get("Test");
+
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
         
@@ -73,7 +73,7 @@ public class ReactComponentTests
     public void ReactComponentGlobalWithRemovingListener()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
+        var check = Entity.Get("Test");
         var sys = new StressTestReactsSystem();
         check.AddHecsSystem(sys);
         check.Init();
@@ -96,7 +96,7 @@ public class ReactComponentTests
     public void ReactComponentLocal()
     {
         EntityManager.RecreateInstance();
-        var check = new Entity("Test");
+        var check = Entity.Get("Test");
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
         check.AddComponent(new TestReactComponent());
@@ -114,7 +114,7 @@ public class ReactComponentTests
     public void AddComponentBeforeInitEntity()
     {
         EntityManager.RecreateInstance();
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.AddComponent(new TestComponent());
         entity.AddComponent(new TestReactComponent());
         entity.AddComponent(new TestWorldSingleComponent());
@@ -130,7 +130,7 @@ public class ReactComponentTests
     public void AddComponentAfterInitEntity()
     {
         EntityManager.RecreateInstance();
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.Init();
         entity.AddComponent(new TestComponent());
         entity.AddComponent(new TestReactComponent());

@@ -14,7 +14,7 @@ public class EntityTests
     {
         EntityManager.RecreateInstance();
 
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.AddComponent(new ActorContainerID { ID = "test" });
         entity.Init();
 
@@ -25,11 +25,11 @@ public class EntityTests
     public void ReactEntity()
     {
         EntityManager.RecreateInstance();
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.AddHecsSystem(new StressTestReactsSystem());
         entity.Init();
 
-        var entity2 = new Entity();
+        var entity2 = Entity.Get("Test");
         entity2.Init();
         entity2.HecsDestroy();
         EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
@@ -99,11 +99,11 @@ public class EntityTests
     {
         EntityManager.RecreateInstance();
         EntityManager.AddWorld();
-        var check = new Entity("ReactEntity");
+        var check = Entity.Get("ReactEntity");
         check.AddHecsSystem(new StressTestReactsSystem());
         check.Init();
 
-        var check2 = new Entity("MigrateEntity");
+        var check2 = Entity.Get("MigrateEntity");
         check2.AddComponent(new TestReactComponent());
         check2.Init();
 

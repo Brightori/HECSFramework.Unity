@@ -10,7 +10,7 @@ internal class CommandsTests
     {
         EntityManager.RecreateInstance();
 
-        var entity = new Entity("Check");
+        var entity = Entity.Get("Check");
         var sys = new StressTestReactsSystem();
         entity.AddHecsSystem(sys);
         entity.Init();
@@ -28,7 +28,7 @@ internal class CommandsTests
     {
         EntityManager.RecreateInstance();
 
-        var entity = new Entity("Check");
+        var entity = Entity.Get("Check");
         var sys = new StressTestReactsSystem();
         entity.AddHecsSystem(sys);
         entity.Init();

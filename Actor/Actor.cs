@@ -123,6 +123,8 @@ namespace HECSFramework.Unity
         {
             if (Entity.IsAlive() && EntityManager.IsAlive)
                 Entity.Dispose();
+
+            Entity = null;
         }
 
         public bool TryGetComponent<T>(out T component, bool lookInChildsToo = false)

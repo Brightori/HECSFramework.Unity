@@ -9,7 +9,7 @@ internal class CountersTests
     public void TestAddComponentCounter()
     {
         EntityManager.RecreateInstance();
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.AddComponent(new CountersHolderComponent());
         entity.AddHecsSystem(new CountersHolderSystem());
         entity.Init();
@@ -26,7 +26,7 @@ internal class CountersTests
     public void TestRemoveComponentCounter()
     {
         EntityManager.RecreateInstance();
-        var entity = new Entity();
+        var entity = Entity.Get("Test");
         entity.AddComponent(new CountersHolderComponent());
         entity.AddHecsSystem(new CountersHolderSystem());
         entity.Init();

@@ -1,4 +1,5 @@
 using HECSFramework.Core;
+using HECSFramework.Core.Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
@@ -8,7 +9,13 @@ using UnityEngine;
 
 public class DebugHECS : OdinEditorWindow
 {
-    [UnityEngine.SerializeField, ShowInInspector, Range(0, 99)] private int worldIndex = 0;
+    [SerializeField, ShowInInspector, Range(0, 99)] private int worldIndex = 0;
+
+    [ShowInInspector, ReadOnly]
+    public int EntitiesCount;
+
+    [ShowInInspector, ReadOnly]
+    public int FreeIndeces;
 
     [ShowInInspector, Searchable]
     [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
@@ -52,6 +59,12 @@ public class DebugHECS : OdinEditorWindow
         if (EntityManager.Worlds[worldIndex] == null)
             return;
 
+        EntitiesCount = EntityManager.Worlds[worldIndex].Entities.Length;
+
+        var freeIndeces = ReflectionHelpers.GetPrivateFieldValue<Stack<int>>(EntityManager.Worlds[worldIndex], "freeIndices");
+
+        FreeIndeces = freeIndeces.Count;
+
         foreach (var e in EntityManager.Worlds[worldIndex].Entities)
         {
             if (e == null || !e.IsAlive || !e.IsInited)
@@ -60,6 +73,7 @@ public class DebugHECS : OdinEditorWindow
             var drawEntity = new DrawEntity();
 
             drawEntity.ID = e.ID;
+            drawEntity.Index = e.Index;
             drawEntity.Guid = e.GUID.ToString();
             drawEntity.ContainerID = e.ContainerID;
 
@@ -86,6 +100,9 @@ public class DrawEntity
 {
     [FoldoutGroup("$ID", false), ReadOnly]
     public string ID;
+       
+    [FoldoutGroup("$ID", false), ReadOnly]
+    public int Index;
 
     [FoldoutGroup("$ID"), ReadOnly]
     public string ContainerID;

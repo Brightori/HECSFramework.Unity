@@ -44,11 +44,11 @@ namespace HECSFramework.Unity
 
             worlds = EntityManager.Worlds;
 
-            gameLogic = new Entity("GameLogic");
-            player = new Entity("Player");
-            uiManager = new Entity("UiManager");
-            sceneManager = new Entity("SceneManager");
-            inputManager = new Entity("InputManager");
+            gameLogic = Entity.Get("GameLogic");
+            player = Entity.Get("Player");
+            uiManager = Entity.Get("UiManager");
+            sceneManager = Entity.Get("SceneManager");
+            inputManager = Entity.Get("InputManager");
             BaseAwake();
             NetworkAwake();
             StrategiesInit();

@@ -19,7 +19,7 @@ namespace HECSFramework.Core
                     continue;
                 }
 
-                var entity = new Entity(EntityManager.Worlds[worldIndex], container.name);
+                var entity = Entity.Get(EntityManager.Worlds[worldIndex], container.name);
                 entity.GenerateGuid();
                 container.Init(entity);
                 entities.Add(entity);
@@ -42,7 +42,7 @@ namespace HECSFramework.Core
                 }
 
                 var container = containers[i];
-                var entity = new Entity(EntityManager.Worlds[worldIndex], container.name);
+                var entity = Entity.Get(EntityManager.Worlds[worldIndex], container.name);
                 entity.GenerateGuid();
                 container.Init(entity);
                 entities.Add(entity);
@@ -62,7 +62,7 @@ namespace HECSFramework.Core
                 }
 
                 var container = containers[i];
-                var entity = new Entity(EntityManager.Worlds[worldIndex], container.name);
+                var entity = Entity.Get(EntityManager.Worlds[worldIndex], container.name);
                 entity.GenerateGuid();
                 container.Init(entity);
                 entities[i] = entity;
