@@ -106,6 +106,8 @@ namespace HECSFramework.Unity
             var prefab = (GameObject)viewReferenceComponent.ViewReference.editorAsset;
             var actorPrfb = Object.Instantiate(prefab).GetComponent<Actor>();
 
+            actorPrfb.Init(null, false, false);
+
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb.Entity);
 
