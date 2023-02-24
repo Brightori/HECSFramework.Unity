@@ -45,7 +45,7 @@ namespace HECSFramework.Unity
             if (world == null)
                 world = EntityManager.Default;
 
-            if (Entity == null)
+            if (Entity == null || !Entity.IsAlive)
             {
                 Entity = world.GetEntityFromPool(gameObject.name);
                 Entity.GUID = actorInitModule.Guid;
