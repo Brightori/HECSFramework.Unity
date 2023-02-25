@@ -7,7 +7,6 @@ using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Systems;
 using UnityEngine;
-using UnityEngine.SearchService;
 
 namespace HECSFramework.Unity
 {
