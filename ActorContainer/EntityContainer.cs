@@ -201,7 +201,7 @@ namespace HECSFramework.Unity
                 if (!pure && system.GetSystem is IHaveActor && !(entity.ContainsMask<ActorProviderComponent>()))
                     continue;
 
-                entity.AddHecsSystem(entity.World.GetSystemFromPool(system.GetTypeIndex()));
+                entity.AddHecsSystem(TypesMap.GetSystemFromFactory(system.GetTypeIndex()));
             }
         }
 

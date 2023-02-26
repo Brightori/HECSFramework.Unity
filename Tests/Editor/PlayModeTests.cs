@@ -63,6 +63,7 @@ public class PlayModeTests : OdinEditorWindow
         actor.Init(initEntity: false);
         EntityContainer.Init(actor.Entity);
         actor.Entity.Init();
+        actor.Entity.AddComponent<CheckTwoComponent>();
     }
 
     [Button]

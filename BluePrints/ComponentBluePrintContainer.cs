@@ -115,7 +115,7 @@ namespace HECSFramework.Unity
 
         public override IComponent GetOrAddComponent(Entity entity)
         {
-            return entity.GetOrAddComponent<T>();
+            return entity.AddComponent<T>();
         }
     }
 

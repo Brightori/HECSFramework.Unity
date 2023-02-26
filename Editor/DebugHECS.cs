@@ -61,7 +61,7 @@ public class DebugHECS : OdinEditorWindow
 
         EntitiesCount = EntityManager.Worlds[worldIndex].Entities.Length;
 
-        var freeIndeces = ReflectionHelpers.GetPrivateFieldValue<Stack<int>>(EntityManager.Worlds[worldIndex], "freeIndices");
+        var freeIndeces = ReflectionHelpers.GetPrivateFieldValue<Stack<int>>(EntityManager.Worlds[worldIndex], "freeIndicesForStandartEntities");
 
         FreeIndeces = freeIndeces.Count;
 
