@@ -152,7 +152,13 @@ namespace HECSFramework.Unity
 
         public override int GetHashCode()
         {
-            return Entity != null ? Entity.Index : gameObject.GetHashCode();
+            if (Entity != null)
+                return Entity.Index;
+
+            if (EntityManager.IsAlive && gameObject != null)
+                return gameObject.GetHashCode();
+
+            return -999;
         }
 
         public override bool Equals(object other)
