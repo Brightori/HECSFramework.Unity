@@ -43,7 +43,7 @@ namespace Systems
                 inject.Actor = Owner.AsActor();
             }
 
-            Owner.AddComponent(new ViewReadyTagComponent());
+            Owner.AddComponent(new ViewReadyTagComponent()).View = pooling;
 
             var initWithView = Owner.GetComponentsByType<IInitAferView>();
 

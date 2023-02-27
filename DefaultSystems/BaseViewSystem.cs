@@ -12,6 +12,7 @@ namespace Systems
         public void InitAferView()
         {
             isReady = true;
+            InitAfterViewLocal();
         }
 
         protected abstract void InitAfterViewLocal();
