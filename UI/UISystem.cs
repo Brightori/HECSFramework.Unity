@@ -1,5 +1,6 @@
 using Commands;
 using Components;
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using System;
@@ -97,7 +98,7 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, transform).Completed += a => LoadUI(a, action);
         }
 
-        public async Task<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
+        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
         {
             while (!isReady)
                 await Task.Delay(50);
