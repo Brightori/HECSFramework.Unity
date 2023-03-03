@@ -1,4 +1,5 @@
-﻿using Components;
+﻿using System;
+using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using UnityEngine;
@@ -11,7 +12,10 @@ namespace HECSFramework.Unity
         private World world;
 
         public ref FastEntity FastEntity => ref world.FastEntities[fastEntityIndex];
+
+        [NonSerialized]
         public Transform TransformCache;
+        
         private FastComponentMonoProvider[] fastComponentMonoProviders;
 
         public virtual void Awake()

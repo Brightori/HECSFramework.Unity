@@ -407,7 +407,7 @@ namespace HECSFrameWork.Components
             var body = new TreeSyntaxNode();
             body.Add(new TabSimpleSyntax(3, "foreach (var a in additionalGlobalEntities)"));
             body.Add(new LeftScopeSyntax(3));
-            body.Add(new TabSimpleSyntax(4, "var additionlEntity = new Entity(a.name);"));
+            body.Add(new TabSimpleSyntax(4, "var additionlEntity = Entity.Get(a.name);"));
             body.Add(new TabSimpleSyntax(4, "a.Init(additionlEntity);"));
             body.Add(new TabSimpleSyntax(4, "additionalEntities.Add(additionlEntity);"));
             body.Add(new RightScopeSyntax(3));
