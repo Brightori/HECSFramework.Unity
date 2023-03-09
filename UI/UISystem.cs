@@ -192,6 +192,7 @@ namespace Systems
                 return;
             }
 
+            uiCurrents.ForceUpdateFilter();
             foreach (var ui in uiCurrents)
             {
                 if (ui == null || !ui.IsAlive)

@@ -36,7 +36,7 @@ namespace HECSFramework.Unity
 
                 foreach (var a in actors)
                 {
-                    if (a.Entity.IsInited)
+                    if (a.IsAlive())
                     {
                         HECSDebug.LogError("Actors on scene when we load it to world, should not be inited, remove init on start from them");
                         continue;
