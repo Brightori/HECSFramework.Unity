@@ -41,9 +41,14 @@ namespace HECSFramework.Unity
 
         public static Entity GetEntity(this EntityContainer entityContainer, World world = null, bool needInit = true)
         {
+            if (world == null)
+                world = EntityManager.Default;
+
             var entity = world.GetEntityFromPool(entityContainer.CachedName);
+            
             if (needInit)
                 entityContainer.Init(entity);
+            
             entity.GetOrAddComponent<ActorContainerID>().ID = entityContainer.CachedName;
             entity.GenerateGuid();
             return entity;
