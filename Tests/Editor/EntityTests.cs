@@ -106,8 +106,9 @@ public class EntityTests
         var check2 = Entity.Get("MigrateEntity");
         check2.AddComponent(new TestReactComponent());
         check2.Init();
+        var guid = check2.GUID;
 
         EntityManager.Worlds[1].MigrateEntityToWorld(check2);
-        Assert.IsTrue(check2.WorldId == 1 && check.GetSystem<StressTestReactsSystem>().ReactGlobalRemove == true);
+        Assert.IsTrue(check2.WorldId == 1 && check.GetSystem<StressTestReactsSystem>().ReactGlobalRemove == true && check2.GUID == guid);
     }
 }
