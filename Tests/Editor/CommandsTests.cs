@@ -39,4 +39,17 @@ internal class CommandsTests
 
         Assert.IsTrue(sys.GlobalReact && sys.GlobalReactRemoved);
     }
+
+    [Test]
+    public void TestGlobalCommandWithoutListener()
+    {
+        EntityManager.RecreateInstance();
+
+        var entity = Entity.Get("Check");
+        entity.Init();
+
+        EntityManager.Command(new StressTestGlobalCommand { Param = true });
+        EntityManager.Command(new StressTestGlobalCommand { Param = true }, 8);
+        Assert.Pass();
+    }
 }
