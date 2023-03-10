@@ -42,8 +42,8 @@ namespace HECSFramework.Unity
                         continue;
                     }
 
-                    a.Init(world);
-                    a.Entity.Init();
+                    a.Init(world, true, true);
+                    //a.Entity.Init();
                     actorsList.Add(a);
                 }
 
