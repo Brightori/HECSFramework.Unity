@@ -134,20 +134,39 @@ namespace HECSFramework.Unity
             throw new ArgumentOutOfRangeException();
         }
 
-
-
         public static void RemoveHecsComponentsAndSystems<T>(this Entity entity)
         {
+            var hecsPoolArray = HECSPooledArray<T>.GetArray(entity.Components.Count);
+
             foreach (var c in entity.GetComponentsByType<T>())
             {
-                entity.RemoveComponent(TypesMap.GetComponentInfo(c as IComponent).ComponentsMask.Index);
+                hecsPoolArray.Add(c);
             }
 
-            foreach (var s in entity.Systems.ToArray())
+            for (int i = 0; i < hecsPoolArray.Count; i++)
+            {
+                entity.RemoveComponent(hecsPoolArray.Items[i] as IComponent);
+            }
+
+            hecsPoolArray.Release();
+
+
+            var hecsSystemsPooledArray = HECSPooledArray<ISystem>.GetArray(entity.Systems.Count);
+
+            foreach (var s in entity.Systems)
             {
                 if (s is T)
-                { entity.RemoveHecsSystem(s); }
+                {
+                    hecsSystemsPooledArray.Add(s);
+                }
             }
+
+            for (int i = 0; i < hecsSystemsPooledArray.Count; i++)
+            {
+                entity.RemoveHecsSystem(hecsSystemsPooledArray.Items[i]);
+            }
+
+            hecsSystemsPooledArray.Release();
         }
     }
 }
