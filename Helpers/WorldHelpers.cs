@@ -43,18 +43,17 @@ namespace HECSFramework.Unity
                     }
 
                     a.Init(world, true, true);
-                    //a.Entity.Init();
                     actorsList.Add(a);
                 }
+            }
 
-                foreach (var a in actors)
+            foreach (var a in actorsList)
+            {
+                foreach (var s in a.Entity.Systems)
                 {
-                    foreach (var s in a.Entity.Systems)
+                    if (s is IStartOnScene startOnScene)
                     {
-                        if (s is IStartOnScene startOnScene)
-                        {
-                            startOnScene.StartOnScene();
-                        }
+                        startOnScene.StartOnScene();
                     }
                 }
             }

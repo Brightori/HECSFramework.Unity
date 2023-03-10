@@ -57,7 +57,12 @@ namespace HECSFramework.Unity
             {
                 if (initWithContainer)
                 {
-                    actorContainer.Init(Entity);
+                    if (actorContainer != null)
+                        actorContainer.Init(Entity);
+                    else
+                    {
+                        HECSDebug.LogWarning("we try to init with empty container " + this.name);
+                    }
                 }
 
                 if (initEntity)
