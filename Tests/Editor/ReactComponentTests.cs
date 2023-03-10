@@ -49,12 +49,12 @@ public class ReactComponentTests
         var check2 = Entity.Get("Test");
 
         check.AddHecsSystem(new StressTestReactsSystem());
+        check.AddComponent(new TestReactComponent());
         check.Init();
         
         check2.Init();
         check2.AddHecsSystem(new StressTestReactsSystem());
 
-        check.AddComponent(new TestReactComponent());
         check2.AddComponent(new TestReactComponent());
 
         EntityManager.Default.GlobalUpdateSystem.Update();
