@@ -89,12 +89,13 @@ namespace HECSFramework.Unity
             var prefab = await asynData.Task;
             var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity).GetComponent<Actor>();
 
-            actorPrfb.Entity.SetWorld(world);
+            actorPrfb.Init(world, false);
 
             if (needLoadContainer)
                 entityContainer.Init(actorPrfb.Entity);
 
             actorPrfb.Entity.RemoveHecsComponentsAndSystems<Exluding>();
+            actorPrfb.Entity.Init();
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
