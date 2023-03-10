@@ -54,9 +54,17 @@ namespace HECSFramework.Unity.Editor
     [Serializable]
     public struct ActorPresentation
     {
+        [ReadOnly]
         public Guid Guid;
+
+        [ReadOnly]
         public string ContainerID;
+
+        [ReadOnly]
         public int EntityIndex;
+
+        [ReadOnly]
+        public int WorldIndex; 
 
         [ListDrawerSettings(Expanded = true, ShowPaging = false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
         public List<IComponent> Components;
@@ -83,6 +91,7 @@ namespace HECSFramework.Unity.Editor
 
             Components = new List<IComponent>(16);
             Systems = new List<ISystem>(16);
+            WorldIndex = entity.WorldId;
         }
 
         public void UpdateIfo()
