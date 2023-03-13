@@ -74,6 +74,44 @@ public class EntityTests
     }
 
     [Test]
+    public void TestFiltersDiffWorlds()
+    {
+        EntityManager.RecreateInstance();
+        EntityManager.AddWorld();
+        EntityManager.AddWorld();
+
+        foreach (var w in EntityManager.Worlds)
+        {
+            if (w != null)
+            {
+                var check = w.GetEntityFromPool("testInput");
+                check.AddComponent(new InputListenerTagComponent());
+                check.Init();
+            }
+        }
+
+        var count = 0;
+
+        foreach (var w in EntityManager.Worlds)
+            if (w != null)
+                w.GlobalUpdateSystem.Update();
+
+        foreach (var w in EntityManager.Worlds)
+        {
+            if (w != null)
+            {
+                var f = w.GetFilter<InputListenerTagComponent>();
+                if (f.Count > 0)
+                {
+                    count++;
+                }
+            }
+        }
+
+        Assert.IsTrue(count >= 3);
+    }
+
+    [Test]
     public void RemoveEntityTest()
     {
         EntityManager.RecreateInstance();
