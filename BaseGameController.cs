@@ -26,7 +26,6 @@ namespace HECSFramework.Unity
         private Entity sceneManager;
         private Entity inputManager;
 
-        private World[] worlds;
         private HECSList<World> waitForStart = new HECSList<World>();
         private HECSList<World> waitForLateStart = new HECSList<World>();
 
@@ -42,7 +41,6 @@ namespace HECSFramework.Unity
             foreach (var w in EntityManager.Worlds)
                 w?.GlobalUpdateSystem.InitCustomUpdate(this);
 
-            worlds = EntityManager.Worlds;
 
             gameLogic = Entity.Get("GameLogic");
             player = Entity.Get("Player");
@@ -114,6 +112,8 @@ namespace HECSFramework.Unity
 
         private void Update()
         {
+            var worlds = EntityManager.Worlds;
+
             for (int i = 0; i < waitForStart.Count; i++)
             {
                 if (waitForStart.Data[i].IsInited)
@@ -143,6 +143,7 @@ namespace HECSFramework.Unity
 
         private void LateUpdate()
         {
+            var worlds = EntityManager.Worlds;
             var worldsCount = worlds.Length;
             for (int i = 0; i < worldsCount; i++)
             {
@@ -153,6 +154,8 @@ namespace HECSFramework.Unity
 
         private void FixedUpdate()
         {
+            var worlds = EntityManager.Worlds;
+
             var worldsCount = worlds.Length;
             for (int i = 0; i < worldsCount; i++)
             {
