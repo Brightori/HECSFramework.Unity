@@ -23,6 +23,7 @@ namespace HECSFramework.Unity.Editor
 
         //BluePrintsFolders
         public static string Identifiers = "/Identifiers/";
+        public static string Actions = "/Actions/";
         private static string GlobalEntities = "/GlobalEntities/";
         private static string Presets = "/Presets/";
         public static string UIBluePrints = "/UIBluePrints/";
@@ -130,7 +131,6 @@ namespace HECSFrameWork
         private static void CreateFolders()
         {
             CheckFolder(ScriptPath);
-            CheckFolder(ScriptPath + Abilities);
             CheckFolder(ScriptPath + Actors);
             CheckFolder(ScriptPath + BluePrints);
             CheckFolder(ScriptPath + Commands);
@@ -146,6 +146,8 @@ namespace HECSFrameWork
             CheckFolder(ScriptPath + BluePrints + PredicatesBlueprints);
             CheckFolder(ScriptPath + BluePrints + ComponentsBluePrints);
             CheckFolder(ScriptPath + BluePrints + SystemsBluePrint);
+            CheckFolder(ScriptPath + BluePrints + Actions);
+            CheckFolder(ScriptPath + BluePrints + Identifiers);
 
             //BluePrintsFolders
             CheckFolder(DataPath + BluePrints);
@@ -156,6 +158,7 @@ namespace HECSFrameWork
             CheckFolder(DataPath + BluePrints + Strategies);
             CheckFolder(DataPath + BluePrints + Presets);
             CheckFolder(DataPath + BluePrints + UIBluePrints);
+            CheckFolder(DataPath + BluePrints + Actions);
 
             //MonoBehaviourComponents
             CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
