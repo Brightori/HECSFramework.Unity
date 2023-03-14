@@ -1,5 +1,4 @@
 using System;
-using Commands;
 using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
@@ -16,6 +15,7 @@ namespace Systems
         [Required]
         public UnityTransformComponent unityTransform;
         private GameObject pooling;
+
 
         public override void InitSystem()
         {
@@ -43,16 +43,24 @@ namespace Systems
                 inject.Actor = Owner.AsActor();
             }
 
-            Owner.AddComponent(new ViewReadyTagComponent()).View = pooling;
+            AfterViewService.ProcessAfterView(Owner, pooling);
+        }
+    }
 
-            var initWithView = Owner.GetComponentsByType<IInitAferView>();
+    public static class AfterViewService
+    {
+        public  static void ProcessAfterView(Entity entity, GameObject view)
+        {
+            entity.AddComponent(new ViewReadyTagComponent()).View = view;
+
+            var initWithView = entity.GetComponentsByType<IInitAferView>();
 
             foreach (var iv in initWithView)
             {
                 iv.InitAferView();
             }
 
-            foreach (var s in Owner.Systems)
+            foreach (var s in entity.Systems)
             {
                 if (s is IInitAferView initAferView)
                 {
