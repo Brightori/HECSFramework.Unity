@@ -44,7 +44,7 @@ namespace Systems
     }
 
     public interface IAnimationSystem : ISystem,
-          IReactCommand<BoolAnimationCommand>,
+        IReactCommand<BoolAnimationCommand>,
         IReactCommand<FloatAnimationCommand>,
         IReactCommand<IntAnimationCommand>,
         IReactCommand<TriggerAnimationCommand>

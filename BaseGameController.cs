@@ -49,7 +49,6 @@ namespace HECSFramework.Unity
             inputManager = Entity.Get("InputManager");
             BaseAwake();
             NetworkAwake();
-            StrategiesInit();
         }
 
         private void NewWorldReact(World world)
@@ -70,7 +69,6 @@ namespace HECSFramework.Unity
 
         partial void NetworkAwake();
         partial void InitNetWorkEntities();
-        partial void StrategiesInit();
 
         private void InitEntities()
         {
