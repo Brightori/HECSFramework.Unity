@@ -452,22 +452,22 @@ namespace HECSFramework.Unity
 
                     foreach (var c in blendTree.children)
                     {
-                        var name = animatorState.name.Replace(" ", "_") + "_" + c.motion.name;
-                        var blendTreeStatefilePath = StateBluePrintsPath + name + ".asset";
+                        //var name = animatorState.name.Replace(" ", "_") + "_" + c.motion.name;
+                        //var blendTreeStatefilePath = StateBluePrintsPath + name + ".asset";
 
-                        if (!File.Exists(Application.dataPath + blendTreeStatefilePath))
-                        {
-                            AnimatorStateIdentifier so = ScriptableObject.CreateInstance<AnimatorStateIdentifier>();
-                            so.name = name;
-                            AssetDatabase.CreateAsset(so, blendTreeStatefilePath);
-                        }
-                        else
-                        {
-                            var needed = AssetDatabase.LoadAssetAtPath<AnimatorStateIdentifier>(blendTreeStatefilePath);
-                            needed.name = name;
-                            EditorUtility.SetDirty(needed);
-                        }
-                        tree.AddUnique(GetDictionaryPosition(c.motion, name));
+                        //if (!File.Exists(Application.dataPath + blendTreeStatefilePath))
+                        //{
+                        //    AnimatorStateIdentifier so = ScriptableObject.CreateInstance<AnimatorStateIdentifier>();
+                        //    so.name = name;
+                        //    AssetDatabase.CreateAsset(so, blendTreeStatefilePath);
+                        //}
+                        //else
+                        //{
+                        //    var needed = AssetDatabase.LoadAssetAtPath<AnimatorStateIdentifier>(blendTreeStatefilePath);
+                        //    needed.name = name;
+                        //    EditorUtility.SetDirty(needed);
+                        //}
+                        //tree.AddUnique(GetDictionaryPosition(c.motion, name));
                     }
 
                     break;
