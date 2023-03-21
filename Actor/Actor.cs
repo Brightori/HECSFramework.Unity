@@ -125,7 +125,7 @@ namespace HECSFramework.Unity
 
         private void OnDestroy()
         {
-            if (Entity.IsAlive() && EntityManager.IsAlive)
+            if (Entity.IsAlive() && Entity.World != null && Entity.World.IsAlive && EntityManager.IsAlive)
                 Entity.Dispose();
 
             Entity = null;
