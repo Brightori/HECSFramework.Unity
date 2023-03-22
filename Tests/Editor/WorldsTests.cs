@@ -53,6 +53,21 @@ public class WorldsTests
         Assert.IsTrue(worlds.All(x => !x.IsAlive) && EntityManager.Worlds[0] != null && EntityManager.Worlds[check.Index] == null && check.Entities.All(z=> z == null));
     }
 
+    [Test]
+    public void DisposeSystemTest()
+    {
+        EntityManager.RecreateInstance();
+        var world = EntityManager.AddWorld();
+        world.Init();
+        var testEntity = world.GetEntityFromPool("test");
+        var testDisposeSystem = new TestDisposeSystem();
+        testEntity.AddHecsSystem(testDisposeSystem);
+        testEntity.Init();
+        
+        EntityManager.RemoveWorld(world);
+        Assert.IsTrue(testDisposeSystem.Disposed);
+    }
+
     private Entity GetEntity(World world)
     {
         var entity = world.GetEntityFromPool();
