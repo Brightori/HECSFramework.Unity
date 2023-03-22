@@ -60,12 +60,12 @@ public class WorldsTests
         var world = EntityManager.AddWorld();
         world.Init();
         var testEntity = world.GetEntityFromPool("test");
-        var testDisposeSystem = new TestDisposeSystem();
+        var testDisposeSystem = new StressTestReactsSystem();
         testEntity.AddHecsSystem(testDisposeSystem);
         testEntity.Init();
-        
+
         EntityManager.RemoveWorld(world);
-        Assert.IsTrue(testDisposeSystem.Disposed);
+        Assert.IsTrue(testDisposeSystem.IsDisposed);
     }
 
     private Entity GetEntity(World world)
