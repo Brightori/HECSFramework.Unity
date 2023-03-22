@@ -85,7 +85,6 @@ namespace HECSFramework.Unity
             }
 
             animators = list.ToArray();
-            InstallHECS.CheckFolder(StateBluePrintsPath);
             InstallHECS.CheckFolder(Application.dataPath + AnimParametersBluePrintsPath);
         }
 
@@ -331,31 +330,6 @@ namespace HECSFramework.Unity
 
             methodBody.Add(new TabSimpleSyntax(3, $"{animatorController.name} = new {nameof(AnimatorHelper)}({dictionaryName});"));
             methodBody.Add(new TabSimpleSyntax(3, $"animhelpers.Add({CParse.Quote}{animatorController.name}{CParse.Quote}, {animatorController.name});"));
-
-            foreach (var l in animatorController.layers)
-            {
-                foreach (var s in l.stateMachine.states)
-                {
-                    var motion = s.state.motion;
-
-                    if (motion == null || string.IsNullOrEmpty(motion.name)) continue;
-
-                    ProcessMotion(motion, s.state, dictionaryBody);
-                }
-
-                var stateMachines = animatorController.layers
-                    .Select(x => x.stateMachine).SelectMany(z => z.stateMachines).SelectMany(y => y.stateMachine.states);
-
-                foreach (var sm in stateMachines)
-                {
-                    var motion = sm.state.motion;
-
-                    if (motion == null || string.IsNullOrEmpty(motion.name)) continue;
-
-                    ProcessMotion(motion, sm.state, dictionaryBody);
-                }
-            }
-
             return tree;
         }
 
