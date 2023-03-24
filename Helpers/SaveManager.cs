@@ -44,7 +44,7 @@ namespace HECSFramework.Unity
             return false;
         }
 
-      
+
 
         public static void SaveToFile(string path, object saveData)
         {
@@ -65,10 +65,14 @@ namespace HECSFramework.Unity
             {
                 fs.Close();
             }
-        }        
-        
+        }
+
         public static void SaveToFile(string path, byte[] data)
         {
+            var folderPath = Path.GetDirectoryName(path);
+            bool exists = Directory.Exists(folderPath);
+            if (!exists) Directory.CreateDirectory(folderPath);
+
             FileStream fs = new FileStream(path, FileMode.Create);
 
             // Construct a BinaryFormatter and use it to serialize the data to the stream.
@@ -94,7 +98,7 @@ namespace HECSFramework.Unity
         {
             if (File.Exists(DefaultSaveDataPath))
                 File.Delete(DefaultSaveDataPath);
-            
+
             Debug.Log("удалили сейв");
         }
     }
