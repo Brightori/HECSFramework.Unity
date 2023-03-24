@@ -93,9 +93,19 @@ namespace Systems
             SpawnUIFromBluePrint(spawn, command.OnUILoad, mainCanvasTransform.Transform);
         }
 
-        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<Entity> action, Transform transform)
+        private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<Entity> action, Transform mainTransform)
         {
-            Addressables.InstantiateAsync(spawn.UIActor, transform).Completed += a => LoadUI(a, action);
+            if (spawn.AdditionalCanvasIdentifier != null)
+            {
+               var neededCanvas = Owner.World.GetFilter<AdditionalCanvasTagComponent>()
+                    .FirstOrDefault(x => x.GetComponent<AdditionalCanvasTagComponent>()
+                        .AdditionalCanvasIdentifier.Id == spawn.AdditionalCanvasIdentifier.Id);
+
+                if (neededCanvas != null)
+                    mainTransform = neededCanvas.GetOrAddComponent<UnityTransformComponent>().Transform;
+            }
+            
+            Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
         public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)

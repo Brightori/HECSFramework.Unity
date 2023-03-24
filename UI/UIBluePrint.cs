@@ -10,6 +10,7 @@ namespace HECSFramework.Unity
         public UIActorReference UIActor;
         public AssetReference Container;
         public UIIdentifier UIType;
+        public AdditionalCanvasIdentifier  AdditionalCanvasIdentifier;
         public UIGroupTagComponent Groups;
     }
 }
