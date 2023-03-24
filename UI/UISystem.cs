@@ -97,14 +97,14 @@ namespace Systems
         {
             if (spawn.AdditionalCanvasIdentifier != null)
             {
-               var neededCanvas = Owner.World.GetFilter<AdditionalCanvasTagComponent>()
-                    .FirstOrDefault(x => x.GetComponent<AdditionalCanvasTagComponent>()
-                        .AdditionalCanvasIdentifier.Id == spawn.AdditionalCanvasIdentifier.Id);
+                var neededCanvas = Owner.World.GetFilter<AdditionalCanvasTagComponent>()
+                     .FirstOrDefault(x => x.GetComponent<AdditionalCanvasTagComponent>()
+                         .AdditionalCanvasIdentifier.Id == spawn.AdditionalCanvasIdentifier.Id);
 
                 if (neededCanvas != null)
                     mainTransform = neededCanvas.GetOrAddComponent<UnityTransformComponent>().Transform;
             }
-            
+
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
@@ -331,17 +331,10 @@ namespace Systems
 
             for (int i = 0; i < uIBluePrints.Count; i++)
             {
-                try
+                if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
+                && !IsCurrentUIContainsId(uIBluePrints[i].UIType.Id))
                 {
-                    if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
-                    && !IsCurrentUIContainsId(uIBluePrints[i].UIType.Id))
-                    {
-                        SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI, mainCanvasTransform.Transform);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
+                    SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI, mainCanvasTransform.Transform);
                 }
             }
         }
