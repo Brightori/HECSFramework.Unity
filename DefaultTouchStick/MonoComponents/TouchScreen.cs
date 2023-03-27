@@ -1,70 +1,110 @@
 using System;
+using System.Collections.Generic;
+using HECSFramework.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class TouchScreen : EventTrigger
 {
-    public event Action<Vector2> onPointerDown, onPointerUP, onPointerClick;
-    public event Action<Vector2, Vector2> onDrag;
-    public event Action<Vector2, Vector2, float> onSweep;
-    public event Action onceCallPointerDown, onceCallPointerUP;
-    public event Action<float> rotateVertical, rotateHorizontal;
+    private struct TouchData
+    {
+        public int PointerId;
+        public Vector2 BeginTouchPos;
+        public Vector3 TouchPos;
+    }
+    public event Action<Vector2> PointerDown, PointerUp, PointerClick;
+    public event Action<Vector2, Vector2> Drag;
+    public event Action<float> Zoom; //delta
+    public event Action<Vector2, Vector2, float> Sweep;
+    public event Action<float> RotateVertical, RotateHorizontal;
 
+    private long beginDragTime;
 
-    private long m_beginDragTime;
-    private Vector2 m_beginDragMousePos = Vector3.zero;
-    private Vector2 m_onDragMousePos = Vector3.zero;
-
-
+    private readonly TouchData[] touches = new TouchData[10];
+    private int touchCount = 0;
+    private float lastZoomDistance = 0f;
     public override void OnPointerDown(PointerEventData eventData)
     {
-        onPointerDown?.Invoke(eventData.position);
-        onceCallPointerDown?.Invoke();
-        onceCallPointerDown = null;
+        if (touchCount >= touches.Length)
+            return;
 
-        m_beginDragMousePos = eventData.position;
-        m_beginDragTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        PointerDown?.Invoke(eventData.position);
+        touches[touchCount++] = new TouchData
+        {
+            PointerId = eventData.pointerId,
+            BeginTouchPos = eventData.position,
+            TouchPos = eventData.position
+        };
+        beginDragTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
+
     public override void OnPointerUp(PointerEventData eventData)
     {
-   
-        onPointerUP?.Invoke(eventData.position);
-        onceCallPointerUP?.Invoke();
-        onceCallPointerUP = null;
-
-        
-
-        Vector2 sweep = eventData.position - m_beginDragMousePos;
+        var index = GetIndexOfTouch(eventData.pointerId);
+        if (index == -1)
+            return;
+        PointerUp?.Invoke(eventData.position);
+        Vector2 sweep = eventData.position - touches[index].BeginTouchPos;
         sweep.x /= Screen.width;
         sweep.y /= Screen.height;
         if (sweep.magnitude > 0.05f)
         {
-            float sweepTime = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - m_beginDragTime) / 1_000.0f;
-            onSweep?.Invoke(m_beginDragMousePos, sweep, sweepTime);
+            float sweepTime = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - beginDragTime) / 1_000.0f;
+            Sweep?.Invoke(touches[index].BeginTouchPos, sweep, sweepTime);
         }
-        else onPointerClick?.Invoke(m_beginDragMousePos);
+        else PointerClick?.Invoke(touches[index].BeginTouchPos);
 
-        m_onDragMousePos = eventData.position;
+        for (int i = index; i < touchCount - 1; i++)
+        {
+            touches[i] = touches[i + 1];
+        }
+        touchCount--;
+        // touchCount = 0;
+        lastZoomDistance = 0;
     }
+
     public override void OnDrag(PointerEventData eventData)
     {
-        rotateVertical?.Invoke(eventData.delta.y / Screen.width);
-        rotateHorizontal?.Invoke(eventData.delta.x / Screen.width);
-        m_onDragMousePos = eventData.position;
+        var index = GetIndexOfTouch(eventData.pointerId);
+        if (index == -1)
+            return;
+        RotateVertical?.Invoke(eventData.delta.y / Screen.width);
+        RotateHorizontal?.Invoke(eventData.delta.x / Screen.width);
+        var touchData = touches[index];
+        touchData.TouchPos = eventData.position;
+        touches[index] = touchData;
 
-        Vector2 sweep = eventData.position - m_beginDragMousePos;
+        Vector2 sweep = eventData.position - touchData.BeginTouchPos;
         sweep.x /= Screen.width;
         sweep.y /= Screen.height;
-        onDrag?.Invoke(m_beginDragMousePos, eventData.delta);
+        if (touchCount == 1)
+        {
+            Drag?.Invoke(touchData.BeginTouchPos, eventData.delta);
+        }
+
+        if (touchCount == 2)
+        {
+            var distance = Vector2.Distance(touches[0].TouchPos, touches[1].TouchPos);
+            if (lastZoomDistance == 0f)
+            {
+                lastZoomDistance = distance;
+                return;
+            }
+            Zoom?.Invoke(distance - lastZoomDistance);
+            lastZoomDistance = distance;
+        }
     }
 
-    /// <summary>
-    /// v - длина слайдера в пикселях
-    /// </summary>
-    /// <param name="v"></param>
-    /// <returns></returns>
-    public float GetVerticalSlider(int v)
+    private int GetIndexOfTouch(int pointerId)
     {
-        return Mathf.Clamp01((m_onDragMousePos.y - m_beginDragMousePos.y) / v);
+        for (var i = 0; i < touches.Length; i++)
+        {
+            var touch = touches[i];
+            if (touch.PointerId == pointerId)
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 }

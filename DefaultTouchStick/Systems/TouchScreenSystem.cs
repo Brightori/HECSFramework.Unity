@@ -7,7 +7,8 @@ using Commands;
 
 namespace Systems
 {
-	[Serializable][Documentation(Doc.UI, Doc.Input, "Converting Screen Input to ECS Commands")]
+    [Serializable]
+    [Documentation(Doc.UI, Doc.Input, "Converting Screen Input to ECS Commands")]
     public sealed class TouchScreenSystem : BaseSystem, IHaveActor
     {
         private TouchScreen touchScreen;
@@ -17,12 +18,17 @@ namespace Systems
         public override void InitSystem()
         {
             Actor.TryGetComponent(out touchScreen, true);
-     
-            touchScreen.onDrag += OnDragProcessing;
+
+            touchScreen.Drag += DragProcessing;
+            touchScreen.Zoom += ZoomProcessing;
         }
 
-   
-        private void OnDragProcessing(Vector2 startDrag, Vector2 delta)
+        private void ZoomProcessing(float value)
+        {
+            EntityManager.Command(new ScreenZoomCommand() { Value = value }, -1);
+        }
+
+        private void DragProcessing(Vector2 startDrag, Vector2 delta)
         {
             EntityManager.Command(new ScreenDragCommand() { Delta = delta }, -1);
         }
