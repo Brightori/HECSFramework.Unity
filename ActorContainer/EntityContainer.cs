@@ -4,6 +4,8 @@ using System.Linq;
 using HECSFramework.Core;
 using Components;
 using System;
+using System.ComponentModel;
+using IComponent = HECSFramework.Core.IComponent;
 
 
 #if UNITY_EDITOR
@@ -330,6 +332,17 @@ namespace HECSFramework.Unity
         public void Sort()
         {
             holder.SortComponents();
+        }
+
+        public T GetOrAddComponent<T>() where T:  class, IComponent, new()
+        {
+            if (IsHaveComponent<T>())
+                return GetComponent<T>();
+
+            var bpProvider = new BluePrintsProvider();
+            AddComponent(new T());
+
+            return GetComponent<T>();
         }
 
         public void AddComponent<T>(T component) where T : class, IComponent, new()
