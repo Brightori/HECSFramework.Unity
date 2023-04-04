@@ -5,11 +5,21 @@ namespace HECSFramework.Unity
 {
     public abstract class ModifierBluePrint<T> : ModifierBluePrintBase where T : IModifier, new()
     {
-        [ShowInInspector] private T modifier = new T();
+        [UnityEngine.SerializeField]
+        [LabelText("Modifier")]
+        private T modifier = new T();
         
         public override IModifier GetModifier()
         {
             return modifier;
+        }
+
+        public U GetModifierWithCast<U>() where U: IModifier
+        {
+            if (modifier is U needed)
+                return needed;
+
+            return default;
         }
     }
 }
