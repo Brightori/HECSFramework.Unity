@@ -43,6 +43,12 @@ namespace Systems
         public void GlobalStart()
         {
             poolingSystem = Owner.World.GetSingleSystem<PoolingSystem>();
+
+            if (Owner.World.TryGetSingleComponent(out MainCanvasTagComponent mainCanvasTagComponent))
+            {
+                isReady = true;
+                mainCanvasTransform = mainCanvasTagComponent.Owner.GetOrAddComponent<UnityTransformComponent>();
+            }
         }
 
         private void LoadReact(AsyncOperationHandle<IList<UIBluePrint>> obj)
