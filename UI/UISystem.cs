@@ -161,7 +161,9 @@ namespace Systems
                 newUiActor.Init();
             else
                 newUiActor.InitActorWithoutEntity();
-            
+
+            newUiActor.ActorContainer.Init(newUiActor.Entity);
+
             newUiActor.transform.SetParent(canvas);
             return newUiActor.Entity;
         }
