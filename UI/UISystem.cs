@@ -160,7 +160,7 @@ namespace Systems
             if (needInit)
                 newUiActor.Init();
             
-            newUiActor.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
+            newUiActor.transform.SetParent(canvas);
             return newUiActor.Entity;
         }
 
