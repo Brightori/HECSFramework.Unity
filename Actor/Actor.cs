@@ -179,7 +179,9 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
-            Entity?.Dispose();
+            if (Entity != null && !Entity.IsDisposed) 
+                Entity.Dispose();
+            
             Entity = null;
             Destroy(gameObject);
         }

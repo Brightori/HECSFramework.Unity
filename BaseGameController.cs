@@ -146,6 +146,7 @@ namespace HECSFramework.Unity
             for (int i = 0; i < worldsCount; i++)
             {
                 worlds[i]?.GlobalUpdateSystem.LateUpdate();
+                worlds[i]?.GlobalUpdateSystem.PreFinishUpdate?.Invoke();
                 worlds[i]?.GlobalUpdateSystem.FinishUpdate?.Invoke();
             }
         }
