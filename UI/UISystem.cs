@@ -108,7 +108,7 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
-        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool ispoolable = false)
+        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false)
         {
             while (!isReady)
                 await Task.Delay(50);
@@ -150,8 +150,10 @@ namespace Systems
 
             var newUIactorPrfb = await Addressables.LoadAssetAsync<GameObject>(bluePrint.UIActor).Task;
             var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
-
-            newUiActor.Init();
+            
+            if (needInit)
+                newUiActor.Init();
+            
             newUiActor.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
             return newUiActor.Entity;
         }
