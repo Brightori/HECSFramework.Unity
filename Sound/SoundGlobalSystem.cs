@@ -12,7 +12,7 @@ namespace Systems
 {
     [Serializable, BluePrint]
     [Documentation(Doc.Audio, Doc.Global, Doc.HECS, "Default sound solution for HECS, its all about 2d sound on this moment")]
-    public class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IReactEntity,
+    public sealed partial class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IReactEntity,
         IReactGlobalCommand<PlaySoundCommand>,
         IReactGlobalCommand<StopSoundCommand>,
         IReactGlobalCommand<UpdateSoundOptionsCommand>
