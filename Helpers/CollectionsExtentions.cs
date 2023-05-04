@@ -6,13 +6,29 @@ namespace HECSFramework.Unity.Helpers
     public static class CollectionsExtentions
     {
         public static T GetRandomElement<T>(this List<T> items)
-            => items[UnityEngine.Random.Range(0, items.Count)];
+         => items[UnityEngine.Random.Range(0, items.Count)];
 
         public static T GetRandomElement<T>(this T[] items)
             => items[UnityEngine.Random.Range(0, items.Length)];
 
         public static T GetRandomElement<T>(this IEnumerable<T> items)
             => items.ElementAt(UnityEngine.Random.Range(0, items.Count()));
+
+        public static T GetRandomOrDefaultElement<T>(this List<T> items)
+        {
+            if (items == null || items.Count == 0)
+                return default;
+
+            return items[UnityEngine.Random.Range(0, items.Count)];
+        }
+
+        public static T GetRandomOrDefaultElement<T>(this T[] items)
+        {
+            if (items == null || items.Length == 0)
+                return default;
+
+            return items[UnityEngine.Random.Range(0, items.Length)];
+        }
 
         public static void AddUniqueElement<T>(this List<T> list, T element)
         {
