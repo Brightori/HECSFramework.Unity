@@ -6,5 +6,6 @@ namespace Commands
     public struct HideUICommand : ICommand, IGlobalCommand
     {
         public int UIViewType;
+        public int UIGroup;
     }
 }

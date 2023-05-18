@@ -8,13 +8,9 @@ namespace Commands
         public int UIViewType;
         public Action<Entity> OnUILoad;
         public bool MultyView;
-    }
 
-    public struct ShowUIOnAdditionalCommand: IGlobalCommand
-    {
         public int AdditionalCanvasID;
-        public int UIViewType;
-        public Action<Entity> OnUILoad;
-        public bool MultyView;
+        public int UIGroup;
+        public bool ClearStack;
     }
 }
