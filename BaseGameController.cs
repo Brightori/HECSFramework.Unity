@@ -35,7 +35,7 @@ namespace HECSFramework.Unity
 
             entityManager = new EntityManager(worldCount);
             EntityManager.OnNewWorldAdded += NewWorldReact;
-            
+
             updateSystem = EntityManager.Default.GlobalUpdateSystem;
 
             foreach (var w in EntityManager.Worlds)
@@ -54,7 +54,7 @@ namespace HECSFramework.Unity
         private void NewWorldReact(World world)
         {
             world.GlobalUpdateSystem.InitCustomUpdate(this);
-            
+
             if (updateSystem.IsGlobalStarted && world.IsInited)
                 world.GlobalUpdateSystem.Start();
             else
@@ -93,10 +93,35 @@ namespace HECSFramework.Unity
         {
             InitEntities();
             InitNetWorkEntities();
+
+            ThreadsInit();
             BaseStart();
 
             foreach (var w in EntityManager.Worlds)
                 w?.GlobalUpdateSystem.Start();
+        }
+
+        private void ThreadsInit()
+        {
+            foreach (var w in EntityManager.Worlds)
+            {
+                if (w == null)
+                    continue;
+
+                foreach (var e in w.Entities)
+                {
+                    if (e.IsAlive && e.IsInited)
+                    {
+                        foreach (var s in e.Systems)
+                        {
+                            if (s is IOnThreadStartInit needed)
+                            {
+                                needed.OnThreadStartInit();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void LateStart()
