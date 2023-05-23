@@ -1,13 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Commands;
 using Components;
-using System.Linq;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -19,8 +18,6 @@ namespace Systems
     {
         public const string UIBluePrints = "UIBluePrints";
 
-        private Queue<ShowUICommand> commandsQueue = new Queue<ShowUICommand>();
-
         private EntitiesFilter uiCurrents;
         private EntitiesFilter additionalCanvases;
 
@@ -31,7 +28,10 @@ namespace Systems
         private bool isReady;
         private bool isLoaded;
 
-        private List<UIBluePrint> spawnInProgress = new List<UIBluePrint>();
+        [Required]
+        public UIStackComponent UIStackComponent;
+
+        private HashSet<UIBluePrint> spawnInProgress = new ();
 
         public override void InitSystem()
         {
@@ -64,21 +64,22 @@ namespace Systems
             if (!isLoaded || !isReady)
                 await UniTask.WaitUntil(() => isReady && isLoaded, PlayerLoopTiming.LastEarlyUpdate);
 
+            if (command.ClearStack)
+                UIStackComponent.UIStack.Clear();
+
+            if (command.UIGroup != 0)
+                ShowGroup(command.UIGroup);
+
             if (!command.MultyView)
             {
-                foreach (var ui in uiCurrents)
+                if (spawnInProgress.Any(x => x.UIType.Id == command.UIViewType) )
+                    return;
+
+                if (TryGetCurrentUI(command.UIViewType, out var entity))
                 {
-                    if (ui == null || !ui.IsAlive)
-                        continue;
-
-                    var uiTag = ui.GetComponent<UITagComponent>();
-
-                    if (uiTag.ViewType.Id == command.UIViewType)
-                    {
-                        uiTag.Owner.Command(command);
-                        command.OnUILoad?.Invoke(uiTag.Owner);
-                        return;
-                    }
+                    entity.Command(command);
+                    command.OnUILoad?.Invoke(entity);
+                    return;
                 }
             }
 
@@ -105,7 +106,7 @@ namespace Systems
                     mainTransform = neededCanvas.GetOrAddComponent<UnityTransformComponent>().Transform;
             }
 
-            Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
+            Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => UILoaded(a, action);
         }
 
         public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false)
@@ -115,7 +116,7 @@ namespace Systems
 
             if (!isMultiple)
             {
-                if (TryGetFromCurrentUI(uiType, out var ui))
+                if (TryGetCurrentUI(uiType, out var ui))
                     return ui;
             }
 
@@ -167,7 +168,7 @@ namespace Systems
             return uIBluePrints.FirstOrDefault(x => x.UIType.Id == uiType);
         }
 
-        private bool TryGetFromCurrentUI(int uiType, out Entity uiEntity)
+        private bool TryGetCurrentUI(int uiType, out Entity uiEntity)
         {
             uiEntity = null;
 
@@ -188,7 +189,7 @@ namespace Systems
             return false;
         }
 
-        private void LoadUI(AsyncOperationHandle<GameObject> obj, Action<Entity> onUILoad)
+        private void UILoaded(AsyncOperationHandle<GameObject> obj, Action<Entity> onUILoad)
         {
             if (obj.Result.TryGetComponent<UIActor>(out var actor))
             {
