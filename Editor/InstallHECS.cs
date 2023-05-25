@@ -19,6 +19,7 @@ namespace HECSFramework.Unity.Editor
         private static string Systems = "/Systems/";
         private static string Strategies = "/Strategies/";
         private static string Content = "/Content/";
+        private static string History = "/History/";
         public readonly static string HECSGenerated = "/HECSGenerated/";
 
         //BluePrintsFolders
@@ -159,6 +160,7 @@ namespace HECSFrameWork
             CheckFolder(DataPath + BluePrints + Presets);
             CheckFolder(DataPath + BluePrints + UIBluePrints);
             CheckFolder(DataPath + BluePrints + Actions);
+            CheckFolder(DataPath + BluePrints + History);
 
             //MonoBehaviourComponents
             CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
