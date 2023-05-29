@@ -53,7 +53,7 @@ namespace Systems
         {
             entity.AddComponent(new ViewReadyTagComponent()).View = view;
 
-            var initWithView = entity.GetComponentsByType<IInitAferView>();
+            var initWithView = entity.GetComponentsByType<IInitAfterView>();
 
             foreach (var iv in initWithView)
             {
@@ -62,7 +62,7 @@ namespace Systems
 
             foreach (var s in entity.Systems)
             {
-                if (s is IInitAferView initAferView)
+                if (s is IInitAfterView initAferView)
                 {
                     initAferView.InitAferView();
                 }

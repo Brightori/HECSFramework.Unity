@@ -3,7 +3,7 @@ using HECSFramework.Unity;
 
 namespace Components
 {
-    public partial class PoolableTagComponent : BaseComponent, IInitAferView, IAfterEntityInit
+    public partial class PoolableTagComponent : BaseComponent, IInitAfterView, IAfterEntityInit
     {
         private IStartOnPooling[] startOnPoolings = new IStartOnPooling[0];
         private IStopOnPooling[] stopOnPoolings = new IStopOnPooling[0];

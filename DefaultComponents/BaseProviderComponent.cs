@@ -7,7 +7,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.Provider, "its base component for providing monobehaviours to ecs")]
-    public abstract class BaseProviderComponent<T> : BaseComponent, IHaveActor, IAfterEntityInit, IInitAferView where T : MonoBehaviour
+    public abstract class BaseProviderComponent<T> : BaseComponent, IHaveActor, IAfterEntityInit, IInitAfterView where T : MonoBehaviour
     {
         public T Get;
 

@@ -11,7 +11,7 @@ namespace HECSFramework.Unity
 
 namespace HECSFramework.Core
 {
-    public interface IInitAferView
+    public interface IInitAfterView
     {
         void InitAferView();
     }
