@@ -8,6 +8,11 @@ namespace HECSFramework.Unity.Helpers
         public static T GetRandomElement<T>(this List<T> items)
          => items[UnityEngine.Random.Range(0, items.Count)];
 
+        public static int GetRandomIndex<T>(this List<T> items)
+        {
+          return  UnityEngine.Random.Range(0, items.Count);
+        }
+
         public static T GetRandomElement<T>(this T[] items)
             => items[UnityEngine.Random.Range(0, items.Length)];
 
