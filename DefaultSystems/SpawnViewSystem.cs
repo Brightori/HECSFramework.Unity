@@ -80,7 +80,7 @@ namespace Systems
         {
             entity.RemoveComponent(new ViewReadyTagComponent());
 
-            var toReset = entity.GetComponentsByType<IInitAferView>();
+            var toReset = entity.GetComponentsByType<IInitAfterView>();
 
             foreach (var iv in toReset)
             {
@@ -89,7 +89,7 @@ namespace Systems
 
             foreach (var s in entity.Systems)
             {
-                if (s is IInitAferView initAfterView)
+                if (s is IInitAfterView initAfterView)
                 {
                     initAfterView.Reset();
                 }
