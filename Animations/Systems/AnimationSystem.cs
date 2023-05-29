@@ -41,6 +41,10 @@ namespace Systems
         protected override void InitAfterViewLocal()
         {
         }
+
+        protected override void ResetLocal()
+        {
+        }
     }
 
     public interface IAnimationSystem : ISystem,

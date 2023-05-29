@@ -1,5 +1,8 @@
 using System;
+using System.Threading.Tasks;
+using Commands;
 using Components;
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using UnityEngine;
@@ -7,43 +10,47 @@ using UnityEngine;
 namespace Systems
 {
     [Serializable][Documentation(Doc.Visual, "this system spawn view to actor and report when spawn view complete")]
-    public sealed class SpawnViewSystem : BaseSystem, IAfterEntityInit 
+    public sealed class SpawnViewSystem : BaseSystem, IAfterEntityInit, IReactCommand<RespawnViewCommand>
     {
         [Required]
         public ViewReferenceGameObjectComponent viewReferenceGameObject;
 
         [Required]
         public UnityTransformComponent unityTransform;
-        private GameObject pooling;
+        private GameObject viewGameObject;
+        private PoolingSystem poolingSystem;
 
-
-        public override void InitSystem()
-        {
-            
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
+        public override void InitSystem() { }
 
         public async void AfterEntityInit()
         {
-            pooling = await Owner.World.GetSingleSystem<PoolingSystem>().GetViewFromPool(viewReferenceGameObject.ViewReference);
+            poolingSystem = Owner.World.GetSingleSystem<PoolingSystem>();
+            await SpawnView();
+        }
 
-            pooling.transform.position = unityTransform.Transform.position;
-            pooling.transform.rotation = unityTransform.Transform.rotation;
-            pooling.transform.SetParent(unityTransform.Transform);
-            pooling.transform.localPosition = Vector3.zero;
+        public async void CommandReact(RespawnViewCommand command)
+        {
+            AfterViewService.ProcessReset(Owner, viewGameObject);
+            poolingSystem.ReleaseView(viewGameObject);
+            //if we destroy gameObject, we need to wait for the next frame
+            await UniTask.Yield();
+            await SpawnView();
+        }
 
-            var injectActor = pooling.GetComponentsInChildren<IHaveActor>();
-
+        private async UniTask SpawnView()
+        {
+            viewGameObject = await poolingSystem.GetViewFromPool(viewReferenceGameObject.ViewReference);
+            viewGameObject.transform.position = unityTransform.Transform.position;
+            viewGameObject.transform.rotation = unityTransform.Transform.rotation;
+            viewGameObject.transform.SetParent(unityTransform.Transform);
+            viewGameObject.transform.localPosition = Vector3.zero;
+            
+            var injectActor = viewGameObject.GetComponentsInChildren<IHaveActor>();
             foreach (var inject in injectActor)
             {
                 inject.Actor = Owner.AsActor();
             }
-
-            AfterViewService.ProcessAfterView(Owner, pooling);
+            AfterViewService.ProcessAfterView(Owner, viewGameObject);
         }
     }
 
@@ -65,6 +72,26 @@ namespace Systems
                 if (s is IInitAferView initAferView)
                 {
                     initAferView.InitAferView();
+                }
+            }
+        }
+        
+        public  static void ProcessReset(Entity entity, GameObject view)
+        {
+            entity.RemoveComponent(new ViewReadyTagComponent());
+
+            var toReset = entity.GetComponentsByType<IInitAferView>();
+
+            foreach (var iv in toReset)
+            {
+                iv.Reset();
+            }
+
+            foreach (var s in entity.Systems)
+            {
+                if (s is IInitAferView initAfterView)
+                {
+                    initAfterView.Reset();
                 }
             }
         }

@@ -1,3 +1,4 @@
+using System;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 
@@ -5,8 +6,8 @@ namespace Components
 {
     public partial class PoolableTagComponent : BaseComponent, IInitAferView, IAfterEntityInit
     {
-        private IStartOnPooling[] startOnPoolings = new IStartOnPooling[0];
-        private IStopOnPooling[] stopOnPoolings = new IStopOnPooling[0];
+        private IStartOnPooling[] startOnPoolings = Array.Empty<IStartOnPooling>();
+        private IStopOnPooling[] stopOnPoolings = Array.Empty<IStopOnPooling>();
 
         private void GatherPoolables()
         {
@@ -40,6 +41,12 @@ namespace Components
         public void InitAferView()
         {
             GatherPoolables();
+        }
+
+        public void Reset()
+        {
+            startOnPoolings = Array.Empty<IStartOnPooling>();
+            stopOnPoolings = Array.Empty<IStopOnPooling>();
         }
     }
 }

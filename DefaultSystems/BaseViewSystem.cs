@@ -22,6 +22,13 @@ namespace Systems
             InitAfterViewLocal();
         }
 
+        public void Reset()
+        {
+            isReady = false;
+            ResetLocal();
+        }
+
         protected abstract void InitAfterViewLocal();
+        protected abstract void ResetLocal();
     }
 }

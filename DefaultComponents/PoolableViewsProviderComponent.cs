@@ -1,4 +1,5 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 using HECSFramework.Unity;
 
 namespace Components
@@ -18,6 +19,11 @@ namespace Components
         public void InitAferView()
         {
             Actor.TryGetComponents(out Views);
+        }
+
+        public void Reset()
+        {
+            Views = Array.Empty<IPoolableView>();
         }
     }
 }

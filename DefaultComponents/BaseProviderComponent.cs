@@ -27,6 +27,11 @@ namespace Components
             SetGet();
         }
 
+        public void Reset()
+        {
+            Get = default;
+        }
+
         private void SetGet()
         {
             Actor.TryGetComponent(out Get, true);
