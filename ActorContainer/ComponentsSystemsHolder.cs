@@ -33,10 +33,10 @@ namespace HECSFramework.Unity
         [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), NumberOfItemsPerPage = 99)]
 #elif ModifyMode
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), Expanded = false, NumberOfItemsPerPage = 99)]
+        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), ShowFoldout = false, NumberOfItemsPerPage = 99)]
 #else
         [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, Expanded = false, NumberOfItemsPerPage = 99)]
+        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, ShowFoldout = false, NumberOfItemsPerPage = 99)]
 #endif
         [Searchable, HideIf("@this.systems.Count == 0")]
         public List<SystemBaseBluePrint> systems = new List<SystemBaseBluePrint>();
