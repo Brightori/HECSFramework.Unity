@@ -38,7 +38,7 @@ namespace Components
                 GatherPoolables();
         }
 
-        public void InitAferView()
+        public void InitAfterView()
         {
             GatherPoolables();
         }

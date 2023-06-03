@@ -64,14 +64,14 @@ namespace Systems
 
             foreach (var iv in initWithView)
             {
-                iv.InitAferView();
+                iv.InitAfterView();
             }
 
             foreach (var s in entity.Systems)
             {
                 if (s is IInitAfterView initAferView)
                 {
-                    initAferView.InitAferView();
+                    initAferView.InitAfterView();
                 }
             }
         }
