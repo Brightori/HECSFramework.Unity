@@ -13,7 +13,7 @@ namespace HECSFramework.Core
 {
     public interface IInitAfterView
     {
-        void InitAferView();
+        void InitAfterView();
         void Reset();
     }
 }

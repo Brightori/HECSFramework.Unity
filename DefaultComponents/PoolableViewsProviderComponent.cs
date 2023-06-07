@@ -16,7 +16,7 @@ namespace Components
                 Actor.TryGetComponents(out Views);
         }
 
-        public void InitAferView()
+        public void InitAfterView()
         {
             Actor.TryGetComponents(out Views);
         }

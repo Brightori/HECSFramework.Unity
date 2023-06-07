@@ -18,7 +18,7 @@ public class DebugHECS : OdinEditorWindow
     public int FreeIndeces;
 
     [ShowInInspector, Searchable]
-    [ListDrawerSettings(Expanded = true, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
+    [ListDrawerSettings(ShowFoldout = false, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
     public List<DrawEntity> Entities = new List<DrawEntity>(16);
 
     [MenuItem("HECS Options/Debug HECS", priority = 2)]
@@ -110,10 +110,10 @@ public class DrawEntity
     [FoldoutGroup("$ID"), ReadOnly]
     public string Guid;
 
-    [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(Expanded = false, IsReadOnly = true), LabelText("Components")]
+    [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(ShowFoldout = false, IsReadOnly = true), LabelText("Components")]
     public List<DrawComponent> drawComponents = new List<DrawComponent>();
 
-    [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(Expanded = false, IsReadOnly = true), LabelText("Systems")]
+    [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(ShowFoldout = false, IsReadOnly = true), LabelText("Systems")]
     public List<DrawSystem> drawSystems = new List<DrawSystem>();
 }
 

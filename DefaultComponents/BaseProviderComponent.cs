@@ -22,7 +22,7 @@ namespace Components
             SetGet();
         }
 
-        public void InitAferView()
+        public void InitAfterView()
         {
             SetGet();
         }

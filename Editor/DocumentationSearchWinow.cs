@@ -1,9 +1,8 @@
-﻿using HECSFramework.Core;
+﻿using System.Collections.Generic;
+using System.Linq;
+using HECSFramework.Core;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using static DocumentationWindow;
 
 public class DocumentationSearchWinow : OdinEditorWindow
@@ -13,7 +12,7 @@ public class DocumentationSearchWinow : OdinEditorWindow
 
     [ShowInInspector]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, ShowFoldout = false, ShowPaging = false)]
     [HideIf("@Documentation.Count == 0")]
     private List<DocumentationView> Documentation = new List<DocumentationView>(128);
     private List<DocumentationRepresentation> documentation;

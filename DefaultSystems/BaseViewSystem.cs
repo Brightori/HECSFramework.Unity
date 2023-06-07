@@ -13,10 +13,10 @@ namespace Systems
         public virtual void AfterEntityInit()
         {
             if (Owner.ContainsMask<ViewReadyTagComponent>() || !Owner.ContainsMask<ViewReferenceGameObjectComponent>())
-                InitAferView();
+                InitAfterView();
         }
 
-        public void InitAferView()
+        public void InitAfterView()
         {
             isReady = true;
             InitAfterViewLocal();
