@@ -118,7 +118,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
     }
 
 
-    [MenuItem("HECS Options/Roslyn Codegen", priority = 0)]
+    [MenuItem("HECS Options/Roslyn Codegen", priority = -30)]
     public static void RoslynCodegenMenu()
         => GetWindow<HECSRoslynCodegen>();
 
