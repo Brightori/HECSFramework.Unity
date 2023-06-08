@@ -46,10 +46,13 @@ namespace Systems
             viewGameObject.transform.localPosition = Vector3.zero;
             
             var injectActor = viewGameObject.GetComponentsInChildren<IHaveActor>();
+            
             foreach (var inject in injectActor)
             {
                 inject.Actor = Owner.AsActor();
             }
+
+            await UniTask.WaitUntil(() => Owner.IsInited);
             AfterViewService.ProcessAfterView(Owner, viewGameObject);
         }
     }
