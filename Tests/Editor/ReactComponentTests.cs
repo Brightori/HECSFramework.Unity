@@ -141,4 +141,25 @@ public class ReactComponentTests
 
         Assert.IsTrue(testReactComponent != null && boolCheckLocal && testComponent.InitCount == 1);
     }
+
+
+    [Test]
+    public void AfterInitTest()
+    {
+        EntityManager.RecreateInstance();
+        var entity = Entity.Get("Test");
+        entity.AddHecsSystem(new StressTestReactsSystem());
+        entity.Init();
+        
+        if (entity.TryGetComponent(out TestInitComponent testInitComponent))
+        {
+            if (testInitComponent.Init)
+            {
+                Assert.Pass();
+                return;
+            }
+        }
+
+        Assert.Fail();
+    }
 }
