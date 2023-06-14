@@ -7,7 +7,7 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
-    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, 
+    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IAfterEntityInit,
         IReactCommand<StressTestLocalCommand>, 
         IReactGlobalCommand<StressTestGlobalCommand>,
         IReactGenericLocalComponent<ICounter>, 
@@ -36,6 +36,11 @@ namespace Systems
         public bool LocalReactRemoved = true;
 
         public Guid ListenerGuid => SystemGuid;
+
+        public void AfterEntityInit()
+        {
+            Owner.GetOrAddComponent<TestInitComponent>();
+        }
 
         public void CommandGlobalReact(StressTestGlobalCommand command)
         {

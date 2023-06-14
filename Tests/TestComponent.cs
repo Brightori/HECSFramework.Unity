@@ -22,6 +22,18 @@ namespace Components
 
     [Serializable]
     [Documentation(Doc.Test, "we use this component on tests purpose")]
+    public sealed class TestInitComponent : BaseComponent, IInitable
+    {
+        public bool Init;
+
+        void IInitable.Init()
+        {
+            Init = true;
+        }
+    }
+
+    [Serializable]
+    [Documentation(Doc.Test, "we use this component on tests purpose")]
     public sealed class TestWorldSingleComponent : ModifiableFloatCounterComponent, IAfterEntityInit, IWorldSingleComponent
     {
         public Strategy Strategy;
