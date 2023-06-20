@@ -103,6 +103,11 @@ namespace HECSFramework.Unity
             return IsHaveComponent<T>();
         }
 
+        public bool ContainsComponent(int componentTypeHashcode)
+        {
+            return Components.Any(x => x.GetHECSComponent.GetTypeHashCode == componentTypeHashcode);
+        }
+
         public virtual T GetComponent<T>() where T : IComponent
         {
             foreach (var c in holder.components)
