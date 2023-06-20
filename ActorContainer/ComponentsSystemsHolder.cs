@@ -72,13 +72,13 @@ namespace HECSFramework.Unity
 
         public void RemoveComponentBluePrint<T> (T component) where T: IComponent
         {
-            var typeID = IndexGenerator.GetIndexForType(component.GetType());
+            var typeID = TypesMap.GetComponentInfo<T>().ComponentsMask.Index;
 
-            foreach (var c in components)
+            foreach (var componentBlueprint in components)
             {
-                if (IndexGenerator.GetIndexForType(component.GetType()) == typeID)
+                if (componentBlueprint.GetHECSComponent.GetTypeHashCode == typeID)
                 {
-                    RemoveComponent(c);
+                    RemoveComponent(componentBlueprint);
                     break;
                 }
             }
