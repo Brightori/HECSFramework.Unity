@@ -15,6 +15,7 @@ namespace HECSFramework.Unity
     public partial class SaveManager
     {
         public static string DefaultSaveDataPath => Application.persistentDataPath + "/saveData.dat";
+        
         public static bool TryLoadFromFile(string path, out object data)
         {
             if (File.Exists(path))
@@ -43,20 +44,6 @@ namespace HECSFramework.Unity
             return false;
         }
 
-        public static bool TryLoadJson(string path, out string json)
-        {
-            if (File.Exists(path))
-            {
-                json = File.ReadAllText(path);
-                return true;
-            }
-            json = default;
-            return false;
-        }
-        public static void SaveJson(string path, string json)
-        {
-            File.WriteAllText(path, json);
-        }
         public static void SaveToFile(string path, object saveData)
         {
             FileStream fs = new FileStream(path, FileMode.Create);
