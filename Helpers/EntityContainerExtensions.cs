@@ -17,5 +17,19 @@ namespace Helpers
                 entity.World.Command(new RemoveHecsComponentWorldCommand { Component = entity.GetComponent(c) });
             }
         }
+
+        public static void RemoveNotBaseComponentsExcept<T>(this EntityContainer entityContainer, Entity entity)
+        {
+            foreach (var c in entity.Components)
+            {
+                if (entityContainer.ContainsComponent(c))
+                    continue;
+
+                if (entity.GetComponent(c) is T)
+                    continue;
+
+                entity.World.Command(new RemoveHecsComponentWorldCommand { Component = entity.GetComponent(c) });
+            }
+        }
     }
 }
