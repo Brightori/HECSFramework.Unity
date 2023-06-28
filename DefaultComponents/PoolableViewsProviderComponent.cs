@@ -1,10 +1,11 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 using HECSFramework.Unity;
 
 namespace Components
 {
     [Documentation(Doc.HECS, Doc.Poolable, "this components provides information of poolableviews, this used by PoolingSystem")]
-    public sealed class PoolableViewsProviderComponent : BaseComponent, IHaveActor, IInitable, IInitAferView
+    public sealed class PoolableViewsProviderComponent : BaseComponent, IHaveActor, IInitable, IInitAfterView
     {
         public Actor Actor { get; set; }
         public IPoolableView[] Views;
@@ -15,9 +16,14 @@ namespace Components
                 Actor.TryGetComponents(out Views);
         }
 
-        public void InitAferView()
+        public void InitAfterView()
         {
             Actor.TryGetComponents(out Views);
+        }
+
+        public void Reset()
+        {
+            Views = Array.Empty<IPoolableView>();
         }
     }
 }

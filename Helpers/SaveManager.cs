@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -14,8 +15,7 @@ namespace HECSFramework.Unity
     public partial class SaveManager
     {
         public static string DefaultSaveDataPath => Application.persistentDataPath + "/saveData.dat";
-
-
+        
         public static bool TryLoadFromFile(string path, out object data)
         {
             if (File.Exists(path))
@@ -43,8 +43,6 @@ namespace HECSFramework.Unity
             data = null;
             return false;
         }
-
-
 
         public static void SaveToFile(string path, object saveData)
         {

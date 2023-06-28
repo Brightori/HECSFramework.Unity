@@ -66,10 +66,10 @@ namespace HECSFramework.Unity.Editor
         [ReadOnly]
         public int WorldIndex; 
 
-        [ListDrawerSettings(Expanded = true, ShowPaging = false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
+        [ListDrawerSettings(ShowFoldout = false, ShowPaging = false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
         public List<IComponent> Components;
 
-        [ListDrawerSettings(Expanded = true, ShowPaging = false, CustomAddFunction = nameof(HandleAddingSystem), CustomRemoveElementFunction = nameof(HandleRemovingSystem))]
+        [ListDrawerSettings(ShowFoldout = false, ShowPaging = false, CustomAddFunction = nameof(HandleAddingSystem), CustomRemoveElementFunction = nameof(HandleRemovingSystem))]
         public List<ISystem> Systems;
 
         public bool IsAlive;

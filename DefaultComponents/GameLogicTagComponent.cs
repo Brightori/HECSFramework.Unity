@@ -2,7 +2,8 @@
 
 namespace Components
 {
-    public class GameLogicTagComponent : BaseComponent
+    [Documentation(Doc.Tag, Doc.GameLogic, Doc.Global, "GameLogicTagComponent")]
+    public class GameLogicTagComponent : BaseComponent, IWorldSingleComponent
     {
     }
 }

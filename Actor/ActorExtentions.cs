@@ -77,7 +77,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static async ValueTask<Actor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<Actor> callBack = null, Vector3 position = new Vector3())
+        public static async ValueTask<Actor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, bool initEntity = true, Action<Actor> callBack = null, Vector3 position = new Vector3())
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.CachedName;
@@ -95,7 +95,8 @@ namespace HECSFramework.Unity
                 entityContainer.Init(actorPrfb.Entity);
 
             actorPrfb.Entity.RemoveHecsComponentsAndSystems<Exluding>();
-            actorPrfb.Entity.Init();
+            if(initEntity)
+                actorPrfb.Entity.Init();
 
             callBack?.Invoke(actorPrfb);
             return actorPrfb;

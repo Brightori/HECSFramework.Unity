@@ -22,18 +22,18 @@ public class DocumentationWindow : OdinEditorWindow
 
     [ShowInInspector, Space(10)][GUIColor(1f, 0.96f, 0.85f, 1)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, ShowFoldout = false, ShowPaging = false)]
     private List<DocumentationView> systems = new List<DocumentationView>();
 
     [ShowInInspector, Space(10)]
     [GUIColor(0.85f, 1f, 0.97f, 1)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, ShowFoldout = false, ShowPaging = false)]
     private List<DocumentationView> components = new List<DocumentationView>();
     
     [ShowInInspector, Space(10)]
     [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, Expanded = true, ShowPaging = false)]
+    [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, IsReadOnly = true, ShowFoldout = false, ShowPaging = false)]
     private List<DocumentationView> common = new List<DocumentationView>();
 
     [MenuItem("HECS Options/Debug/Project Documentation")]
