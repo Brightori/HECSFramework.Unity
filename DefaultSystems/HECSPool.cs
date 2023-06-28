@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using AssetsManagement.Containers;
 using Cysharp.Threading.Tasks;
+using HECSFramework.Core;
 using UnityEngine;
 
-public class HECSPool<T> : IDisposable where T : UnityEngine.Object
+public class HECSPool<TContainer> : IDisposable
+    where TContainer : IAssetContainer<GameObject>
 {
-    private Queue<T> queue;
-    private Task<T> getNewPooledObject;
+    private Queue<GameObject> queue;
+    private UniTask<TContainer> containerTask;
     private int maxCount;
 
-    public HECSPool(Task<T> getObject, int maxCount = 256)
+    public HECSPool(UniTask<TContainer> getObject, int maxCount = 256)
     {
-        queue = new Queue<T>(maxCount);
+        queue = new Queue<GameObject>(maxCount);
         this.maxCount = maxCount;
-        getNewPooledObject = getObject;
+        containerTask = getObject;
     }
 
     public void SetMaxCount(int maxCount)
@@ -24,30 +26,32 @@ public class HECSPool<T> : IDisposable where T : UnityEngine.Object
 
     public void Dispose()
     {
-        getNewPooledObject = null;
+        containerTask = default;
         queue.Clear();
     }
 
-    public async UniTask<T> Get()
+    public async UniTask<GameObject> Get()
     {
         if (queue.Count == 0)
         {
-            var refObj = await getNewPooledObject;
-            return MonoBehaviour.Instantiate(refObj);
+            TContainer container = await containerTask;
+            return await container.CreateInstance(Vector3.zero, Quaternion.identity);
         }
 
         return queue.Dequeue();
     }
 
-    public void Release(T pooledObj)
+    public void Release(GameObject pooledObj)
     {
+        var awaiter = containerTask.GetAwaiter();
+        if (!awaiter.IsCompleted)
+        {
+            HECSDebug.LogError("Try to release obj from container that is not ready");
+            return;
+        }
         if (queue.Count > maxCount)
         {
-            //todo надо прописать внятный механизм того что мы делаем если сущностей больше чем надо
-            if (pooledObj is IDisposable disposable)
-                disposable.Dispose();
-
-            MonoBehaviour.Destroy(pooledObj);
+            awaiter.GetResult().ReleaseInstance(pooledObj);
             return;
         }
 

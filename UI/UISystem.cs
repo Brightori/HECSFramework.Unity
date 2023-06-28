@@ -111,6 +111,7 @@ namespace Systems
                     mainTransform = neededCanvas.GetOrAddComponent<UnityTransformComponent>().Transform;
             }
 
+            //todo rewrite  to use AssetServiceSystem
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 

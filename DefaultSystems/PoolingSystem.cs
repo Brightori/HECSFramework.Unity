@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using AssetsManagement.Containers;
 using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
@@ -17,8 +16,8 @@ namespace Systems
         public const int minPoolSize = 5;
         public const int maxPoolSize = 512;
 
-        private Dictionary<string, HECSPool<GameObject>> pooledGOs = new Dictionary<string, HECSPool<GameObject>>(64);
-        private Dictionary<string, EntityContainer> pooledContainers = new Dictionary<string, EntityContainer>(16);
+        private Dictionary<string, HECSPool<AssetReferenceContainer<AssetReference, GameObject>>> pooledGOs = new(64);
+        private Dictionary<string, AssetReferenceContainer<AssetReference, EntityContainer>> pooledContainers = new(16);
 
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true) where T : Actor
         {
@@ -57,6 +56,9 @@ namespace Systems
 
         public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference)
         {
+            var assetService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
+            var containerTask = assetService.GetContainer<AssetReference, GameObject>(assetReference);
+            
             if (pooledGOs.TryGetValue(assetReference.AssetGUID, out var pool))
             {
                 var view = await pool.Get();
@@ -69,61 +71,50 @@ namespace Systems
             }
             else
             {
-                //todo мы должны туть брать из пула, а не возвращать независимую копию
-                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(Addressables.LoadAssetAsync<GameObject>(assetReference).Task, maxPoolSize));
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<AssetReferenceContainer<AssetReference, GameObject>>(containerTask, maxPoolSize));
                 return await pooledGOs[assetReference.AssetGUID].Get();
             }
         }
 
-        public async Task<EntityContainer> GetEntityContainerFromPool(string key)
+        public async UniTask<EntityContainer> GetEntityContainerFromPool(AssetReference assetReference)
         {
-            if (pooledContainers.TryGetValue(key, out var container))
+            var assetGuid = assetReference.AssetGUID;
+            if (pooledContainers.TryGetValue(assetGuid, out var container))
             {
-                return container;
+                return container.Asset;
             }
-            else
+            
+            var assetService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
+            var containerTask = assetService.GetContainer<AssetReference, EntityContainer>(assetReference);
+            container = await containerTask;
+
+            //release to decrease ref count
+            if (pooledContainers.ContainsKey(assetGuid))
             {
-                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(key).Task;
-
-                if (pooledContainers.ContainsKey(key)) return loaded;
-
-                pooledContainers.Add(key, loaded);
-                return loaded;
+                assetService.ReleaseContainer(container);
             }
-        }
-
-        public async Task<EntityContainer> GetEntityContainerFromPool(AssetReference assetReference)
-        {
-            if (pooledContainers.TryGetValue(assetReference.AssetGUID, out var container))
-            {
-                return container;
-            }
-            else
-            {
-                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(assetReference).Task;
-
-                if (pooledContainers.ContainsKey(assetReference.AssetGUID)) return loaded;
-
-                pooledContainers.Add(assetReference.AssetGUID, loaded);
-                return loaded;
-            }
+            
+            pooledContainers.Add(assetGuid, container);
+            return pooledContainers[assetGuid].Asset;
         }
        
         
         public async void Warmup(EntityContainer entityContainer, int count)
         {
-            if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
+            if (!entityContainer.TryGetComponent(out ViewReferenceComponent view)) return;
+            
+            var toRelease = new List<GameObject>(count);
+            for (var i = 0; i < count; i++)
             {
-                var needed = await Addressables.LoadAssetAsync<GameObject>(view.ViewReference).Task;
-
-                for (int i = 0; i < count; i++)
-                {
-                    var instance = MonoBehaviour.Instantiate(needed.gameObject);
-                    ReleaseView(view.ViewReference, instance.gameObject);
-                }
-
-                needed.gameObject.SetActive(false);
+                var viewObj = await GetViewFromPool(view.ViewReference);
+                toRelease.Add(viewObj);
             }
+
+            for (var i = 0; i < count; i++)
+            {
+                ReleaseView(toRelease[i]);
+            }
+            toRelease.Clear();
         }
 
         public void Release(Actor actor)
@@ -155,7 +146,7 @@ namespace Systems
         public void ReleaseView(IPoolableView poolableView)
         {
             poolableView.Stop();
-
+            
             if (pooledGOs.TryGetValue(poolableView.AssetRef.AssetGUID, out var pool))
             {
                 poolableView.View.transform.SetParent(null);
@@ -164,6 +155,7 @@ namespace Systems
             }
             else
             {
+                HECSDebug.LogError("View does not have pool");
                 MonoBehaviour.Destroy(poolableView.View);
             }
         }
@@ -171,43 +163,12 @@ namespace Systems
         public void ReleaseView(GameObject gameObject)
         {
             if (gameObject.TryGetComponent(out IPoolableView poolableView))
-            {
-                poolableView.Stop();
-
-                if (pooledGOs.ContainsKey(poolableView.AddressableKey))
-                {
-                    pooledGOs[poolableView.AddressableKey].Release(gameObject);
-                    poolableView.View.transform.SetParent(null);
-                    poolableView.View.SetActive(false);
-                    return;
-                }
-            }
-            MonoBehaviour.Destroy(gameObject);
-        }
-
-        public void ReleaseView(AssetReference assetReference, GameObject gameObject)
-        {
-            if (gameObject.TryGetComponent(out IPoolableView poolableView))
-                poolableView.Stop();
-
-            gameObject.SetActive(false);
-            gameObject.transform.SetParent(null);
-
-            if (pooledGOs.TryGetValue(assetReference.AssetGUID, out var pool))
-            {
-                pooledGOs[assetReference.AssetGUID].Release(gameObject);
-                return;
-            }
+                ReleaseView(poolableView);
             else
             {
-                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(assetReference.InstantiateAsync().Task));
-                pooledGOs[assetReference.AssetGUID].Release(gameObject);
+                HECSDebug.LogError("View is not poolable");
+                MonoBehaviour.Destroy(poolableView.View);
             }
-        }
-
-        public GameObject GetNewInstance(GameObject actor)
-        {
-            return MonoBehaviour.Instantiate(actor);
         }
 
         public override void Dispose()
