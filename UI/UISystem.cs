@@ -61,37 +61,10 @@ namespace Systems
 
         public async void CommandGlobalReact(ShowUICommand command)
         {
-            if (!isLoaded || !isReady)
-                await UniTask.WaitUntil(() => isReady && isLoaded, PlayerLoopTiming.LastEarlyUpdate);
-
-            if (command.ClearStack)
-                UIStackComponent.UIStack.Clear();
-
-            if (command.UIGroup != 0)
-                ShowGroup(command.UIGroup);
-
-            if (!command.MultyView)
-            {
-                if (spawnInProgress.Any(x => x.UIType.Id == command.UIViewType) )
-                    return;
-
-                if (TryGetCurrentUI(command.UIViewType, out var entity))
-                {
-                    entity.Command(command);
-                    command.OnUILoad?.Invoke(entity);
-                    return;
-                }
-            }
-
-            var spawn = uIBluePrints.FirstOrDefault(x => x.UIType.Id == command.UIViewType);
-
-            if (spawn == null)
-            {
-                Debug.LogAssertion("Cannot find UIBluePrint for " + command.UIViewType);
-                return;
-            }
-
-            SpawnUIFromBluePrint(spawn, command.OnUILoad, mainCanvasTransform.Transform);
+            await ShowUI
+               (command.UIViewType, command.OnUILoad, 
+                command.MultyView, command.ShowPrevious, command.AdditionalCanvasID, 
+                command.UIGroup, command.ClearStack, command.Poolable);
         }
 
         private void SpawnUIFromBluePrint(UIBluePrint spawn, Action<Entity> action, Transform mainTransform)
@@ -109,14 +82,17 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => UILoaded(a, action);
         }
 
-        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false)
+        public async UniTask<Entity> ShowUI
+           (int uiViewType, Action<Entity> onLoadUI = null,  
+            bool multiView = false, bool showPrevious = false, int additionalCanvas = 0,  
+            int uiGroup = 0, bool clearStack = false, bool ispoolable = false, bool needInit = true)
         {
             if (!isLoaded || !isReady)
                 await UniTask.WaitUntil(() => isReady && isLoaded, PlayerLoopTiming.LastEarlyUpdate);
 
-            if (!isMultiple)
+            if (!multiView)
             {
-                if (TryGetCurrentUI(uiType, out var ui))
+                if (TryGetCurrentUI(uiViewType, out var ui))
                     return ui;
             }
 
@@ -135,17 +111,22 @@ namespace Systems
                 canvas = needCanvas.GetComponent<UnityTransformComponent>().Transform;
             }
 
-            var bluePrint = GetUIBluePrint(uiType);
+            var bluePrint = GetUIBluePrint(uiViewType);
 
             if (bluePrint == null)
-                throw new Exception("we dont have blue print for this ui " + uiType);
+                throw new Exception("we dont have blue print for this ui " + uiViewType);
 
             if (ispoolable)
             {
                 var container = await poolingSystem.GetEntityContainerFromPool(bluePrint.Container);
                 var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(container);
-                uiActorFromPool.Entity.Init();
-                uiActorFromPool.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
+                
+                if (needInit)
+                {
+                    uiActorFromPool.Entity.Init();
+                    uiActorFromPool.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
+                }
+                  
                 return uiActorFromPool.Entity;
             }
 

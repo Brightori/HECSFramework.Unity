@@ -7,5 +7,6 @@ namespace Commands
     {
         public int UIViewType;
         public int UIGroup;
+        public bool ShowPrevious;
     }
 }
