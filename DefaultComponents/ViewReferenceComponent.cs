@@ -2,6 +2,7 @@
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
 using System;
+using Commands;
 
 namespace Components
 {
@@ -9,6 +10,12 @@ namespace Components
     public partial class ViewReferenceComponent : BaseComponent
     {
         public ActorViewReference ViewReference;
+
+        public override void BeforeDispose()
+        {
+            base.BeforeDispose();
+            EntityManager.Default.Command(new ActorViewDisposedCommand{Actor = Owner.AsActor()});
+        }
     }
 
     [Serializable]
