@@ -239,13 +239,16 @@ namespace HECSFramework.Unity
 
             foreach (var s in sysTypes)
             {
-                var systemAttr = s.GetCustomAttribute<RequiredAtContainerAttribute>();
+                var systemAttrs = s.GetCustomAttributes<RequiredAtContainerAttribute>();
 
-                if (systemAttr != null)
+                foreach (var attr in systemAttrs)
                 {
-                    foreach (var neededType in systemAttr.neededTypes)
+                    if (attr != null)
                     {
-                        tempTypes.Add(neededType);
+                        foreach (var neededType in attr.neededTypes)
+                        {
+                            tempTypes.Add(neededType);
+                        }
                     }
                 }
 
