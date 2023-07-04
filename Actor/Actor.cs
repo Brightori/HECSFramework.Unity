@@ -168,7 +168,7 @@ namespace HECSFramework.Unity
 
         public override bool Equals(object other)
         {
-            return Entity.Equals(other);
+            return Entity != null && Entity.Equals(other);
         }
 
         protected virtual void Reset()
