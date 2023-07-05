@@ -16,5 +16,10 @@ namespace Components
 
         [ShowInInspector] //this property for debing|show at inspector
         public float ShowCurrentValue => Value;
+
+        public void SetupBaseValue(float newBaseValue)
+        {
+            modifiableFloatCounter.Setup(Id, SetupValue);
+        }
     }
 }
