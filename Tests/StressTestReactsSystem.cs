@@ -84,7 +84,16 @@ namespace Systems
             if (isAdded)
                 ReactGlobalAdd = true;
             else
+            {
+                var filter = Owner.World.GetFilter<TestReactComponent>();
+                filter.ForceUpdateFilter();
+
+                if (filter.Count > 0)
+                    HECSDebug.LogError("in remove component we have problems");
+
                 ReactGlobalRemove = true;
+            }    
+                
         }
 
         public void ComponentReactLocal(ICounter component, bool isAdded)
