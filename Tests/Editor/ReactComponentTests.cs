@@ -70,6 +70,29 @@ public class ReactComponentTests
     }
 
     [Test]
+    public void ReactRemoveComponentAndCheckFilter()
+    {
+        EntityManager.RecreateInstance();
+        var check = Entity.Get("Test");
+        var filter = check.World.GetFilter<TestReactComponent>();
+
+        check.AddHecsSystem(new StressTestReactsSystem());
+        check.AddComponent(new TestReactComponent());
+        check.Init();
+
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.FinishUpdate?.Invoke();
+
+        check.RemoveComponent<TestReactComponent>();
+        var system = check.GetSystem<StressTestReactsSystem>();
+
+        filter.ForceUpdateFilter();
+
+        Assert.IsTrue(system.ReactGlobalAdd && system.ReactGlobalRemove && filter.Count == 0);
+    }
+
+    [Test]
     public void ReactComponentGlobalWithRemovingListener()
     {
         EntityManager.RecreateInstance();
