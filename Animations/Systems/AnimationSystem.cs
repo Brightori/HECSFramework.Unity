@@ -29,13 +29,13 @@ namespace Systems
         public void CommandReact(FloatAnimationCommand command)
         {
             if (isReady)
-                AnimatorStateComponent.State.SetFloat(command.Index, command.Value);
+                AnimatorStateComponent.State.SetFloat(command.Index, command.Value, command.ForceSet);
         }
 
         public void CommandReact(IntAnimationCommand command)
         {
             if (isReady)
-                AnimatorStateComponent.State.SetInt(command.Index, command.Value);
+                AnimatorStateComponent.State.SetInt(command.Index, command.Value, command.ForceSet);
         }
 
         protected override void InitAfterViewLocal()

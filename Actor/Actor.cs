@@ -233,7 +233,7 @@ namespace HECSFramework.Unity
         /// <returns></returns>
         public bool Equals(Actor other)
         {
-            return other.Entity.ID == Entity.ID;
+            return other != null && other.Entity.ID == Entity.ID;
         }
     }
 }
