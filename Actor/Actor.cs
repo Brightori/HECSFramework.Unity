@@ -201,6 +201,8 @@ namespace HECSFramework.Unity
             {
                 Entity.Dispose();
                 Entity = world.GetEntityFromPool(gameObject.name);
+                Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+                Entity.GetOrAddComponent<UnityTransformComponent>();
                 container.Init(Entity);
             }
 
