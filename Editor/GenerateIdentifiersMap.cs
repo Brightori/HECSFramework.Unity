@@ -81,8 +81,8 @@ namespace HECSFramework.Unity
             foreach (var e in entityContainers)
             {
                 dicBody.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope} {e.ContainerIndex}, {CParse.Quote}{e.name}{CParse.Quote} {CParse.RightScope},"));
-                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
-                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+                body.Add(new TabSimpleSyntax(1, $"public const int {e.name} = {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public const string {e.name}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
             }
 
             return tree.ToString();
@@ -105,8 +105,8 @@ namespace HECSFramework.Unity
 
             foreach (var e in entityContainers)
             {
-                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
-                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+                body.Add(new TabSimpleSyntax(1, $"public const int {e.name} = {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public const string {e.name}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
             }
 
             return tree.ToString();
@@ -160,8 +160,8 @@ namespace HECSFramework.Unity
                 if (!e.IsHaveComponent<NetworkEntityTagComponent>())
                     continue;
 
-                body.Add(new TabSimpleSyntax(1, $"public static int {e.name} => {e.ContainerIndex};"));
-                body.Add(new TabSimpleSyntax(1, $"public static string {e.name}_string => {CParse.Quote}{e.name}{CParse.Quote};"));
+                body.Add(new TabSimpleSyntax(1, $"public const int {e.name} = {e.ContainerIndex};"));
+                body.Add(new TabSimpleSyntax(1, $"public const string {e.name}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
             }
 
             return tree.ToString();
@@ -209,7 +209,7 @@ namespace HECSFramework.Unity
             foreach (var identifier in identifierContainers)
             {
                 var name = identifier.name.Replace("Container", "");
-                body.Add(new TabSimpleSyntax(1, $"public static int {name} => {identifier.Id};"));
+                body.Add(new TabSimpleSyntax(1, $"public const int {name} = {identifier.Id};"));
             }
 
             return composeIdentifiersMap.ToString();
