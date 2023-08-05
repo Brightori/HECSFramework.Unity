@@ -75,6 +75,22 @@ namespace Systems
             }
         }
 
+        public async UniTask<GameObject> GetFastViewFromPool(AssetReference assetReference)
+        {
+            if (pooledGOs.TryGetValue(assetReference.AssetGUID, out var pool))
+            {
+                var view = await pool.Get();
+                view.SetActive(true);
+                return view;
+            }
+            else
+            {
+                //todo мы должны туть брать из пула, а не возвращать независимую копию
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(Addressables.LoadAssetAsync<GameObject>(assetReference).Task, maxPoolSize));
+                return await pooledGOs[assetReference.AssetGUID].Get();
+            }
+        }
+
         public async Task<EntityContainer> GetEntityContainerFromPool(string key)
         {
             if (pooledContainers.TryGetValue(key, out var container))
@@ -190,6 +206,28 @@ namespace Systems
             if (gameObject.TryGetComponent(out IPoolableView poolableView))
                 poolableView.Stop();
 
+            gameObject.SetActive(false);
+            gameObject.transform.SetParent(null);
+
+            if (pooledGOs.TryGetValue(assetReference.AssetGUID, out var pool))
+            {
+                pooledGOs[assetReference.AssetGUID].Release(gameObject);
+                return;
+            }
+            else
+            {
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(assetReference.InstantiateAsync().Task));
+                pooledGOs[assetReference.AssetGUID].Release(gameObject);
+            }
+        }
+
+        /// <summary>
+        /// we dont check here is poolable or not and just remove to pool
+        /// </summary>
+        /// <param name="assetReference"></param>
+        /// <param name="gameObject"></param>
+        public void ReleaseViewFast(AssetReference assetReference, GameObject gameObject)
+        {
             gameObject.SetActive(false);
             gameObject.transform.SetParent(null);
 
