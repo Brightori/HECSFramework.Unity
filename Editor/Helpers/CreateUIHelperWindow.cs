@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Components;
 using HECSFramework.Core;
+using HECSFramework.Core.Helpers;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Editor;
 using Helpers;
@@ -126,6 +128,12 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
             var entryOfContainer = AddAssetToGroup(newContainer, UIActorsContainers);
             uibluePrint.Container = new UnityEngine.AddressableAssets.AssetReference(entryOfContainer.guid);
+
+            newContainer.GetOrAddComponent<UITagComponent>().ViewType = uiidentifier;
+            newContainer.GetOrAddComponent<UnityTransformComponent>();
+            newContainer.GetOrAddComponent<UnityRectTransformComponent>();
+            ReflectionHelpers.SetPrivateFieldValue(newContainer.GetOrAddComponent<UIGroupTagComponent>(), "Groups", Groups);
+            newContainer.AddSystemToContainer<HideUISystem>();
         }
         else if (Container != null)
         {

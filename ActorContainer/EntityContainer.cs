@@ -401,6 +401,23 @@ namespace HECSFramework.Unity
             isEditorTimeChanged = true;
         }
 
+        public void AddSystemToContainer<T>() where T : class, ISystem, new()
+        {
+            if (Systems.Any(x => x.GetSystem is T))
+                return;
+
+            var bpProvider = new BluePrintsProvider();
+            var key = typeof(T);
+
+            if (bpProvider.Systems.TryGetValue(key, out var needed))
+            {
+                var componentNode = new SystemBluePrintNode(key.Name, needed, new List<EntityContainer> { this });
+                componentNode.AddBluePrint();
+            }
+            else
+                Debug.LogError($"we dont have bp for {key.Name} mby u should codogen first");
+        }
+
         /// <summary>
         /// не использовать это вне эдитор скриптов, это функционал для редактора
         /// </summary>
