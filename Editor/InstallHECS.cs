@@ -301,28 +301,19 @@ namespace Strategies
         {
             var template =
   @"using HECSFramework.Core;
-using Strategies;
 
 
 namespace Strategies
 {
-    [Documentation(Doc.NONE, """")]
-    public class #SCRIPTNAME# : DilemmaDecision
+    [Documentation(Doc.Strategy, ""#SCRIPTNAME#"")]
+    public class #SCRIPTNAME# : InterDecision
     {
         public override string TitleOfNode { get; } = ""#SCRIPTNAME#"";
 
         protected override void Run(Entity entity)
         {
-            if (true)
-            {
-                Positive.Execute(entity);
-                return;
-            }
-            else
-            {
-                Negative.Execute(entity);
-                return;
-            }
+
+           Next.Execute(entity);
         }
     }
 }
