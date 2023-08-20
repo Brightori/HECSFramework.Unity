@@ -6,7 +6,7 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [CreateAssetMenu(fileName = "identifier", menuName = "Identifiers/Identifier")]
-    public class IdentifierContainer : ScriptableObject, IIdentifier
+    public class IdentifierContainer : ScriptableObject, IIdentifier, IValidate
     {
         [SerializeField, ReadOnly] private int id; 
 
@@ -18,6 +18,12 @@ namespace HECSFramework.Unity
                     id = IndexGenerator.GenerateIndex(name);
                 return id;
             }
+        }
+
+        public bool IsValid()
+        {
+            OnValidate();
+            return true;
         }
 
         [Button]

@@ -20,7 +20,12 @@ namespace HECSFramework.Unity
         [SerializeField, ReadOnly]
         private string guid;
 
+        [SerializeField]
+        private ModifierIdentifier modifierIdentifier;
+
         private Guid currentGuid;
+
+        public override int ModifierID => modifierIdentifier.Id;
 
         public override float GetValue { get => value; set => this.value = value; }
         public override ModifierCalculationType GetCalculationType { get => calculationType; set => calculationType = value; }
@@ -51,6 +56,8 @@ namespace HECSFramework.Unity
                 currentGuid = value;
             }
         }
+
+    
 
         public UnityFloatModifier()
         {

@@ -168,7 +168,7 @@ namespace HECSFramework.Unity
 
         public override bool Equals(object other)
         {
-            return Entity.Equals(other);
+            return Entity != null && Entity.Equals(other);
         }
 
         protected virtual void Reset()
@@ -201,6 +201,8 @@ namespace HECSFramework.Unity
             {
                 Entity.Dispose();
                 Entity = world.GetEntityFromPool(gameObject.name);
+                Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
+                Entity.GetOrAddComponent<UnityTransformComponent>();
                 container.Init(Entity);
             }
 
@@ -233,7 +235,7 @@ namespace HECSFramework.Unity
         /// <returns></returns>
         public bool Equals(Actor other)
         {
-            return other.Entity.ID == Entity.ID;
+            return other != null && other.Entity.ID == Entity.ID;
         }
     }
 }

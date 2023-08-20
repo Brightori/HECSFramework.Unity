@@ -9,6 +9,7 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
 using UnityEngine;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using HECSFramework.Unity.Editor;
 
 public class AddressablesGroupsHistoryWindow : OdinEditorWindow
 {
@@ -21,6 +22,7 @@ public class AddressablesGroupsHistoryWindow : OdinEditorWindow
 
     public void InitOrUpdate()
     {
+        InstallHECS.CheckFolder(PathToAddressablesHistoriesFolder);
         var files = Directory.GetFiles(PathToAddressablesHistoriesFolder, "*.addrHistory");
 
         foreach (var file in files)
@@ -39,6 +41,8 @@ public class AddressablesGroupsHistoryWindow : OdinEditorWindow
     [Button("Save groups history"), PropertySpace(20)]
     private void SaveAddressablesGroupsHistory()
     {
+        InstallHECS.CheckFolder(PathToAddressablesHistoriesFolder);
+
         var path = PathToAddressablesHistoriesFolder + "AddressablesHistory_" + $"{DateTime.UtcNow.ToFileTimeUtc()}" + ".addrHistory";
         var addressablesGroupsHistory = new AddressablesGroupsHistory();
         addressablesGroupsHistory.Init();

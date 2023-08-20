@@ -1,8 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
+using HECSFramework.Core;
 using HECSFramework.Core.Generator;
+using Strategies;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace HECSFramework.Unity.Editor
 {
@@ -48,7 +52,11 @@ namespace HECSFramework.Unity.Editor
         private static string SystemTemplate = "/82a-HECS__HECSSystem-System.cs.txt";
         private static string CommandTemplate = "/83a-HECS__HECSCommand-Command.cs.txt";
         private static string AbilityTemplate = "/84a-HECS__HECSAbility-Ability.cs.txt";
-        private static string PredicateTemplate = "/85a-HECS__HECSPredicate-Predicate.cs.txt";
+        private static string ActionTemplate = "/84b-HECS__Action-Action.cs.txt";
+        private static string PredicateTemplate = "/85a-HECS__Predicate-Predicate.cs.txt";
+        private static string InterDecision = "/86a-HECS__InterDecision-InterDecision.cs.txt";
+        private static string DilemmaDecision = "/87a-HECS__DilemmaDecision-DilemmaDecision.cs.txt";
+        private static string GenericNode = "/88a-HECS__GenericNode-GenericNode.cs.txt";
 
         public static string DataPath => Application.dataPath;
         public static string ScriptPath => Application.dataPath + "/Scripts/";
@@ -202,6 +210,146 @@ namespace HECSFrameWork
 
             if (!File.Exists(DataPath + ScriptTemplates + PredicateTemplate))
                 CreatePredicateTemplate();
+
+            if (!File.Exists(DataPath + ScriptTemplates + ActionTemplate))
+                CreateActionTemplate();
+            
+            if (!File.Exists(DataPath + ScriptTemplates + InterDecision))
+                CreateInterDecisionTemplate();
+
+            if (!File.Exists(DataPath + ScriptTemplates + DilemmaDecision))
+                CreateDilemmaDecisionTemplate();
+            
+            if (!File.Exists(DataPath + ScriptTemplates + GenericNode))
+                CreateGenericNodeTemplate();
+        }
+
+        private static void CreateGenericNodeTemplate()
+        {
+            var template =
+@"using HECSFramework.Core;
+
+namespace Strategies
+{
+    [Documentation(Doc.Strategy, """")]
+    public class #SCRIPTNAME# : GenericNode<T>
+        {
+            public override string TitleOfNode { get; } = ""#SCRIPTNAME#"";
+
+            [Connection(ConnectionPointType.Out, "" <> Out"")]
+        public BaseDecisionNode Out;
+
+            public override void Execute(Entity entity)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public override T Value(Entity entity)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+    }
+";
+
+            var path = (DataPath + ScriptTemplates + GenericNode).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
+        }
+
+        private static void CreateDilemmaDecisionTemplate()
+        {
+            var template =
+ @"using HECSFramework.Core;
+using Strategies;
+
+
+namespace Strategies
+{
+    [Documentation(Doc.NONE, """")]
+    public class #SCRIPTNAME# : DilemmaDecision
+    {
+        public override string TitleOfNode { get; } = ""#SCRIPTNAME#"";
+
+        protected override void Run(Entity entity)
+        {
+            if (true)
+            {
+                Positive.Execute(entity);
+                return;
+            }
+            else
+            {
+                Negative.Execute(entity);
+                return;
+            }
+        }
+    }
+}
+";
+
+            var path = (DataPath + ScriptTemplates + DilemmaDecision).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
+        }
+
+        private static void CreateInterDecisionTemplate()
+        {
+            var template =
+  @"using HECSFramework.Core;
+
+
+namespace Strategies
+{
+    [Documentation(Doc.Strategy, ""#SCRIPTNAME#"")]
+    public class #SCRIPTNAME# : InterDecision
+    {
+        public override string TitleOfNode { get; } = ""#SCRIPTNAME#"";
+
+        protected override void Run(Entity entity)
+        {
+
+           Next.Execute(entity);
+        }
+    }
+}
+";
+
+            var path = (DataPath + ScriptTemplates + InterDecision).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
+        }
+
+        private static void CreateActionTemplate()
+        {
+            var template =
+   @"using System;
+using HECSFramework.Core;
+
+namespace Components
+{
+    [Serializable]
+    [Documentation(Doc.Action, """")]
+    public sealed class #SCRIPTNAME# : IAction
+    {
+        public void Action(Entity entity)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+}";
+
+            var path = (DataPath + ScriptTemplates + ActionTemplate).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
         }
 
         private static void CreatePredicateTemplate()
@@ -234,19 +382,23 @@ namespace Predicates
         private static void CreateAbilityTemplate()
         {
             var template =
-    @"using HECSFrameWork;
-using HECSFrameWork.Components;
-using Commands;
-using Components;
-using System;
+    @"using System;
+using HECSFramework.Core;
 
-namespace Abilities
+namespace Systems
 {
-    [Serializable][Documentation(Doc.NONE, """")]
-    public sealed class #SCRIPTNAME# : AbilityBase
+    [Serializable]
+    [Documentation(Doc.Abilities, """")]
+    public sealed class #SCRIPTNAME# : BaseAbilitySystem
     {
-        public override void Execute<T>(T owner, T target = default, bool enable = true)
+        public override void Execute(Entity owner = null, Entity target = null, bool enable = true)
         {
+            throw new NotImplementedException();
+        }
+
+        public override void InitSystem()
+        {
+            throw new NotImplementedException();
         }
     }
 }";
