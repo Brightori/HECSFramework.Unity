@@ -11,7 +11,7 @@ namespace Components
     [Serializable][Documentation(Doc.HECS, Doc.Holder, Doc.GameLogic, "entity containers provider")]
     public abstract class BaseContainerHolderComponent<T> : BaseComponent, IValidate where T : IComponent
     {
-        [SerializeField] private EntityContainer[] containers;
+        [SerializeField] protected EntityContainer[] containers;
 
         public bool TryGetContainerByID(int index, out EntityContainer entityContainer)
         {
