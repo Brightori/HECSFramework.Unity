@@ -58,7 +58,10 @@ namespace Systems
 
         public override void Dispose()
         {
-            poolingSystem.ReleaseView(viewGameObject);
+            if (!EntityManager.Default.TryGetSingleComponent<OnApplicationQuitTagComponent>(out _))
+            {
+                poolingSystem.ReleaseView(viewGameObject);
+            }
         }
     }
 
