@@ -5,10 +5,16 @@ namespace HECSFramework.Unity
 {
     public class AnimationEventProvider : MonoBehaviour, IHaveActor
     {
-        public Actor Actor { get; set; }
+        public Actor Actor { get;  set; }
 
         public void SendAnimationEvent(AnimationEventIdentifier animationEvent)
         {
+            if (animationEvent == null)
+            {
+                Debug.LogWarning("animation event missed " + gameObject.name);
+                return;
+            }
+
             Actor.Command(new AnimationEventCommand { Id = animationEvent.Id });
         }
 
