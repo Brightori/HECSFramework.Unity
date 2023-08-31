@@ -11,7 +11,9 @@ namespace HECSFramework.Unity
         {
             if (animationEvent == null)
             {
+#if UNITY_EDITOR
                 Debug.LogWarning("animation event missed " + gameObject.name);
+#endif
                 return;
             }
 
