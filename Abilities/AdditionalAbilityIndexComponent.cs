@@ -1,7 +1,9 @@
-﻿using HECSFramework.Core;
+﻿using System;
+using HECSFramework.Core;
 
 namespace Components
 {
+    [Serializable]
     public sealed partial class AdditionalAbilityIndexComponent : BaseComponent, IInitable
     {
         [UnityEngine.SerializeField]
