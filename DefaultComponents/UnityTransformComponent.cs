@@ -1,7 +1,6 @@
 ﻿using System;
 using HECSFramework.Core;
 using HECSFramework.Unity;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Components
@@ -12,7 +11,7 @@ namespace Components
     {
         public Actor Actor { get; set; }
         
-        [ReadOnly]
+        [NonSerialized]
         public Transform Transform;
 
         public void Init()
