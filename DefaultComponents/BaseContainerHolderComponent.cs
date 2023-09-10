@@ -27,7 +27,8 @@ namespace Components
         [Button]
         public virtual bool IsValid()
         {
-            containers = new SOProvider<EntityContainer>().GetCollection().Where(x => x.IsHaveComponent<T>()).ToArray();
+            containers = new SOProvider<EntityContainer>().GetCollection().Where(x => x.IsHaveComponent<T>() 
+                && !x.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true)).ToArray();
             return true;
         }
     }
