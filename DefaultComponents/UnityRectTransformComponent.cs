@@ -7,7 +7,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Actor, "This component provide access to unity rect transform, if this entity not actor, this component remove self")]
-    public sealed class UnityRectTransformComponent : BaseComponent, IHaveActor, IInitable
+    public sealed class UnityRectTransformComponent : BaseComponent, IHaveActor, IInitable, IDisposable
     {
         public Actor Actor { get; set; }
 
@@ -20,6 +20,12 @@ namespace Components
                 rectTransform = Actor.GameObject.GetComponent<RectTransform>();
             else
                 Actor.Entity.RemoveComponent(this);
+        }
+
+        public void Dispose()
+        {
+            Actor = null;
+            rectTransform = null;
         }
     }
 }
