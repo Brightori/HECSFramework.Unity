@@ -201,9 +201,43 @@ namespace Systems
                 actor.InitWithContainer();
                 actor.Command(new ShowUICommand());
                 onUILoad?.Invoke(actor.Entity);
+
+                if (Owner.TryGetComponent(out UIPriorityIndexComponent uIPriorityIndexComponent))
+                {
+                    SortUI(uIPriorityIndexComponent);
+                }
             }
             else
                 Debug.LogAssertion("this is not UIActor " + obj.Result.name);
+        }
+
+        private void SortUI(UIPriorityIndexComponent uIPriorityIndexComponent)
+        {
+            var transformComponent = uIPriorityIndexComponent.Owner.GetComponent<UnityTransformComponent>();
+            var parent = transformComponent.Transform.parent;
+            transformComponent.Transform.SetAsFirstSibling();
+
+            for (int i = 1; i < parent.childCount; i++)
+            {
+                if (parent.GetChild(i).TryGetComponent(out Actor actor))
+                {
+                    if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent priorityIndexComponent))
+                    {
+                        if (priorityIndexComponent.Priority < uIPriorityIndexComponent.Priority)
+                        {
+                            transformComponent.Transform.SetSiblingIndex(i);
+                        }
+                        else
+                            return;
+                    }
+                    else
+                    {
+                        transformComponent.Transform.SetSiblingIndex(i);
+                    }
+                }
+            } 
+
+            transformComponent.Transform.GetSiblingIndex();
         }
 
         public void CommandGlobalReact(HideUICommand command)
