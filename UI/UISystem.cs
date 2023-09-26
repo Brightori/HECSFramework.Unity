@@ -202,7 +202,7 @@ namespace Systems
                 actor.Command(new ShowUICommand());
                 onUILoad?.Invoke(actor.Entity);
 
-                if (Owner.TryGetComponent(out UIPriorityIndexComponent uIPriorityIndexComponent))
+                if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent uIPriorityIndexComponent))
                 {
                     SortUI(uIPriorityIndexComponent);
                 }
@@ -221,9 +221,12 @@ namespace Systems
             {
                 if (parent.GetChild(i).TryGetComponent(out Actor actor))
                 {
-                    if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent priorityIndexComponent))
+                    if (!actor.Entity.IsAlive() || actor.Entity == transformComponent.Owner)
+                        continue;
+
+                    if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent currentPriority))
                     {
-                        if (priorityIndexComponent.Priority < uIPriorityIndexComponent.Priority)
+                        if (currentPriority.Priority < uIPriorityIndexComponent.Priority)
                         {
                             transformComponent.Transform.SetSiblingIndex(i);
                         }
@@ -235,7 +238,7 @@ namespace Systems
                         transformComponent.Transform.SetSiblingIndex(i);
                     }
                 }
-            } 
+            }
 
             transformComponent.Transform.GetSiblingIndex();
         }
