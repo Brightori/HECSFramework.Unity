@@ -24,7 +24,7 @@ namespace Components
 
         private IEnumerable<EntityContainer> GetContainers()
         {
-            var containers = new SOProvider<EntityContainer>().GetCollection().Where(x => x.IsHaveComponent<T>()
+            var containers = new SOProvider<EntityContainer>().GetCollection().Where(x => x is not PresetContainer && x.IsHaveComponent<T>()
                && !x.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true));
 
             return containers;
