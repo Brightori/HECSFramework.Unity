@@ -7,7 +7,7 @@ scripts_path=$(echo "$current_dir" | awk -F '/Assets' '{print $1 "/Assets"}')
 
 echo "Scripts path: $scripts_path"
 
-codesign --force --deep -s - ./RoslynHECS
+codesign --force --deep -s - ./RoslynHECSx86
 
-./RoslynHECS no_commands no_resolvers path:"$scripts_path"
+./RoslynHECSx86 no_commands no_resolvers path:"$scripts_path"
 
