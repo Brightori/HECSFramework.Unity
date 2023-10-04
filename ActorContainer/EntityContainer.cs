@@ -352,6 +352,7 @@ namespace HECSFramework.Unity
             var bpProvider = new BluePrintsProvider();
             AddComponent(new T());
 
+            isEditorTimeChanged = true;
             return GetComponent<T>();
         }
 
