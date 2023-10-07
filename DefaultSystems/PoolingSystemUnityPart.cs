@@ -22,9 +22,9 @@ namespace Systems
 
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true) where T : Actor
         {
-            var view =  await GetViewFromPool(assetReference);
+            var view = await GetViewFromPool(assetReference);
             var actor = view.GetOrAddMonoComponent<Actor>();
-            
+
             if (actor.Entity != null)
             {
                 actor.Entity.Dispose();
@@ -41,10 +41,10 @@ namespace Systems
             return (T)actor;
         }
 
-        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T: Actor
+        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T : Actor
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            var view =  await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
+            var view = await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
 
             if (init)
             {
@@ -124,7 +124,7 @@ namespace Systems
                 return loaded;
             }
         }
-        
+
         public async void Warmup(EntityContainer entityContainer, int count)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
@@ -221,7 +221,7 @@ namespace Systems
                 pooledGOs[assetReference.AssetGUID].Release(gameObject);
             }
         }
-     
+
         /// <summary>
         /// we dont check here is poolable or not and just remove to pool
         /// </summary>
@@ -239,7 +239,7 @@ namespace Systems
             }
             else
             {
-                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(assetReference.InstantiateAsync().Task));
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(Addressables.LoadAssetAsync<GameObject>(assetReference).Task));
                 pooledGOs[assetReference.AssetGUID].Release(gameObject);
             }
         }
