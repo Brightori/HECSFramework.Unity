@@ -217,11 +217,11 @@ namespace Systems
             }
             else
             {
-                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(assetReference.InstantiateAsync().Task));
+                pooledGOs.Add(assetReference.AssetGUID, new HECSPool<GameObject>(Addressables.LoadAssetAsync<GameObject>(assetReference).Task));
                 pooledGOs[assetReference.AssetGUID].Release(gameObject);
             }
         }
-
+     
         /// <summary>
         /// we dont check here is poolable or not and just remove to pool
         /// </summary>
