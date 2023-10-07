@@ -124,13 +124,13 @@ namespace Systems
                 return loaded;
             }
         }
-       
         
         public async void Warmup(EntityContainer entityContainer, int count)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
             {
-                var needed = await Addressables.LoadAssetAsync<GameObject>(view.ViewReference).Task;
+                var neededHandler = Addressables.LoadAssetAsync<GameObject>(view.ViewReference);
+                var needed = await neededHandler.Task;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -138,7 +138,8 @@ namespace Systems
                     ReleaseView(view.ViewReference, instance.gameObject);
                 }
 
-                needed.gameObject.SetActive(false);
+                await UniTask.NextFrame();
+                Addressables.Release(neededHandler);
             }
         }
 
