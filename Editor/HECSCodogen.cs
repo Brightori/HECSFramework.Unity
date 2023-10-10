@@ -34,10 +34,16 @@ public class HECSRoslynCodegen : OdinEditorWindow
                     return;
             }
 
+#if OSX_ARM
+            var find = Directory.GetFiles(Application.dataPath, "script.sh.command", SearchOption.AllDirectories);
+#elif OSX_INTEL
+            var find = Directory.GetFiles(Application.dataPath, "script_x86.sh.command", SearchOption.AllDirectories);
+#else
             var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
 
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
                 PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
+#endif
         }
         catch (Exception e)
         {
@@ -160,10 +166,10 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         Debug.Log("Generating Roslyn files...");
 
-        #if UNITY_EDITOR_OSX
+#if UNITY_EDITOR_OSX
         OSX();
         return;
-        #endif
+#endif
 
         Process myProcess = new Process
         {
