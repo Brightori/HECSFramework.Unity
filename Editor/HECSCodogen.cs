@@ -40,10 +40,9 @@ public class HECSRoslynCodegen : OdinEditorWindow
             var find = Directory.GetFiles(Application.dataPath, "script_x86.sh.command", SearchOption.AllDirectories);
 #else
             var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
-
+#endif
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
                 PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
-#endif
         }
         catch (Exception e)
         {
