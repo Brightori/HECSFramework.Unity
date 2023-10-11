@@ -399,7 +399,7 @@ namespace Systems
         {
             uiCurrents.ForceUpdateFilter();
 
-            using (var result = HECSPooledArray<Entity>.GetArray(uiCurrents.Count))
+            var result = HECSPooledArray<Entity>.GetArray(uiCurrents.Count);
             {
                 foreach (var bp in uIBluePrints)
                 {
