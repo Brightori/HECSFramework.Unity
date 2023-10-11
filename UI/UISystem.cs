@@ -3,6 +3,7 @@ using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -389,8 +390,30 @@ namespace Systems
 
             await UniTask.WhenAll(cached);
             cached.Clear();
+
             command.OnLoadUI?.Invoke();
             Owner.RemoveComponent<UIBusyTagComponent>();
+        }
+
+        public HECSPooledArray<Entity> GetGroup(int index)
+        {
+            uiCurrents.ForceUpdateFilter();
+
+            using (var result = HECSPooledArray<Entity>.GetArray(uiCurrents.Count))
+            {
+                foreach (var bp in uIBluePrints)
+                {
+                    if (bp.Groups.IsHaveGroupIndex(index))
+                    {
+                        var needed = uiCurrents.FirstOrDefault(x => x.GetComponent<UITagComponent>().ViewType.Id == bp.UIType.Id);
+
+                        if (needed != null)
+                            result.Add(needed);
+                    }
+                }
+
+                return result;
+            }
         }
 
         private bool IsCurrentUIContainsId(int id)
