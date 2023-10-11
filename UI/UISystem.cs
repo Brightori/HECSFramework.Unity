@@ -383,7 +383,7 @@ namespace Systems
                 if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
                 && !IsCurrentUIContainsId(uIBluePrints[i].UIType.Id))
                 {
-                    cached.Add(ShowUI(uIBluePrints[i].UIType.Id));
+                    cached.Add(ShowUI(uIBluePrints[i].UIType.Id, isLocked: false));
                 }
             }
 
@@ -453,8 +453,6 @@ namespace Systems
             else
                 HECSDebug.LogError("we dont have unityTransform on " + neededCanvas.ID);
         }
-
-
     }
 
     public interface IUISystem : ISystem,
