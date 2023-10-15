@@ -6,7 +6,7 @@ namespace HECSFramework.Unity
 {
     [Documentation(Doc.HECS, Doc.Containers, "this container can inject containers depends from predicates, attention pls - we not overlook is have components in conditionals containers ")]
     [Documentation(Doc.HECS, Doc.Containers, "we inject first container with all predicates ready")]
-    [CreateAssetMenu(fileName = "ActorContainer", menuName = "Actor Container")]
+    [CreateAssetMenu(fileName = "ConditionalContainer", menuName = "ConditionalContainer")]
     public class ConditionalContainer : ActorContainer
     {
         public ConditionsAndContainer[] ConditionsAndContainers;
