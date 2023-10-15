@@ -1,0 +1,34 @@
+﻿using System.Linq;
+using HECSFramework.Core;
+using UnityEngine;
+
+namespace HECSFramework.Unity
+{
+    [Documentation(Doc.HECS, Doc.Containers, "this container can inject containers depends from predicates, attention pls - we not overlook is have components in conditionals containers ")]
+    [Documentation(Doc.HECS, Doc.Containers, "we inject first container with all predicates ready")]
+    [CreateAssetMenu(fileName = "ActorContainer", menuName = "Actor Container")]
+    public class ConditionalContainer : ActorContainer
+    {
+        public ConditionsAndContainer[] ConditionsAndContainers;
+
+        public override void Init(Entity entity, bool pure = false)
+        {
+            foreach (var condition in ConditionsAndContainers)
+            {
+                if (condition.Predicates.All(x=> x.GetPredicate.IsReady(entity)))
+                {
+                    condition.Container.Init(entity, pure);
+                    break;
+                }
+            }
+
+            base.Init(entity, pure);
+        }
+    }
+
+    public struct ConditionsAndContainer
+    {
+        public PredicateBluePrint[] Predicates;
+        public EntityContainer Container;
+    }
+}
