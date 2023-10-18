@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using HECSFramework.Core;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -9,13 +11,14 @@ namespace HECSFramework.Unity
     [CreateAssetMenu(fileName = "ConditionalContainer", menuName = "ConditionalContainer")]
     public class ConditionalContainer : ActorContainer
     {
+        [PropertyOrder(-1)]
         public ConditionsAndContainer[] ConditionsAndContainers;
 
         public override void Init(Entity entity, bool pure = false)
         {
             foreach (var condition in ConditionsAndContainers)
             {
-                if (condition.Predicates.All(x=> x.GetPredicate.IsReady(entity)))
+                if (condition.Predicates.All(x => x.GetPredicate.IsReady(entity)))
                 {
                     condition.Container.Init(entity, pure);
                     break;
@@ -26,6 +29,7 @@ namespace HECSFramework.Unity
         }
     }
 
+    [Serializable]
     public struct ConditionsAndContainer
     {
         public PredicateBluePrint[] Predicates;
