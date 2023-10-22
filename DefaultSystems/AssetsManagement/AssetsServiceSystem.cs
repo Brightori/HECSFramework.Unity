@@ -26,7 +26,7 @@ namespace Systems
         {
         }
 
-        public async UniTask<AssetReferenceContainer<TRef, TObject>> GetContainer<TRef, TObject>(TRef reference)
+        public async UniTask<AssetRefContainer<TRef, TObject>> GetContainer<TRef, TObject>(TRef reference)
             where TRef : AssetReference
             where TObject : Object
         {
@@ -40,14 +40,14 @@ namespace Systems
             }
 
             containersRefsCount[reference]++;
-            return assetsContainersCache[reference] as AssetReferenceContainer<TRef, TObject>;
+            return assetsContainersCache[reference] as AssetRefContainer<TRef, TObject>;
         }
 
-        public void ReleaseContainer<TRef, TObject>(AssetReferenceContainer<TRef, TObject> referenceContainer)
+        public void ReleaseContainer<TRef, TObject>(AssetRefContainer<TRef, TObject> refContainer)
             where TRef : AssetReference
             where TObject : Object
         {
-            TRef reference = referenceContainer.Reference;
+            TRef reference = refContainer.Reference;
             if (!assetsContainersCache.ContainsKey(reference))
             {
                 Debug.LogError($"Cannot find container with provided ref {reference}");
@@ -56,7 +56,7 @@ namespace Systems
 
             containersRefsCount[reference]--;
 
-            int assetsInstancesRefsCount = referenceContainer.RefsCount;
+            int assetsInstancesRefsCount = refContainer.RefsCount;
             int assetContainerRefsCount = containersRefsCount[reference];
 
             if (assetsInstancesRefsCount == 0 && assetContainerRefsCount == 0)
@@ -85,8 +85,8 @@ namespace Systems
                 await reference.LoadAssetAsync<TObject>().ToUniTask();
 
                 exceptionsCount = 0;
-                AssetReferenceContainer<TRef, TObject> referenceContainer = new AssetReferenceContainer<TRef, TObject>(reference);
-                assetsContainersCache[reference] = referenceContainer;
+                AssetRefContainer<TRef, TObject> refContainer = new AssetRefContainer<TRef, TObject>(reference);
+                assetsContainersCache[reference] = refContainer;
                 containersRefsCount[reference] = 0;
 
                 assetsLoadsMap.Remove(reference);

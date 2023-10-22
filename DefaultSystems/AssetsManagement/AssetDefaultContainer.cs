@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HECSFramework.HECS.Unity.DefaultSystems.AssetsManagement
 {
-    public class AssetDefaultContainer : IAssetContainer<GameObject>
+    public class AssetDefaultContainer : IAssetGameObjectContainer
     {
         private readonly GameObject asset;
         

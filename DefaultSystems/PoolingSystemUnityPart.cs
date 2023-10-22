@@ -17,7 +17,7 @@ namespace Systems
         public const int minPoolSize = 5;
         public const int maxPoolSize = 512;
 
-        private Dictionary<string, HECSPool<GameObject>> pooledGOs = new Dictionary<string, HECSPool<GameObject>>(64);
+        private Dictionary<string, HECSPool<GameObject>> pooledGOs = new(64);
         private Dictionary<string, EntityContainer> pooledContainers = new Dictionary<string, EntityContainer>(16);
 
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true) where T : Actor
