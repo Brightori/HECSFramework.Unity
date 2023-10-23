@@ -19,7 +19,7 @@ public class DebugHECS : OdinEditorWindow
 
     [ShowInInspector, Searchable]
     [ListDrawerSettings(ShowFoldout = false, DraggableItems = false, HideAddButton = true, HideRemoveButton = true, NumberOfItemsPerPage = 100)]
-    public List<DrawEntity> Entities = new List<DrawEntity>(16);
+    public List<DrawEntity> Entities = new List<DrawEntity>(256);
 
     [MenuItem("HECS Options/Debug HECS", priority = 2)]
     public static void ShowDebugHECSWindow()
@@ -41,11 +41,11 @@ public class DebugHECS : OdinEditorWindow
         if (EntityManager.Default == null)
             return;
 
-        RedrawWindow();
+        //RedrawWindow();
         Repaint();
     }
-
-    [Button]
+    [PropertyOrder(-1)]
+    [Button(ButtonHeight = 50)]
     public void RedrawWindow()
     {
         Entities.Clear();
@@ -76,6 +76,8 @@ public class DebugHECS : OdinEditorWindow
             drawEntity.Index = e.Index;
             drawEntity.Guid = e.GUID.ToString();
             drawEntity.ContainerID = e.ContainerID;
+            drawEntity.IsAlive = e.IsAlive;
+            drawEntity.IsPaused = e.IsPaused;
 
             foreach (var c in e.GetComponentsByType<IComponent>())
             {
@@ -109,6 +111,13 @@ public class DrawEntity
 
     [FoldoutGroup("$ID"), ReadOnly]
     public string Guid;
+
+    [FoldoutGroup("$ID"), ReadOnly]
+    public bool IsAlive;
+
+    [FoldoutGroup("$ID"), ReadOnly]
+    public bool IsPaused;
+
 
     [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(ShowFoldout = false, IsReadOnly = true), LabelText("Components")]
     public List<DrawComponent> drawComponents = new List<DrawComponent>();
