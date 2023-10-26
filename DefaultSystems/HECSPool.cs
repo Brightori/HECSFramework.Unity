@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class HECSPool<T> : IDisposable where T : UnityEngine.Object
 {
@@ -25,6 +26,11 @@ public class HECSPool<T> : IDisposable where T : UnityEngine.Object
     public void Dispose()
     {
         getNewPooledObject = null;
+
+        foreach (var item in queue) 
+        { 
+            Object.Destroy(item);
+        }
         queue.Clear();
     }
 
