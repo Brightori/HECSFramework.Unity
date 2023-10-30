@@ -4,11 +4,12 @@ using UnityEngine;
 
 namespace HECSFramework.HECS.Unity.DefaultSystems.AssetsManagement
 {
-    public class AssetDefaultContainer : IAssetGameObjectContainer
+    public class AssetDefaultContainer : IAssetContainer<GameObject>
     {
         private readonly GameObject asset;
         
         public GameObject Asset => asset;
+        public int RefsCount { get; } = 0;
 
         public AssetDefaultContainer(GameObject asset)
         {

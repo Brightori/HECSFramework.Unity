@@ -5,18 +5,26 @@ using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using UnityEngine;
 
-public class HECSPool<TContainer> : IDisposable
+public interface IHECSPool
+{
+    void SetMaxCount(int maxCount);
+    UniTask<GameObject> Get();
+    void Release(GameObject pooledObj);
+    void Dispose();
+}
+
+public class HECSPool<TContainer> : IDisposable, IHECSPool
     where TContainer : IAssetContainer<GameObject>
 {
     private Queue<GameObject> queue;
-    private UniTask<TContainer> containerTask;
+    private TContainer container;
     private int maxCount;
 
-    public HECSPool(UniTask<TContainer> getObject, int maxCount = 256)
+    public HECSPool(TContainer getObject, int maxCount = 256)
     {
         queue = new Queue<GameObject>(maxCount);
         this.maxCount = maxCount;
-        containerTask = getObject;
+        container = getObject;
     }
 
     public void SetMaxCount(int maxCount)
@@ -26,7 +34,7 @@ public class HECSPool<TContainer> : IDisposable
 
     public void Dispose()
     {
-        containerTask = default;
+        container = default;
         queue.Clear();
     }
 
@@ -34,7 +42,6 @@ public class HECSPool<TContainer> : IDisposable
     {
         if (queue.Count == 0)
         {
-            TContainer container = await containerTask;
             return await container.CreateInstance(Vector3.zero, Quaternion.identity);
         }
 
@@ -43,15 +50,9 @@ public class HECSPool<TContainer> : IDisposable
 
     public void Release(GameObject pooledObj)
     {
-        var awaiter = containerTask.GetAwaiter();
-        if (!awaiter.IsCompleted)
-        {
-            HECSDebug.LogError("Try to release obj from container that is not ready");
-            return;
-        }
         if (queue.Count > maxCount)
         {
-            awaiter.GetResult().ReleaseInstance(pooledObj);
+            container.ReleaseInstance(pooledObj);
             return;
         }
 
