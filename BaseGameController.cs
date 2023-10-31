@@ -1,5 +1,6 @@
 ﻿using System;
 using Commands;
+using Components;
 using HECSFramework.Core;
 using Systems;
 using UnityEngine;
@@ -49,6 +50,16 @@ namespace HECSFramework.Unity
             inputManager = Entity.Get("InputManager");
             BaseAwake();
             NetworkAwake();
+        }
+
+        private void OnApplicationQuit()
+        {
+            if (EntityManager.IsAlive)
+            {
+                var entity = EntityManager.Default.GetEntityFromPool("OnQuit");
+                entity.AddComponent<OnApplicationQuitTagComponent>();
+                entity.Init();
+            }
         }
 
         private void NewWorldReact(World world)

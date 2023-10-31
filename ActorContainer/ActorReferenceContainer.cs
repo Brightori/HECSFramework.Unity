@@ -154,7 +154,7 @@ namespace HECSFramework.Unity
 
         public override T GetComponent<T>()
         {
-            foreach (var c in componentsBluePrints)
+            foreach (var c in Components)
             {
                 if (c.GetHECSComponent is T needed)
                     return needed;

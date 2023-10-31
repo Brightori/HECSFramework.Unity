@@ -3,6 +3,7 @@ using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
+using Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,10 +29,10 @@ namespace Systems
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
         private PoolingSystem poolingSystem;
 
+        private List<UniTask<Entity>> cached = new List<UniTask<Entity>>(8);
+
         private bool isReady;
         private bool isLoaded;
-
-        private List<UIBluePrint> spawnInProgress = new List<UIBluePrint>();
 
         public override void InitSystem()
         {
@@ -115,10 +116,12 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
-        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false)
+        public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true)
         {
             while (!isReady)
                 await Task.Delay(50);
+
+            uiCurrents.ForceUpdateFilter();
 
             if (!isMultiple)
             {
@@ -126,7 +129,23 @@ namespace Systems
                     return ui;
             }
 
+            if (isLocked)
+            {
+                await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
+                Owner.GetOrAddComponent<UIBusyTagComponent>();
+            }
+
             Transform canvas = null;
+
+            var bluePrint = GetUIBluePrint(uiType);
+
+            if (bluePrint == null)
+                throw new Exception("we dont have blue print for this ui " + uiType);
+
+            if (additionalCanvas == 0 && bluePrint.AdditionalCanvasIdentifier != null)
+            {
+                additionalCanvas = bluePrint.AdditionalCanvasIdentifier.Id;
+            }
 
             if (additionalCanvas == 0)
                 canvas = mainCanvasTransform.Transform;
@@ -140,11 +159,6 @@ namespace Systems
 
                 canvas = needCanvas.GetComponent<UnityTransformComponent>().Transform;
             }
-
-            var bluePrint = GetUIBluePrint(uiType);
-
-            if (bluePrint == null)
-                throw new Exception("we dont have blue print for this ui " + uiType);
 
             if (ispoolable)
             {
@@ -166,6 +180,10 @@ namespace Systems
             newUiActor.ActorContainer.Init(newUiActor.Entity);
 
             newUiActor.transform.SetParent(canvas);
+
+            if (isLocked)
+                Owner.RemoveComponent<UIBusyTagComponent>();
+
             return newUiActor.Entity;
         }
 
@@ -202,9 +220,46 @@ namespace Systems
                 actor.InitWithContainer();
                 actor.Command(new ShowUICommand());
                 onUILoad?.Invoke(actor.Entity);
+
+                if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent uIPriorityIndexComponent))
+                {
+                    SortUI(uIPriorityIndexComponent);
+                }
             }
             else
                 Debug.LogAssertion("this is not UIActor " + obj.Result.name);
+        }
+
+        private void SortUI(UIPriorityIndexComponent uIPriorityIndexComponent)
+        {
+            var transformComponent = uIPriorityIndexComponent.Owner.GetComponent<UnityTransformComponent>();
+            var parent = transformComponent.Transform.parent;
+            transformComponent.Transform.SetAsFirstSibling();
+
+            for (int i = 1; i < parent.childCount; i++)
+            {
+                if (parent.GetChild(i).TryGetComponent(out Actor actor))
+                {
+                    if (!actor.Entity.IsAlive() || actor.Entity == transformComponent.Owner)
+                        continue;
+
+                    if (actor.Entity.TryGetComponent(out UIPriorityIndexComponent currentPriority))
+                    {
+                        if (currentPriority.Priority < uIPriorityIndexComponent.Priority)
+                        {
+                            transformComponent.Transform.SetSiblingIndex(i);
+                        }
+                        else
+                            return;
+                    }
+                    else
+                    {
+                        transformComponent.Transform.SetSiblingIndex(i);
+                    }
+                }
+            }
+
+            transformComponent.Transform.GetSiblingIndex();
         }
 
         public void CommandGlobalReact(HideUICommand command)
@@ -264,32 +319,7 @@ namespace Systems
                     case UIGroupCommand groupUI:
                         CommandGlobalReact(groupUI);
                         break;
-                    case ShowUIOnAdditionalCommand additionalCanvasUI:
-                        CommandGlobalReact(additionalCanvasUI);
-                        break;
                 }
-            }
-        }
-
-        public void CommandGlobalReact(ShowUIAndHideOthersCommand command)
-        {
-            HideAllExcept(command.UIActorType);
-            EntityManager.Command(new ShowUICommand { UIViewType = command.UIActorType, OnUILoad = command.OnUILoad });
-        }
-
-        public void CommandGlobalReact(HideAllUIExceptCommand command)
-        {
-            HideAllExcept(command.UIActorType);
-        }
-
-        private void HideAllExcept(int uIActorType)
-        {
-            foreach (var e in uiCurrents)
-            {
-                if (!e.IsAlive()) continue;
-
-                if (e.GetComponent<UITagComponent>().ViewType.Id == uIActorType) continue;
-                e.Command(new HideUICommand());
             }
         }
 
@@ -328,13 +358,25 @@ namespace Systems
             }
 
             uiCurrents.ForceUpdateFilter();
+            ShowUIGroup(command).Forget();
+        }
+
+        public async UniTask ShowUIGroup(UIGroupCommand command)
+        {
+            await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
+
+            Owner.GetOrAddComponent<UIBusyTagComponent>();
 
             foreach (var ui in uiCurrents)
             {
                 if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
                 {
                     if (uIGroupTagComponent.IsHaveGroupIndex(command.UIGroup))
+                    {
+                        ui.Command(new ShowUICommand());
                         continue;
+                    }
+                        
                     else
                         ui.Command(new HideUICommand());
                 }
@@ -347,8 +389,35 @@ namespace Systems
                 if (uIBluePrints[i].Groups.IsHaveGroupIndex(command.UIGroup)
                 && !IsCurrentUIContainsId(uIBluePrints[i].UIType.Id))
                 {
-                    SpawnUIFromBluePrint(uIBluePrints[i], command.OnLoadUI, mainCanvasTransform.Transform);
+                    cached.Add(ShowUI(uIBluePrints[i].UIType.Id, isLocked: false));
                 }
+            }
+
+            await UniTask.WhenAll(cached);
+            cached.Clear();
+
+            command.OnLoadUI?.Invoke();
+            Owner.RemoveComponent<UIBusyTagComponent>();
+        }
+
+        public HECSPooledArray<Entity> GetGroup(int index)
+        {
+            uiCurrents.ForceUpdateFilter();
+
+            var result = HECSPooledArray<Entity>.GetArray(uiCurrents.Count);
+            {
+                foreach (var bp in uIBluePrints)
+                {
+                    if (bp.Groups.IsHaveGroupIndex(index))
+                    {
+                        var needed = uiCurrents.FirstOrDefault(x => x.GetComponent<UITagComponent>().ViewType.Id == bp.UIType.Id);
+
+                        if (needed != null)
+                            result.Add(needed);
+                    }
+                }
+
+                return result;
             }
         }
 
@@ -412,16 +481,11 @@ namespace Systems
             else
                 HECSDebug.LogError("we dont have unityTransform on " + neededCanvas.ID);
         }
-
-
     }
 
     public interface IUISystem : ISystem,
         IReactGlobalCommand<ShowUICommand>,
-        IReactGlobalCommand<ShowUIOnAdditionalCommand>,
         IReactGlobalCommand<HideUICommand>,
-        IReactGlobalCommand<ShowUIAndHideOthersCommand>,
-        IReactGlobalCommand<HideAllUIExceptCommand>,
         IReactGlobalCommand<UIGroupCommand>,
         IReactGlobalCommand<CanvasReadyCommand>
     { }

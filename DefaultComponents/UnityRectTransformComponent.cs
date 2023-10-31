@@ -1,26 +1,31 @@
 ﻿using System;
 using HECSFramework.Core;
 using HECSFramework.Unity;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Actor, "This component provide access to unity rect transform, if this entity not actor, this component remove self")]
-    public sealed class UnityRectTransformComponent : BaseComponent, IHaveActor, IInitable
+    public sealed class UnityRectTransformComponent : BaseComponent, IHaveActor, IInitable, IDisposable
     {
         public Actor Actor { get; set; }
 
-        [ReadOnly]
-        public RectTransform RectTransform;
+        private RectTransform rectTransform;
+        public RectTransform RectTransform => rectTransform;
 
         public void Init()
         {
             if (Actor != null)
-                RectTransform = Actor.GameObject.GetComponent<RectTransform>();
+                rectTransform = Actor.GameObject.GetComponent<RectTransform>();
             else
                 Actor.Entity.RemoveComponent(this);
+        }
+
+        public void Dispose()
+        {
+            Actor = null;
+            rectTransform = null;
         }
     }
 }

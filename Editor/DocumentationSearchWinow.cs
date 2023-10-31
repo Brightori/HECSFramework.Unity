@@ -28,6 +28,9 @@ public class DocumentationSearchWinow : OdinEditorWindow
     [Button]
     public void Search()
     {
+        if (string.IsNullOrEmpty(SearchWord))
+            return;
+
         Documentation.Clear();
         var word = SearchWord.ToLower();
 

@@ -5,7 +5,11 @@ using HECSFramework.Unity;
 
 namespace Components
 {
-    public sealed partial class ActionsHolderComponent : BaseComponent, IInitable
+    public sealed partial class ActionsHolderComponent : BaseActionsHolderComponent, IInitable
+    {
+    }
+
+    public abstract partial class BaseActionsHolderComponent : BaseComponent, IInitable
     {
         public ActionBPToIdentifier[] ActionBPToIdentifiers;
 

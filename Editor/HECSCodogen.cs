@@ -34,8 +34,13 @@ public class HECSRoslynCodegen : OdinEditorWindow
                     return;
             }
 
+#if OSX_ARM
+            var find = Directory.GetFiles(Application.dataPath, "script.sh.command", SearchOption.AllDirectories);
+#elif OSX_INTEL
+            var find = Directory.GetFiles(Application.dataPath, "script_x86.sh.command", SearchOption.AllDirectories);
+#else
             var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
-
+#endif
             if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
                 PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
         }
@@ -159,6 +164,12 @@ public class HECSRoslynCodegen : OdinEditorWindow
     private async Task Generate(string args, bool isServer)
     {
         Debug.Log("Generating Roslyn files...");
+
+#if UNITY_EDITOR_OSX
+        OSX();
+        return;
+#endif
+
         Process myProcess = new Process
         {
             StartInfo =
@@ -189,6 +200,13 @@ public class HECSRoslynCodegen : OdinEditorWindow
         Debug.Log(result);
 
         EditorApplication.UnlockReloadAssemblies();
+    }
+
+    private void OSX()
+    {
+        string open = $@"open {CodegenExePath}";
+        Process.Start(@"/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"
+            , open);
     }
 
     private static Task<string> MspGeneration(string input, string output, string dataPath)
@@ -239,7 +257,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         var tree = new TreeSyntaxNode();
 
         tree.Add(new UsingSyntax("MessagePack"));
-        tree.Add(new UsingSyntax("MessagePack.Resolvers",1));
+        tree.Add(new UsingSyntax("MessagePack.Resolvers", 1));
 
         tree.Add(new NameSpaceSyntax("HECSFramework.Core"));
         tree.Add(new LeftScopeSyntax());

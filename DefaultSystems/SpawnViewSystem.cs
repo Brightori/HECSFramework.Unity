@@ -58,6 +58,14 @@ namespace Systems
             await UniTask.WaitUntil(() => Owner.IsInited);
             AfterViewService.ProcessAfterView(Owner, viewGameObject);
         }
+
+        public override void Dispose()
+        {
+            if (!EntityManager.Default.TryGetSingleComponent<OnApplicationQuitTagComponent>(out _))
+            {
+                poolingSystem.ReleaseView(viewGameObject);
+            }
+        }
     }
 
     public static class AfterViewService

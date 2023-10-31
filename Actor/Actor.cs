@@ -49,7 +49,7 @@ namespace HECSFramework.Unity
                 Entity = world.GetEntityFromPool(gameObject.name);
                 Entity.GUID = actorInitModule.Guid;
             }
-            
+
             Entity.GetOrAddComponent<ActorProviderComponent>().Actor = this;
             Entity.GetOrAddComponent<UnityTransformComponent>();
 
@@ -168,7 +168,7 @@ namespace HECSFramework.Unity
 
         public override bool Equals(object other)
         {
-            return Entity != null && Entity.Equals(other);
+            return other is Actor otherActor && Equals(otherActor);
         }
 
         protected virtual void Reset()
@@ -179,9 +179,9 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
-            if (Entity != null && !Entity.IsDisposed) 
+            if (Entity != null && !Entity.IsDisposed)
                 Entity.Dispose();
-            
+
             Entity = null;
             Destroy(gameObject);
         }
@@ -211,21 +211,20 @@ namespace HECSFramework.Unity
 
         public void InjectContainer(EntityContainer container, bool isAdditive = false)
         {
-            var components = container.GetComponentsInstances();
-            var systems = container.GetSystemsInstances();
-
-            Entity.Inject(components, systems, isAdditive);
+            InjectContainer(container, EntityManager.Default, isAdditive);
         }
 
-        public void InjectContainer(EntityContainer container, bool isAdditive = false, params IComponent[] additionalComponents)
+        public void InjectContainer(EntityContainer container, World world, bool isAdditive = false, params IComponent[] additionalComponents)
         {
-            var components = container.GetComponentsInstances();
-            var systems = container.GetSystemsInstances();
 
-            foreach (var additional in additionalComponents)
-                components.Add(additional);
+            var neededWorld = world == null ? EntityManager.Default : world;
+            InjectContainer(container, neededWorld, isAdditive);
 
-            Entity.Inject(components, systems, isAdditive);
+            if (additionalComponents != null && additionalComponents.Length > 0)
+            {
+                foreach (var additional in additionalComponents)
+                    Entity.AddComponent(additional);
+            }
         }
 
         /// <summary>
@@ -235,7 +234,7 @@ namespace HECSFramework.Unity
         /// <returns></returns>
         public bool Equals(Actor other)
         {
-            return other != null && other.Entity.ID == Entity.ID;
+            return other.IsAlive() && this.IsAlive() && other.Entity.ID == Entity.ID;
         }
     }
 }

@@ -8,6 +8,6 @@ namespace Commands
     {
         public bool Show;
         public int UIGroup;
-        public Action<Entity> OnLoadUI;
+        public Action OnLoadUI;
     }
 }

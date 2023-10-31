@@ -2,6 +2,7 @@ using HECSFramework.Unity;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(-10)]
 public class InjectActor : MonoBehaviour
 {
     private void Awake()

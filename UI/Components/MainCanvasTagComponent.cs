@@ -9,7 +9,7 @@ namespace Components
 {
     [Serializable, RequiredAtContainer(typeof(UnityTransformComponent), typeof(AdditionalCanvasesSystem))]
     [Documentation(Doc.UI, Doc.Tag, "This component marks main canvas for placing ui")]
-    public class MainCanvasTagComponent : BaseComponent, IWorldSingleComponent, IHaveActor
+    public sealed class MainCanvasTagComponent : BaseComponent, IWorldSingleComponent, IHaveActor
     {
         public Actor Actor { get; set; }
 
