@@ -1,96 +1,98 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HECSFramework.Unity;
 using HECSFramework.Unity.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
-public class ExportContainerWindow : OdinEditorWindow
+namespace HECSFramework.Unity
 {
-    [FolderPath(AbsolutePath = true)]
-    public string CopyTo;
-
-    public EntityContainer EntityContainer;
-
-    private List<FileInfo> Components = new List<FileInfo>();
-    private List<FileInfo> Systems = new List<FileInfo>();
-
-    [MenuItem("HECS Options/Helpers/Export Container Window")]
-    public static void GetExportContainerWindow()
+    public class ExportContainerWindow : OdinEditorWindow
     {
-        GetWindow<ExportContainerWindow>();
-    }
+        [FolderPath(AbsolutePath = true)]
+        public string CopyTo;
 
-    [Button]
-    public void Copy()
-    {
-        if (string.IsNullOrEmpty(CopyTo) || EntityContainer == null)
-            return;
+        public EntityContainer EntityContainer;
 
-        DirectoryInfo lookingFor = new DirectoryInfo(Application.dataPath);
+        private List<FileInfo> Components = new List<FileInfo>();
+        private List<FileInfo> Systems = new List<FileInfo>();
 
-        foreach (var c in EntityContainer.Components)
+        [MenuItem("HECS Options/Helpers/Export/Export Container Window")]
+        public static void GetExportContainerWindow()
         {
-            var needed = c.GetHECSComponent.GetType().Name;
+            GetWindow<ExportContainerWindow>();
+        }
 
-            var find = lookingFor.GetFiles(needed + ".cs", SearchOption.AllDirectories);
+        [Button]
+        public void Copy()
+        {
+            if (string.IsNullOrEmpty(CopyTo) || EntityContainer == null)
+                return;
 
-            foreach (var f in find)
+            DirectoryInfo lookingFor = new DirectoryInfo(Application.dataPath);
+
+            foreach (var c in EntityContainer.Components)
             {
-                if (f.FullName.Contains("HECS"))
+                var needed = c.GetHECSComponent.GetType().Name;
+
+                var find = lookingFor.GetFiles(needed + ".cs", SearchOption.AllDirectories);
+
+                foreach (var f in find)
+                {
+                    if (f.FullName.Contains("HECS"))
+                        continue;
+
+                    Components.Add(f);
+                }
+            }
+
+            foreach (var c in EntityContainer.Systems)
+            {
+                var needed = c.GetSystem.GetType().Name;
+
+                var find = lookingFor.GetFiles(needed + ".cs", SearchOption.AllDirectories);
+
+                foreach (var f in find)
+                {
+                    if (f.FullName.Contains("HECS"))
+                        continue;
+
+                    Systems.Add(f);
+                }
+            }
+
+            int count = 1;
+
+            InstallHECS.CheckFolder(CopyTo + "/Components/");
+            InstallHECS.CheckFolder(CopyTo + "/Systems/");
+            var componentsCopyDirectory = new DirectoryInfo(CopyTo + "/Components/");
+            var systemsCopyDirectory = new DirectoryInfo(CopyTo + "/Systems/");
+
+            foreach (var c in Components)
+            {
+                if (componentsCopyDirectory.EnumerateFiles().Any(x => x.Name == c.Name))
+                {
+                    File.Copy(c.FullName, CopyTo + "/" + "/Components/" + count.ToString() + c.Name, true);
+                    count++;
                     continue;
+                }
 
-                Components.Add(f);
+                File.Copy(c.FullName, CopyTo + "/" + "/Components/" + c.Name);
             }
-        }
 
-        foreach (var c in EntityContainer.Systems)
-        {
-            var needed = c.GetSystem.GetType().Name;
-
-            var find = lookingFor.GetFiles(needed + ".cs", SearchOption.AllDirectories);
-
-            foreach (var f in find)
+            foreach (var c in Systems)
             {
-                if (f.FullName.Contains("HECS"))
+                if (systemsCopyDirectory.EnumerateFiles().Any(x => x.Name == c.Name))
+                {
+                    File.Copy(c.FullName, CopyTo + "/" + "/Systems/" + count.ToString() + c.Name, true);
+                    count++;
                     continue;
+                }
 
-                Systems.Add(f);
+                File.Copy(c.FullName, CopyTo + "/" + "/Systems/" + c.Name);
             }
-        }
-
-        int count = 1;
-
-        InstallHECS.CheckFolder(CopyTo + "/Components/");
-        InstallHECS.CheckFolder(CopyTo + "/Systems/");
-        var componentsCopyDirectory = new DirectoryInfo(CopyTo + "/Components/");
-        var systemsCopyDirectory = new DirectoryInfo(CopyTo + "/Systems/");
-
-        foreach (var c in Components)
-        {
-            if (componentsCopyDirectory.EnumerateFiles().Any(x=> x.Name == c.Name))
-            {
-                File.Copy(c.FullName, CopyTo + "/" + "/Components/" + count.ToString() + c.Name, true);
-                count++;
-                continue;
-            }
-
-            File.Copy(c.FullName, CopyTo + "/" + "/Components/" + c.Name);
-        }
-
-        foreach (var c in Systems)
-        {
-            if (systemsCopyDirectory.EnumerateFiles().Any(x => x.Name == c.Name))
-            {
-                File.Copy(c.FullName, CopyTo + "/" + "/Systems/" + count.ToString() + c.Name, true);
-                count++;
-                continue;
-            }
-
-            File.Copy(c.FullName, CopyTo + "/" + "/Systems/" + c.Name);
         }
     }
 }
