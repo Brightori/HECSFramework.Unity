@@ -62,6 +62,41 @@ public class DocumentationWindow : OdinEditorWindow
         buttons = buttons.OrderBy(x=> x.Name).Distinct().ToList();
     }
 
+#if ODIN_INSPECTOR_3_2
+    protected override void OnImGUI()
+    {
+        GUILayout.BeginHorizontal();
+        scrollPosButtons = EditorGUILayout.BeginScrollView(scrollPosButtons, GUILayout.MaxWidth(400f), GUILayout.Width(150f), GUILayout.MinWidth(60f));
+        DrawButtons();
+        GUILayout.EndScrollView();
+        GUI.backgroundColor = defaultColor;
+        base.OnImGUI();
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+
+        GUILayout.BeginVertical();
+        GUI.backgroundColor = defaultColor;
+        if (GUILayout.Button("Reset", GUILayout.Height(30f)))
+        {
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                var data = buttons[i];
+                data.IsActve = false;
+                buttons[i] = data;
+                RedrawData();
+            }        
+        }
+
+        if (GUILayout.Button("Search", GUILayout.Height(30f)))
+        {
+            GetWindow<DocumentationSearchWinow>();
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.EndHorizontal();
+    }
+#else
     protected override void OnGUI()
     {
         GUILayout.BeginHorizontal();
@@ -95,6 +130,7 @@ public class DocumentationWindow : OdinEditorWindow
 
         GUILayout.EndHorizontal();
     }
+#endif
 
     private void RedrawData()
     {
