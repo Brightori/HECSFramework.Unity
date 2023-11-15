@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 namespace Systems
 {
     [Serializable, BluePrint]
-    [Documentation(Doc.UI, "Система которая отвечает за перемещение экранного стика")]
+    [Documentation(Doc.UI, "РЎРёСЃС‚РµРјР° РєРѕС‚РѕСЂР°СЏ РѕС‚РІРµС‡Р°РµС‚ Р·Р° РїРµСЂРµРјРµС‰РµРЅРёРµ СЌРєСЂР°РЅРЅРѕРіРѕ СЃС‚РёРєР°")]
     public sealed class StickFollowSystem : BaseSystem, IStickFollowSystem
     {
         [UsedImplicitly] private const float EditorSpeedMod = 0.1f;
@@ -29,7 +29,7 @@ namespace Systems
 
         public void UpdateLocal()
         {
-            // Стики залипают, если в InputSystem приходит эксепшен. Сбрасываем их вручную.
+            // РЎС‚РёРєРё Р·Р°Р»РёРїР°СЋС‚, РµСЃР»Рё РІ InputSystem РїСЂРёС…РѕРґРёС‚ СЌРєСЃРµРїС€РµРЅ. РЎР±СЂР°СЃС‹РІР°РµРј РёС… РІСЂСѓС‡РЅСѓСЋ.
             if (Touchscreen.current != null && Touchscreen.current.touches.Count == 0 && lastCursorPos != Vector2.zero)
             {
                 ProcessPointerUp(Vector2.zero);

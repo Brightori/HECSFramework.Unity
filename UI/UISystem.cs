@@ -371,7 +371,11 @@ namespace Systems
                 if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
                 {
                     if (uIGroupTagComponent.IsHaveGroupIndex(command.UIGroup))
+                    {
+                        ui.Command(new ShowUICommand());
                         continue;
+                    }
+                        
                     else
                         ui.Command(new HideUICommand());
                 }

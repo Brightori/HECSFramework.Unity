@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using Components;
 using HECSFramework.Core;
+using HECSFramework.Core.Helpers;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
 using Sirenix.OdinInspector.Editor;
@@ -29,6 +31,27 @@ public class ValidateWindow : OdinEditorWindow
             }
         }
 
+        foreach (var container in list) 
+        {
+            try
+            {
+                var holder = ReflectionHelpers.GetPrivateFieldValue<ComponentsSystemsHolder>(container, "holder");
+                if (holder == null || holder.components == null || container.Components.Any(x => x == null))
+                {
+                    throw new Exception("we have null component in " + container.name);
+                }
+
+                if (container.Systems.Any(x => x == null))
+                {
+                    throw new Exception("we have null system in " + container.name);
+                }
+            }
+            catch
+            {
+                Debug.LogError("we have null refs at " + container.name);
+            }
+        }
+
         foreach (var container in list)
         {
             if (container is PresetContainer)
@@ -37,10 +60,24 @@ public class ValidateWindow : OdinEditorWindow
             if (!container.IsValid())
                 Debug.LogWarning("we have problem with " + container.name);
 
-            foreach (var c in container.GetComponents<IValidate>())
+            try
             {
-                if (!c.IsValid())
-                    Debug.LogWarning($"we have problem with {c.GetType()} on {container.name}");
+                foreach (var c in container.GetComponents<IValidate>())
+                {
+                    try
+                    {
+                        if (!c.IsValid())
+                            Debug.LogWarning($"we have problem with {c.GetType()} on {container.name}");
+                    }
+                    catch
+                    {
+                        Debug.LogError(container.name + " we have error here");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString() + $" {container.name}");
             }
 
             try

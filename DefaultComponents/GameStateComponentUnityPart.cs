@@ -10,15 +10,27 @@ namespace Components
         {
             get
             {
-                if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
+#if UNITY_EDITOR
+
+                if (Application.isPlaying)
                 {
-                    return IdentifierToStringMap.IntToString[CurrentState];
+                    if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
+                    {
+                        return IdentifierToStringMap.IntToString[CurrentState];
+                    }
+                    else
+                    {
+                        Debug.LogError("we dont have state like this " + CurrentState.ToString());
+                        return "Wrong State";
+                    }
                 }
                 else
-                {
-                    Debug.LogError("we dont have state like this " + CurrentState.ToString());
-                    return "Wrong State";
-                }
+                    return "";
+
+
+#else
+                return "";
+#endif
             }
         }
     }

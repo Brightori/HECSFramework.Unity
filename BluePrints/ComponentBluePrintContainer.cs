@@ -115,6 +115,9 @@ namespace HECSFramework.Unity
 
         public override IComponent GetOrAddComponent(Entity entity)
         {
+            if (component is IPoolableComponent)
+                return entity.GetOrAddComponent<T>();
+
             return entity.AddComponent<T>();
         }
     }
