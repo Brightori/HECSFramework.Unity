@@ -10,7 +10,7 @@ namespace Systems
 {
     [Serializable, BluePrint]
     [Documentation(Doc.UI, "Система которая отвечает за перемещение экранного стика")]
-    public sealed class StickFollowSystem : BaseSystem, IStickFollowSystem
+    public sealed class StickFollowSystem : BaseSystem, IStickFollowSystem, IAfterEntityInit
     {
         [UsedImplicitly] private const float EditorSpeedMod = 0.1f;
 
@@ -23,8 +23,7 @@ namespace Systems
 
         public override void InitSystem()
         {
-            stick = Actor.GameObject.GetComponentInChildren<StickWidget>();
-            Owner.TryGetSystem(out stickInputSystem);
+           
         }
 
         public void UpdateLocal()
@@ -80,6 +79,12 @@ namespace Systems
             lastCursorPos = Vector2.zero;
             stick.Rect.anchoredPosition = Vector2.zero;
             stick.RestorePosition();
+        }
+
+        public void AfterEntityInit()
+        {
+            stick = Actor.GameObject.GetComponentInChildren<StickWidget>();
+            Owner.TryGetSystem(out stickInputSystem);
         }
     }
 

@@ -6,7 +6,7 @@ namespace Systems
 {
     [Serializable, BluePrint]
     [Documentation("Stick", "Система которая перехватывает нажатия на область действия экранного стика")]
-    public class StickInputSystem : BaseSystem, IStickInputSystem
+    public class StickInputSystem : BaseSystem, IStickInputSystem, IAfterEntityInit
     {
         private StickPanelWidget stickPanel;
         private IStickFollowSystem followSystem;
@@ -17,12 +17,7 @@ namespace Systems
 
         public override void InitSystem()
         {
-            Owner.TryGetSystem(out followSystem);
-            if (!Actor.TryGetComponent(out stickPanel, true)) return;
-
-            stickPanel.Dragged += followSystem.ProcessDrag;
-            stickPanel.PointerDown += followSystem.ProcessPointerDown;
-            stickPanel.PointerUp += followSystem.ProcessPointerUp;
+           
         }
 
         public override void Dispose()
@@ -34,6 +29,16 @@ namespace Systems
             stickPanel.Dragged -= followSystem.ProcessDrag;
             stickPanel.PointerDown -= followSystem.ProcessPointerDown;
             stickPanel.PointerUp -= followSystem.ProcessPointerUp;
+        }
+
+        public void AfterEntityInit()
+        {
+            Owner.TryGetSystem(out followSystem);
+            if (!Actor.TryGetComponent(out stickPanel, true)) return;
+
+            stickPanel.Dragged += followSystem.ProcessDrag;
+            stickPanel.PointerDown += followSystem.ProcessPointerDown;
+            stickPanel.PointerUp += followSystem.ProcessPointerUp;
         }
     }
 
