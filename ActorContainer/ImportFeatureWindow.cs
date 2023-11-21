@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using HECSFramework.Core;
 using Sirenix.OdinInspector;
@@ -109,3 +110,4 @@ namespace HECSFramework.Unity
         }
     }
 }
+#endif
