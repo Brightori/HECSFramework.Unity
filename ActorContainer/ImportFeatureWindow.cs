@@ -55,7 +55,7 @@ namespace HECSFramework.Unity
                         {
                             featuresByFeature.Add(currentFeature);
 
-                            if (componentsByFeature.ContainsKey(currentFeature))
+                            if (systemsByFeature.ContainsKey(currentFeature))
                             {
                                 systemsByFeature[currentFeature].Add(system.Key);
                             }
