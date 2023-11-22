@@ -6,11 +6,11 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Provider, Doc.GameLogic, "this system gather components providers from actor and inject them to current entity")]
-    public sealed class InjectComponentsFromActorSystem : BaseSystem, IHaveActor, IAfterEntityInit
+    public sealed class InjectComponentsFromActorSystem : BaseSystem, IHaveActor 
     {
         public Actor Actor { get; set; }
 
-        public void AfterEntityInit()
+        public override void InitSystem()
         {
             if (Actor.TryGetComponents(out IComponentsProvider[] provider))
             {
@@ -19,10 +19,6 @@ namespace Systems
                     p.Inject(Owner);
                 }
             }
-        }
-
-        public override void InitSystem()
-        {
         }
     }
 
