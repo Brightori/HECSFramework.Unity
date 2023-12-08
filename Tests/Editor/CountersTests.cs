@@ -68,6 +68,34 @@ internal class CountersTests
     }
 
     [Test]
+    public void TestAddIntModifier()
+    {
+        var check = new ModifiersIntContainer();
+
+        check.SetBaseValue(10);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultIntModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 2,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        check.AddModifier(Guid.NewGuid(), new DefaultIntModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 2,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        Assert.IsTrue(check.GetCalculatedValue() == 14);
+    }
+
+    [Test]
     public void TestSubtractModifier()
     {
         var check = new ModifiersFloatContainer();
