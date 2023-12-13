@@ -171,12 +171,12 @@ namespace Systems
             var newUIactorPrfb = await Addressables.LoadAssetAsync<GameObject>(bluePrint.UIActor).Task;
             var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
 
+            newUiActor.ActorContainer.Init(newUiActor.Entity);
+
             if (needInit)
                 newUiActor.Init();
             else
                 newUiActor.InitActorWithoutEntity();
-
-            newUiActor.ActorContainer.Init(newUiActor.Entity);
 
             newUiActor.transform.SetParent(canvas);
 
