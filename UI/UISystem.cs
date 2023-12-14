@@ -361,6 +361,12 @@ namespace Systems
 
         public async UniTask ShowUIGroup(UIGroupCommand command)
         {
+            if (!isLoaded || !isReady)
+            {
+                commandsQueue.Enqueue(command);
+                return;
+            }
+
             await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             Owner.GetOrAddComponent<UIBusyTagComponent>();
