@@ -3,7 +3,6 @@ using Components;
 using HECSFramework.Core;
 using NUnit.Framework;
 using Systems;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 internal class CountersTests
 {
@@ -40,7 +39,7 @@ internal class CountersTests
     }
 
     [Test]
-    public void TestAddModifier()
+    public void TestAddFloatModifier()
     {
         var check = new ModifiersFloatContainer();
 
@@ -65,6 +64,25 @@ internal class CountersTests
         });
 
         Assert.IsTrue(check.GetCalculatedValue() == 6);
+    }
+
+    [Test]
+    public void TestAddSingleFloatModifier()
+    {
+        var check = new ModifiersFloatContainer();
+
+        check.SetBaseValue(2);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 8,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        Assert.IsTrue(check.GetCalculatedValue() == 10);
     }
 
     [Test]
@@ -296,6 +314,6 @@ internal class CountersTests
             ModifierGuid = Guid.NewGuid(),
         });
 
-        Assert.IsTrue(check.GetCalculatedValue() == 0);
+        Assert.IsTrue(check.GetCalculatedValue() == 2);
     }
 }
