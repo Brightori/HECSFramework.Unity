@@ -344,6 +344,12 @@ namespace HECSFramework.Unity
             holder.SortComponents();
         }
 
+        [Button(ButtonSizes.Large)]
+        public void AddFeature()
+        {
+            EditorWindow.GetWindow<ImportFeatureWindow>().Init(this);
+        }
+
         public T GetOrAddComponent<T>() where T:  class, IComponent, new()
         {
             if (IsHaveComponent<T>())

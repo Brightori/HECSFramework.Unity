@@ -2,6 +2,8 @@
 using HECSFramework.Core;
 using HECSFramework.Core.Generator;
 using HECSFramework.Unity.Editor;
+using HECSFramework.Unity.Helpers;
+using Strategies;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +28,8 @@ namespace HECSFramework.Unity
 
             var sort = new Dictionary<Type, HashSet<IdentifierContainer>>(64);
 
+            var strategies = new SOProvider<Strategy>().GetCollection().ToList();
+
             foreach (var identifier in identifiersContainers)
                 AddToDictionary(sort, identifier);
 
@@ -44,6 +48,7 @@ namespace HECSFramework.Unity
             maps += GetAbilitiesMap(abilities);
             maps += GetNetworkContainersMap(entityContainers);
             maps += GetIdentifierStringMap(names);
+            maps += GetStrategiesMap(strategies);
 
             SaveToFile(maps);
         }
@@ -59,6 +64,33 @@ namespace HECSFramework.Unity
                 dict.Add(type, new HashSet<IdentifierContainer>());
                 dict[type].Add(container);
             }
+        }
+
+        private static string GetStrategiesMap(List<Strategy> strategies)
+        {
+            var tree = new TreeSyntaxNode();
+            var body = new TreeSyntaxNode();
+
+            tree.Add(new SimpleSyntax($"public static partial class StrategiesMap" + CParse.Paragraph));
+
+            tree.Add(new LeftScopeSyntax());
+
+            tree.Add(new TabSimpleSyntax(1, "static StrategiesMap()"));
+            tree.Add(new LeftScopeSyntax(1));
+            tree.Add(GetIntToStringDictionaryCLear("StrategiesIDtoString", out var dicBody));
+            tree.Add(new RightScopeSyntax(1));
+
+            tree.Add(body);
+            tree.Add(new RightScopeSyntax());
+
+            foreach (var e in strategies)
+            {
+                dicBody.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope} {e.StrategyIndex}, {CParse.Quote}{e.name}{CParse.Quote} {CParse.RightScope},"));
+                body.AddUnique(new TabSimpleSyntax(1, $"public const int {e.name} = {e.StrategyIndex};"));
+                body.AddUnique(new TabSimpleSyntax(1, $"public const string {e.name}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
+            }
+
+            return tree.ToString();
         }
 
         private static string GetContainersMap(List<EntityContainer> entityContainers)
@@ -113,6 +145,20 @@ namespace HECSFramework.Unity
         }
 
         private static ISyntax GetIntToStringDictionary(string name, List<EntityContainer> containers, out ISyntax body)
+        {
+            var tree = new TreeSyntaxNode();
+            var dicBody = new TreeSyntaxNode();
+
+            tree.Add(new TabSimpleSyntax(2, $"{name} = new Dictionary<int, string>"));
+            tree.Add(new LeftScopeSyntax(2));
+            tree.Add(dicBody);
+            tree.Add(new RightScopeSyntax(2, true));
+
+            body = dicBody;
+            return tree;
+        }
+
+        private static ISyntax GetIntToStringDictionaryCLear(string name, out ISyntax body)
         {
             var tree = new TreeSyntaxNode();
             var dicBody = new TreeSyntaxNode();

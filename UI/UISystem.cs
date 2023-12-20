@@ -172,12 +172,11 @@ namespace Systems
             var newUIactorPrfb = await Addressables.LoadAssetAsync<GameObject>(bluePrint.UIActor).Task;
             var newUiActor = MonoBehaviour.Instantiate(newUIactorPrfb, canvas).GetComponent<UIActor>();
 
+            newUiActor.InitActorWithoutEntity();
+            newUiActor.ActorContainer.Init(newUiActor.Entity);
+
             if (needInit)
                 newUiActor.Init();
-            else
-                newUiActor.InitActorWithoutEntity();
-
-            newUiActor.ActorContainer.Init(newUiActor.Entity);
 
             newUiActor.transform.SetParent(canvas);
 
@@ -363,6 +362,12 @@ namespace Systems
 
         public async UniTask ShowUIGroup(UIGroupCommand command)
         {
+            if (!isLoaded || !isReady)
+            {
+                commandsQueue.Enqueue(command);
+                return;
+            }
+
             await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             Owner.GetOrAddComponent<UIBusyTagComponent>();
@@ -376,7 +381,7 @@ namespace Systems
                         ui.Command(new ShowUICommand());
                         continue;
                     }
-                        
+
                     else
                         ui.Command(new HideUICommand());
                 }

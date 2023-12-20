@@ -133,8 +133,22 @@ namespace Systems
                 return loaded;
             }
         }
-       
-        
+
+        public async void Warmup(AssetReference viewReference, int count)
+        {
+            var neededHandler = Addressables.LoadAssetAsync<GameObject>(viewReference);
+            var needed = await neededHandler.Task;
+
+            for (int i = 0; i < count; i++)
+            {
+                var instance = MonoBehaviour.Instantiate(needed.gameObject);
+                ReleaseView(viewReference, instance);
+            }
+
+            await UniTask.NextFrame();
+            Addressables.Release(neededHandler);
+        }
+
         public async void Warmup(EntityContainer entityContainer, int count)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
