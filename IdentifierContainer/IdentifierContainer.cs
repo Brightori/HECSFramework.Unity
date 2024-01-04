@@ -6,7 +6,7 @@ using UnityEngine;
 namespace HECSFramework.Unity
 {
     [CreateAssetMenu(fileName = "identifier", menuName = "Identifiers/Identifier")]
-    public class IdentifierContainer : ScriptableObject, IIdentifier, IValidate
+    public class IdentifierContainer : ScriptableObject, IIdentifier, IValidate, IEquatable<IdentifierContainer>
     {
         [SerializeField, ReadOnly] private int id; 
 
@@ -18,6 +18,22 @@ namespace HECSFramework.Unity
                     id = IndexGenerator.GenerateIndex(name);
                 return id;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IdentifierContainer container &&
+                   Id == container.Id;
+        }
+
+        public bool Equals(IdentifierContainer other)
+        {
+            return other.Id == Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), Id);
         }
 
         public bool IsValid()

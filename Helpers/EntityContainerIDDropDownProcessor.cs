@@ -35,7 +35,7 @@ namespace Helpers
             {
                 foreach (var c in container.Components)
                 {
-                    if (c.GetHECSComponent.GetType().Name == typeName)
+                    if (string.IsNullOrEmpty(typeName) || c.GetHECSComponent.GetType().Name == typeName)
                         list.Add(container.name, container.ContainerIndex);
                 }
             }

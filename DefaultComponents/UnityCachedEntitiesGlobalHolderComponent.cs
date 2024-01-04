@@ -13,5 +13,15 @@ namespace Components
             cachedEntities.Add(container.ContainerIndex, entity);
             return entity;
         }
+
+        public Entity GetOrAddEntityToCache(EntityContainer container)
+        {
+            if (cachedEntities.TryGetValue(container.ContainerIndex, out var entity))
+            {
+                return entity;
+            }
+
+            return AddEntityToCache(container);
+        }
     }
 }

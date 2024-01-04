@@ -57,13 +57,6 @@ namespace HECSFramework.Unity
             }
         }
 
-    
-
-        public UnityFloatModifier()
-        {
-            _ = ModifierGuid;
-        }
-
         public override void Modify(ref float currentMod)
         {
             currentMod = ModifiersCalculation.GetResult(currentMod, GetValue, GetCalculationType, GetModifierType);
