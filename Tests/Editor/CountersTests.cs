@@ -67,6 +67,62 @@ internal class CountersTests
     }
 
     [Test]
+    public void TestAddFloatModifierByPercent()
+    {
+        var check = new ModifiersFloatContainer();
+
+        check.SetBaseValue(4);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 50,
+            GetModifierType = ModifierValueType.Percent,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 50,
+            GetModifierType = ModifierValueType.Percent,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        Assert.IsTrue(check.GetCalculatedValue() == 9);
+    }
+
+    [Test]
+    public void TestBaseValueAddFloatModifier()
+    {
+        var check = new BaseValueModifiersFloatContainer();
+
+        check.SetBaseValue(2);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 2,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 50,
+            GetModifierType = ModifierValueType.Percent,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        Assert.IsTrue(check.GetCalculatedValue() == 5);
+    }
+
+    [Test]
     public void TestAddSingleFloatModifier()
     {
         var check = new ModifiersFloatContainer();
@@ -139,6 +195,34 @@ internal class CountersTests
         });
 
         Assert.IsTrue(check.GetCalculatedValue() == -2);
+    }
+
+    [Test]
+    public void TestSubtractModifierOnBaseValue()
+    {
+        var check = new BaseValueModifiersFloatContainer();
+
+        check.SetBaseValue(4);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Subtract,
+            GetValue = 1,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Subtract,
+            GetValue = 50,
+            GetModifierType = ModifierValueType.Percent,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        Assert.IsTrue(check.GetCalculatedValue() == 1);
     }
 
     [Test]
