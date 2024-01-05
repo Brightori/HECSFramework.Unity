@@ -32,6 +32,7 @@ namespace HECSFramework.Unity
             return scene;
         }
 
+        //todo rewrite to use AssetServiceSystem
         public static async Task<GameObject> LoadPrefabToWorld(this World world, string location)
         {
             var obj = await Addressables.InstantiateAsync(location).Task;

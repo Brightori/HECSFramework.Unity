@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using Components;
 using HECSFramework.Core;
-using HECSFramework.Unity;
 using Helpers;
+using Systems;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using ActorViewReference = Components.ActorViewReference;
 using Object = UnityEngine.Object;
 
 namespace HECSFramework.Unity
@@ -22,20 +22,20 @@ namespace HECSFramework.Unity
             return entity.GetComponent<ActorProviderComponent>().Actor;
         }
 
-        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<Actor> callBack = null)
+        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent,
+            Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
-            var asynData = viewReferenceComponent.ViewReference.InstantiateAsync();
-            var actorPrfb = await asynData.Task;
-            Addressables.Release(asynData);
-            callBack?.Invoke(actorPrfb);
+            var assetsService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
+            var container = await assetsService.GetContainer<ActorViewReference, GameObject>(viewReferenceComponent.ViewReference);
+            var actorPrfb = await container.CreateInstanceForComponent<Actor>(position, rotation, parent);
+            assetsService.ReleaseContainer(container);
             return actorPrfb;
         }
 
-        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Vector3 position, Quaternion rotation, Transform parent)
+        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<Actor> callBack = null)
         {
-            var asynData = viewReferenceComponent.ViewReference.InstantiateAsync(position, rotation, parent);
-            var actorPrfb = await asynData.Task;
-            Addressables.Release(asynData);
+            var actorPrfb = await GetActor(viewReferenceComponent, Vector3.zero, Quaternion.identity, null);
+            callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }
 
@@ -60,19 +60,14 @@ namespace HECSFramework.Unity
             var actorID = entityContainer.CachedName;
 
             if (viewReferenceComponent == null)
-                throw new Exception("нет вью рефа у " + actorID);
+                throw new Exception($"actor {actorID} does not have any view ");
 
-            var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
-            var prefab = await asynData.Task;
-            var actorPrfb = Object.Instantiate(prefab, position, rotation, transform).GetOrAddMonoComponent<Actor>();
-
+            var actorPrfb = await GetActor(viewReferenceComponent, position, rotation, transform);
             if (needLoadContainer)
             {
                 actorPrfb.Init(world, initEntity: false);
                 entityContainer.Init(actorPrfb.Entity);
             }
-
-            //Addressables.Release(asynData);
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }
@@ -85,10 +80,8 @@ namespace HECSFramework.Unity
             if (viewReferenceComponent == null)
                 throw new Exception("нет вью рефа у " + actorID);
 
-            var asynData = Addressables.LoadAssetAsync<GameObject>(viewReferenceComponent.ViewReference.AssetGUID);
-            var prefab = await asynData.Task;
-            var actorPrfb = Object.Instantiate(prefab, position, Quaternion.identity).GetComponent<Actor>();
 
+            var actorPrfb = await GetActor(viewReferenceComponent, position);
             actorPrfb.Init(world, false);
 
             if (needLoadContainer)

@@ -39,6 +39,9 @@ namespace Systems
 
         private async UniTask SpawnView()
         {
+            //after ProcessAfterView component collect all poolable views to release on destroy
+            Owner.GetOrAddComponent<PoolableViewsProviderComponent>();
+            
             viewGameObject = await poolingSystem.GetViewFromPool(viewReferenceGameObject.ViewReference);
             viewGameObject.transform.position = unityTransform.Transform.position;
             viewGameObject.transform.rotation = unityTransform.Transform.rotation;
