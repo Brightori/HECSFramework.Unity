@@ -1,5 +1,6 @@
 ﻿using System;
 using HECSFramework.Core;
+using Helpers;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -20,12 +21,12 @@ namespace HECSFramework.Unity
         [SerializeField, ReadOnly]
         private string guid;
 
-        [SerializeField]
-        private ModifierIdentifier modifierIdentifier;
+        [SerializeField, IdentifierDropDown(nameof(ModifierIdentifier))]
+        private int modifierIdentifier;
 
         private Guid currentGuid;
 
-        public override int ModifierID => modifierIdentifier.Id;
+        public override int ModifierID { get=> modifierIdentifier; set=> modifierIdentifier = value; }
 
         public override float GetValue { get => value; set => this.value = value; }
         public override ModifierCalculationType GetCalculationType { get => calculationType; set => calculationType = value; }

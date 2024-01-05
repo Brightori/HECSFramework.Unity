@@ -8,7 +8,12 @@ namespace HECSFramework.Unity
         [UnityEngine.SerializeField]
         [LabelText("Modifier")]
         private T modifier = new T();
-        
+
+        private void OnEnable()
+        {
+            modifier.ModifierID = Id;
+        }
+
         public override IModifier GetModifier()
         {
             return modifier;

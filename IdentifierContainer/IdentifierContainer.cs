@@ -28,6 +28,9 @@ namespace HECSFramework.Unity
 
         public bool Equals(IdentifierContainer other)
         {
+            if (other == null) 
+                return false;
+
             return other.Id == Id;
         }
 
