@@ -1,5 +1,6 @@
 ﻿using Components;
 using HECSFramework.Unity;
+using Systems;
 using Unity.IL2CPP.CompilerServices;
 
 namespace HECSFramework.Core
@@ -9,6 +10,11 @@ namespace HECSFramework.Core
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public partial class World
     {
+        partial void AddUnityWorldPart(Entity worldService)
+        {
+            worldService.AddHecsSystem(new AssetsServiceSystem());
+        }
+
         partial void ComponentAdditionalProcessing(IComponent component, Entity owner, bool add)
         {
             if (component is IHaveActor haveActor)

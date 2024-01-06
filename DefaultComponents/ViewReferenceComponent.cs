@@ -7,14 +7,17 @@ using Commands;
 namespace Components
 {
     [Serializable, BluePrint]
+    [Documentation(Doc.Visual, "this components hold asset reference to actor prefab, and this is basis functionality for actor")]
     public partial class ViewReferenceComponent : BaseComponent
     {
         public ActorViewReference ViewReference;
 
         public override void BeforeDispose()
         {
-            base.BeforeDispose();
-            EntityManager.Default.Command(new ActorViewDisposedCommand{Actor = Owner.AsActor()});
+            if (!EntityManager.Default.TryGetSingleComponent(out OnApplicationQuitTagComponent onApplicationQuitTagComponent))
+            {
+                EntityManager.Default.Command(new ActorViewDisposedCommand { Actor = Owner.AsActor() });
+            }
         }
     }
 
