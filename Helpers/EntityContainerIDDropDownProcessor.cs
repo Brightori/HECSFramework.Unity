@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Components;
+using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
 using Sirenix.OdinInspector;
@@ -33,6 +35,12 @@ namespace Helpers
             var list = new ValueDropdownList<int>();
             foreach (var container in containersProvider.GetCollection())
             {
+                if (container is PresetContainer)
+                    continue;
+
+                if (container.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true))
+                    continue;
+
                 foreach (var c in container.Components)
                 {
                     if (string.IsNullOrEmpty(typeName) || c.GetHECSComponent.GetType().Name == typeName)
