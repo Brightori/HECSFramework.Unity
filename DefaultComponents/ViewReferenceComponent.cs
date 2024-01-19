@@ -16,7 +16,13 @@ namespace Components
         {
             if (!EntityManager.Default.TryGetSingleComponent(out OnApplicationQuitTagComponent onApplicationQuitTagComponent))
             {
-                EntityManager.Default.Command(new ActorViewDisposedCommand { Actor = Owner.AsActor() });
+                if (Owner.TryGetComponent(out ActorProviderComponent actorProviderComponent))
+                {
+                    if (actorProviderComponent.Actor.IsAlive())
+                    {
+                        EntityManager.Default.Command(new ActorViewDisposedCommand { Actor = Owner.AsActor() });
+                    }
+                }
             }
         }
     }

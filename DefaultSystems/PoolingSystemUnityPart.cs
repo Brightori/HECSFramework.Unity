@@ -18,38 +18,38 @@ namespace Systems
         public const int minPoolSize = 5;
         public const int maxPoolSize = 512;
 
-        private readonly Dictionary<AssetReference, IHECSPool> pools = new(64);
-        private readonly Dictionary<AssetReference, UniTask> poolsLoadMap = new();
+        private readonly Dictionary<string, IHECSPool> pools = new(64);
+        private readonly Dictionary<string, UniTask> poolsLoadMap = new();
         private readonly Dictionary<string, EntityContainer> pooledContainers = new(16);
 
         private bool IsPoolExistsFor(AssetReference assetReference)
         {
-            return pools.ContainsKey(assetReference) || poolsLoadMap.ContainsKey(assetReference);
+            return pools.ContainsKey(assetReference.AssetGUID) || poolsLoadMap.ContainsKey(assetReference.AssetGUID);
         }
         private async UniTask<IHECSPool> GetPool(AssetReference assetReference)
         {
-            if (poolsLoadMap.TryGetValue(assetReference, out var load))
+            if (poolsLoadMap.TryGetValue(assetReference.AssetGUID, out var load))
             {
                 await load;
             }
-            else if(!pools.ContainsKey(assetReference))
+            else if (!pools.ContainsKey(assetReference.AssetGUID))
             {
                 var loadingTCS = new UniTaskCompletionSource();
-                poolsLoadMap[assetReference] = loadingTCS.Task.Preserve();
+                poolsLoadMap[assetReference.AssetGUID] = loadingTCS.Task.Preserve();
                 var assetService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
                 var container = await assetService.GetContainer<AssetReference, GameObject>(assetReference);
-                pools.Add(assetReference, new HECSPool<IAssetContainer<GameObject>>(container, maxPoolSize));
-                poolsLoadMap.Remove(assetReference);
+                pools.Add(assetReference.AssetGUID, new HECSPool<IAssetContainer<GameObject>>(container, maxPoolSize));
+                poolsLoadMap.Remove(assetReference.AssetGUID);
                 loadingTCS.TrySetResult();
             }
 
-            return pools[assetReference];
+            return pools[assetReference.AssetGUID];
         }
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true) where T : Actor
         {
-            var view =  await GetViewFromPool(assetReference);
+            var view = await GetViewFromPool(assetReference);
             var actor = view.GetOrAddMonoComponent<Actor>();
-            
+
             if (actor.Entity != null)
             {
                 actor.Entity.Dispose();
@@ -66,10 +66,10 @@ namespace Systems
             return (T)actor;
         }
 
-        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T: Actor
+        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T : Actor
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            var view =  await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
+            var view = await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
 
             if (init)
             {
@@ -142,7 +142,7 @@ namespace Systems
             for (int i = 0; i < count; i++)
             {
                 var instance = MonoBehaviour.Instantiate(needed.gameObject);
-                ReleaseView(viewReference, instance);
+                ReleaseView(viewReference, instance).Forget();
             }
 
             await UniTask.NextFrame();

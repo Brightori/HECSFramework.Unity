@@ -32,7 +32,7 @@ public class MultipleContainerWindow : OdinEditorWindow
     [Button]
     public void AddSystem()
     {
-        if (ComponentType == null)
+        if (SystemType == null)
             return;
 
         var bp = new BluePrintsProvider();
