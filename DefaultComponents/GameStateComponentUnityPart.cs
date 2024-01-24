@@ -24,9 +24,10 @@ namespace Components
                         Debug.LogError("we dont have state like this " + CurrentState.ToString());
                         return "Wrong State";
                     }
-#endif
+#else
 
                     return "";
+#endif
                 }
                 else
                     return "";
