@@ -14,6 +14,7 @@ namespace Components
 
                 if (Application.isPlaying)
                 {
+#if IdentifiersGenerated
                     if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
                     {
                         return IdentifierToStringMap.IntToString[CurrentState];
@@ -23,13 +24,16 @@ namespace Components
                         Debug.LogError("we dont have state like this " + CurrentState.ToString());
                         return "Wrong State";
                     }
+#endif
+
+                    return "";
                 }
                 else
                     return "";
 
 
 #else
-                return "";
+                    return "";
 #endif
             }
         }
