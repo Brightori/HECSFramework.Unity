@@ -1,10 +1,11 @@
 ﻿#if UNITY_EDITOR
 using Sirenix.OdinInspector;
 using HECSFramework.Unity.Editor;
+using UnityEditor;
 #endif
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 
 namespace HECSFramework.Unity
 {
@@ -20,6 +21,32 @@ namespace HECSFramework.Unity
         {
             var window = UnityEditor.EditorWindow.GetWindow<MakePresetFromEntityContainer>();
             window.Init(this);
+        }
+
+        public void CopyOrReplaceComponents(EntityContainer to)
+        {
+            foreach (var c in ComponentsBluePrints)
+            {
+                var needed = to.Components.FirstOrDefault(x => x.Equals(c));
+
+                if (needed != null)
+                {
+                    c.LoadFromData(needed.GetHECSComponent);
+                   
+                }
+                else
+                {
+                    var asset = Instantiate(c);
+                    AssetDatabase.AddObjectToAsset(asset, to);
+
+                    asset.name = c.GetHECSComponent.GetType().Name;
+                    to.AddComponent(asset);
+                }
+
+                EditorUtility.SetDirty(c);
+            }
+
+            EditorUtility.SetDirty(to);
         }
 #endif
     }
@@ -90,7 +117,7 @@ namespace HECSFramework.Unity.Editor
             }
 
             AssetDatabase.SaveAssets();
-            
+
             if (close)
                 Close();
         }

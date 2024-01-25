@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using HECSFramework.Core;
 using HECSFramework.Unity;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
@@ -16,6 +15,16 @@ public class MultipleContainerWindow : OdinEditorWindow
     [ValueDropdown(nameof(GetSystems))]
     public Type SystemType;
 
+    public PresetContainer ApplyContainer;
+
+    [Button]
+    public void ApplyPreset()
+    {
+        foreach (var container in Containers) 
+        {
+            ApplyContainer.CopyOrReplaceComponents(container);
+        }
+    }
 
     [Button]
     public void AddComponent()
