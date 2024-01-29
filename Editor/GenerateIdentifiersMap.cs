@@ -112,9 +112,11 @@ namespace HECSFramework.Unity
 
             foreach (var e in entityContainers)
             {
+                var fieldName = e.name.Replace("-", "").Replace(" ", "").Insert(0,"_");
+
                 dicBody.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope} {e.ContainerIndex}, {CParse.Quote}{e.name}{CParse.Quote} {CParse.RightScope},"));
-                body.AddUnique(new TabSimpleSyntax(1, $"public const int {e.name} = {e.ContainerIndex};"));
-                body.AddUnique(new TabSimpleSyntax(1, $"public const string {e.name}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
+                body.AddUnique(new TabSimpleSyntax(1, $"public const int {fieldName} = {e.ContainerIndex};"));
+                body.AddUnique(new TabSimpleSyntax(1, $"public const string {fieldName}_string = {CParse.Quote}{e.name}{CParse.Quote};"));
             }
 
             return tree.ToString();
