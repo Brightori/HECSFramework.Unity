@@ -14,6 +14,12 @@ namespace Components
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Transform GetTransform(this Entity entity)
+        {
+            return entity.GetComponent<UnityTransformComponent>().Transform;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion GetRotation(this Entity entity)
         {
             return entity.GetComponent<UnityTransformComponent>().Transform.rotation;
