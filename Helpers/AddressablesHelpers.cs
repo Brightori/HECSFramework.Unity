@@ -10,6 +10,7 @@ using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 #endif
 
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace HECSFramework.Unity
 {
@@ -40,6 +41,16 @@ namespace HECSFramework.Unity
             }
 
             return default;
+        }
+
+        public static AssetReference GetAssetReference(Object obj, string groupName)
+        {
+            var guid = GetGuidOfObject(obj);
+
+            if (!IsAssetAddressable(guid))
+                SetAddressableGroup(obj, groupName);
+
+            return new AssetReference(guid);
         }
 
         public static bool IsAssetAddressable(Object obj)
