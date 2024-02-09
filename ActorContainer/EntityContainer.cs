@@ -226,6 +226,18 @@ namespace HECSFramework.Unity
             }
         }
 
+        /// <summary>
+        /// we should use it when we change container runtime and need update container
+        /// </summary>
+        public void UpdateComponentsCacheData()
+        {
+            foreach (var c in Components)
+            {
+                c.ResetDataReady();
+                c.LoadFromData(c.GetHECSComponent);
+            }
+        }
+
         public List<IComponent> GetComponentsInstances()
         {
             var list = new List<IComponent>(holder.components.Count);

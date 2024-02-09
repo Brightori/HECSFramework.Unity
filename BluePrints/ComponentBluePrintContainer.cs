@@ -55,6 +55,11 @@ namespace HECSFramework.Unity
             }
         }
 
+        public void ResetDataReady()
+        {
+            dataReady = false; 
+        }
+
         public abstract IComponent GetOrAddComponent(Entity entity); 
     }
     
