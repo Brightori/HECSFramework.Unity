@@ -232,10 +232,7 @@ namespace HECSFramework.Unity
         public void UpdateComponentsCacheData()
         {
             foreach (var c in Components)
-            {
                 c.ResetDataReady();
-                c.LoadFromData(c.GetHECSComponent);
-            }
         }
 
         public List<IComponent> GetComponentsInstances()
