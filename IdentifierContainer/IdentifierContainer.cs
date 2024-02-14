@@ -10,6 +10,11 @@ namespace HECSFramework.Unity
     {
         [SerializeField, ReadOnly] private int id; 
 
+        public static bool operator == (IdentifierContainer lhs, IdentifierContainer rhs) => lhs.Equals (rhs);
+        public static bool operator != (IdentifierContainer lhs, IdentifierContainer rhs) => !lhs.Equals (rhs);
+
+        public static implicit operator int (IdentifierContainer lhs) => lhs.Id;
+
         public int Id 
         {
             get
