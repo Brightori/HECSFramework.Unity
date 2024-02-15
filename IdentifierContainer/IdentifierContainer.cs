@@ -1,4 +1,5 @@
 ﻿using HECSFramework.Core;
+using Helpers;
 using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
@@ -8,14 +9,14 @@ namespace HECSFramework.Unity
     [CreateAssetMenu(fileName = "identifier", menuName = "Identifiers/Identifier")]
     public class IdentifierContainer : ScriptableObject, IIdentifier, IValidate, IEquatable<IdentifierContainer>
     {
-        [SerializeField, ReadOnly] private int id; 
+        [SerializeField, ReadOnly] private int id;
 
-        public static bool operator == (IdentifierContainer lhs, IdentifierContainer rhs) => lhs.Equals (rhs);
-        public static bool operator != (IdentifierContainer lhs, IdentifierContainer rhs) => !lhs.Equals (rhs);
+        public static bool operator ==(IdentifierContainer lhs, IdentifierContainer rhs) => lhs.EqualsIdentifiers(rhs);
+        public static bool operator !=(IdentifierContainer lhs, IdentifierContainer rhs) => !lhs.EqualsIdentifiers(rhs);
 
-        public static implicit operator int (IdentifierContainer lhs) => lhs.Id;
+        public static implicit operator int(IdentifierContainer lhs) => lhs.Id;
 
-        public int Id 
+        public int Id
         {
             get
             {
@@ -33,7 +34,7 @@ namespace HECSFramework.Unity
 
         public bool Equals(IdentifierContainer other)
         {
-            if (other == null) 
+            if (other == null)
                 return false;
 
             return other.Id == Id;

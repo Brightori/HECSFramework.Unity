@@ -1,4 +1,5 @@
-﻿using Commands;
+﻿using System.Runtime.CompilerServices;
+using Commands;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 
@@ -16,6 +17,15 @@ namespace Helpers
 
                 entity.World.Command(new RemoveHecsComponentWorldCommand { Component = entity.GetComponent(c) });
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsIdentifiers(this IdentifierContainer identifierContainer, IdentifierContainer other)
+        {
+            if (identifierContainer is null || other is null)
+                return false;
+            
+            return identifierContainer.Id == other.Id;
         }
 
         public static void RemoveNotBaseComponentsExcept<T>(this EntityContainer entityContainer, Entity entity)
