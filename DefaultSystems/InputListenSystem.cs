@@ -37,8 +37,15 @@ namespace Systems
                 updateableAction.OnStart += OnActionStart;
                 updateableAction.OnEnd += OnActionEnd;
                 updateableAction.OnUpdate += OnActionUpdate;
+                updateableAction.OnPerformed += OnPerformed;
                 actions.Add(updateableAction);
             }
+        }
+
+        private void OnPerformed(int index, InputAction.CallbackContext context)
+        {
+            var command = new InputPerformedCommand { Index = index, Context = context };
+            SendCommandToAllListeners(command);
         }
 
         private void OnActionStart(int index, InputAction.CallbackContext context)

@@ -17,11 +17,17 @@ namespace Components
         public event Action<int, InputAction.CallbackContext> OnStart;
         public event Action<int, InputAction.CallbackContext> OnEnd;
         public event Action<int, InputAction.CallbackContext> OnUpdate;
+        public event Action<int, InputAction.CallbackContext> OnPerformed;
         
         public void UpdateAction()
         {
-            if (!isPressed) return;
-            OnUpdate?.Invoke(index, cachedForUpdate);
+            if (isPressed)
+            {
+                OnUpdate?.Invoke(index, cachedForUpdate);
+
+                if (action.phase != InputActionPhase.Performed)
+                    isPressed = false;
+            }
         }
 
         public UpdateableAction(int index, InputAction action)
@@ -35,19 +41,19 @@ namespace Components
 
         private void Ended(InputAction.CallbackContext obj)
         {
-            isPressed = false;
             OnEnd?.Invoke(index,obj);
         }
 
         private void Updated(InputAction.CallbackContext obj)
         {
+            isPressed = true;
+            OnPerformed?.Invoke(index,obj);
             cachedForUpdate = obj;
         }
 
         private void Started(InputAction.CallbackContext obj)
         {
             OnStart?.Invoke(index, obj);
-            isPressed = true;
         }
 
 
