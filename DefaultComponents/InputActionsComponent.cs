@@ -47,6 +47,31 @@ namespace Components
             return false;
         }
 
+        public bool TryGetInputAction(int index, out InputAction inputAction)
+        {
+            var actionSetting = InputActionSettings.FirstOrDefault(x => x.Identifier.Id == index);
+            if (actionSetting == null)
+            {
+                inputAction = null;
+                return false;
+            }
+
+            foreach (var a in actions.actionMaps)
+            {
+                foreach (var action in a.actions)
+                {
+                    if (action.name == actionSetting.ActionName)
+                    {
+                        inputAction = action;
+                        return true;
+                    }
+                }
+            }
+
+            inputAction = null;
+            return false;
+        }
+
         #region UnityEditor
 #if UNITY_EDITOR
         private string savePath => "Assets/" + "/Blueprints/" + "Identifiers/" + "InputIdentifiers/";
