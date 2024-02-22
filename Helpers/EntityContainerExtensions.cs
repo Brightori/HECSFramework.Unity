@@ -22,10 +22,9 @@ namespace Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EqualsIdentifiers(this IdentifierContainer identifierContainer, IdentifierContainer other)
         {
-            if (identifierContainer is null || other is null)
-                return false;
-            
-            return identifierContainer.Id == other.Id;
+            if (!identifierContainer && !other)
+                return true;
+            return identifierContainer && other && identifierContainer.Id == other.Id;
         }
 
         public static void RemoveNotBaseComponentsExcept<T>(this EntityContainer entityContainer, Entity entity)
