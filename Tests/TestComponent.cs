@@ -14,6 +14,11 @@ namespace Components
 
         public int InitCount = 0;
 
+        public override void Init()
+        {
+            InitCount++;
+        }
+
         public override void AfterInit()
         {
             InitCount++;
