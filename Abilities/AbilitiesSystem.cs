@@ -1,19 +1,17 @@
-﻿using Components;
+﻿using Commands;
+using Components;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 
 namespace Systems
 {
-    public sealed partial class AbilitiesSystem : BaseSystem, IReactComponentLocal<ViewReadyTagComponent>
+    public sealed partial class AbilitiesSystem : BaseSystem, IReactCommand<AddComponentReactLocalCommand<ViewReadyTagComponent>>
     {
-        public void ComponentReact(ViewReadyTagComponent component, bool isAdded)
+        public void CommandReact(AddComponentReactLocalCommand<ViewReadyTagComponent> command)
         {
-            if (isAdded)
+            foreach (var a in abilitiesHolderComponent.Abilities)
             {
-                foreach (var a in abilitiesHolderComponent.Abilities)
-                {
-                    a.GetOrAddComponent<ViewReadyTagComponent>();
-                }
+                a.GetOrAddComponent<ViewReadyTagComponent>();
             }
         }
 

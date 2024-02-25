@@ -5,7 +5,7 @@ using Strategies;
 namespace Components
 {
     [Serializable][Documentation(Doc.Test, "we use this component on tests purpose")]
-    public sealed class TestComponent : ModifiableFloatCounterComponent, IAfterEntityInit
+    public sealed class TestComponent : ModifiableFloatCounterComponent 
     {
         public Strategy Strategy;
 
@@ -14,7 +14,7 @@ namespace Components
 
         public int InitCount = 0;
 
-        public void AfterEntityInit()
+        public override void AfterInit()
         {
             InitCount++;
         }
@@ -22,13 +22,13 @@ namespace Components
 
     [Serializable]
     [Documentation(Doc.Test, "we use this component on tests purpose")]
-    public sealed class TestInitComponent : BaseComponent, IInitable
+    public sealed class TestInitComponent : BaseComponent 
     {
-        public bool Init;
+        public bool InitValue;
 
-        void IInitable.Init()
+        public override void Init()
         {
-            Init = true;
+            InitValue = true;
         }
     }
 

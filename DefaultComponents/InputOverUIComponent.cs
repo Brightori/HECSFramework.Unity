@@ -10,7 +10,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Input, "this component holds bool  - on this moment we over ui or not")]
-    public sealed partial class InputOverUIComponent : BaseComponent, IWorldSingleComponent, IInitable
+    public sealed partial class InputOverUIComponent : BaseComponent, IWorldSingleComponent 
     {
         [SerializeField]
         private InputIdentifier inputIdentifier;
@@ -48,7 +48,7 @@ namespace Components
             return isOverUI;
         }
 
-        public void Init()
+        public override void Init()
         {
             pointerEventData = new PointerEventData(EventSystem.current);
 

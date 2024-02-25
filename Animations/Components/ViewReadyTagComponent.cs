@@ -9,5 +9,10 @@ namespace Components
     public sealed partial class ViewReadyTagComponent : BaseComponent
     {
         public GameObject View;
+
+        public override void AfterInit()
+        {
+            this.AddComponentReactLocal();
+        }
     }
 }

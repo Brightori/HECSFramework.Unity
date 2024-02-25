@@ -14,7 +14,7 @@ internal class CountersTests
         entity.AddComponent(new CountersHolderComponent());
         entity.AddHecsSystem(new CountersHolderSystem());
         entity.Init();
-        entity.AddComponent(new TestComponent());
+        entity.AddComponent(new TestComponent()).ComponentReactByTypeLocal<ICounter>();
 
         EntityManager.Default.GlobalUpdateSystem.Update();
 

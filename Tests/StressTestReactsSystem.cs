@@ -9,11 +9,7 @@ namespace Systems
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
     public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IAfterEntityInit,
         IReactCommand<StressTestLocalCommand>, 
-        IReactGlobalCommand<StressTestGlobalCommand>,
-        IReactGenericLocalComponent<ICounter>, 
-        IReactGenericGlobalComponent<ICounter>, 
-        IReactComponentGlobal<TestReactComponent>, 
-        IReactComponentLocal<TestReactComponent>
+        IReactGlobalCommand<StressTestGlobalCommand>
     {
         public bool ReactGlobalAdd;
         public bool ReactGlobalRemove;

@@ -7,14 +7,14 @@ using UnityEngine.AI;
 namespace Components
 {
     [Serializable, BluePrint]
-    public sealed class NavMeshAgentComponent : BaseComponent, IHaveActor, IInitable, IDisposable
+    public sealed class NavMeshAgentComponent : BaseComponent, IHaveActor, IDisposable
     {
         private NavMeshAgent navmeshAgent;
         public NavMeshAgent NavMeshAgent => navmeshAgent;
 
         public Actor Actor { get; set; }
      
-        public void Init()
+        public override void Init()
         {
             Actor.TryGetComponent(out navmeshAgent);
         }

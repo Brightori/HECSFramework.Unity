@@ -7,7 +7,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Animation, "This component override animations, but u should run  SetupOverrideAnimator() manualy, because in some cases we have view with animator later then actor ")]
-    public sealed class OverrideAnimatorComponent : BaseComponent, IInitable, IHaveActor, IValidate
+    public sealed class OverrideAnimatorComponent : BaseComponent, IHaveActor, IValidate
     {
         [SerializeField] private OverrideAnimatonClip[] overrideAnimatonClips = new OverrideAnimatonClip[0];
 
@@ -17,7 +17,7 @@ namespace Components
 
         public Actor Actor { get; set; }
 
-        public void Init()
+        public override void Init()
         {
         }
 

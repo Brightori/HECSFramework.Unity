@@ -147,6 +147,6 @@ public class EntityTests
         var guid = check2.GUID;
 
         EntityManager.Worlds[1].MigrateEntityToWorld(check2);
-        Assert.IsTrue(check2.WorldId == 1 && check.GetSystem<StressTestReactsSystem>().ReactGlobalRemove == true && check2.GUID == guid);
+        Assert.IsTrue(check2.WorldId == 1 && check2.GUID == guid);
     }
 }

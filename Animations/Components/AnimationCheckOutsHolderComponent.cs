@@ -9,11 +9,11 @@ namespace Components
     [Serializable]
     [RequiredAtContainer(typeof(Systems.AnimationDoneCheckOutSystem))]
     [Documentation(Doc.HECS, Doc.Animation, "This component holds needed animation info checkouts")]
-    public sealed class AnimationCheckOutsHolderComponent : BaseComponent, IInitable, IValidate
+    public sealed class AnimationCheckOutsHolderComponent : BaseComponent, IValidate
     {
         [SerializeField] private AnimationDoneCheckOutInfo[] animationDoneCheckOutInfos = new AnimationDoneCheckOutInfo[0];
 
-        public void Init()
+        public override void Init()
         {
             foreach (var ac in animationDoneCheckOutInfos)
                 ac.FillTiming();

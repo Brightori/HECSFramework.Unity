@@ -5,15 +5,15 @@ using HECSFramework.Unity;
 
 namespace Components
 {
-    public sealed partial class ActionsHolderComponent : BaseActionsHolderComponent, IInitable
+    public sealed partial class ActionsHolderComponent : BaseActionsHolderComponent 
     {
     }
 
-    public abstract partial class BaseActionsHolderComponent : BaseComponent, IInitable
+    public abstract partial class BaseActionsHolderComponent : BaseComponent 
     {
         public ActionBPToIdentifier[] ActionBPToIdentifiers;
 
-        public void Init()
+        public override void Init()
         {
             foreach (var actionBP in ActionBPToIdentifiers)
             {
