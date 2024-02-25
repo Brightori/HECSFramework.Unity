@@ -20,8 +20,6 @@ namespace Systems
     {
         public const string UIBluePrints = "UIBluePrints";
 
-        private Queue<IGlobalCommand> commandsQueue = new Queue<IGlobalCommand>();
-
         private EntitiesFilter uiCurrents;
         private EntitiesFilter additionalCanvases;
 
@@ -29,16 +27,17 @@ namespace Systems
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
         private PoolingSystem poolingSystem;
 
-        private List<UniTask<Entity>> cached = new List<UniTask<Entity>>(8);
-
         private bool isReady;
         private bool isLoaded;
+
+        private List<UniTask<Entity>> cached = new List<UniTask<Entity>>(8);
 
         public override void InitSystem()
         {
             uiCurrents = Owner.World.GetFilter<UITagComponent>();
             additionalCanvases = Owner.World.GetFilter<AdditionalCanvasTagComponent>();
             Addressables.LoadAssetsAsync<UIBluePrint>(UIBluePrints, null).Completed += LoadReact;
+            Owner.GetOrAddComponent<UIBusyTagComponent>();
         }
 
         public void GlobalStart()
@@ -60,16 +59,12 @@ namespace Systems
             isLoaded = true;
 
             if (isLoaded && isReady)
-                ProcessQueue();
+                Owner.RemoveComponent<UIBusyTagComponent>();
         }
 
-        public void CommandGlobalReact(ShowUICommand command)
+        public  async void CommandGlobalReact(ShowUICommand command)
         {
-            if (!isLoaded || !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
+            await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             if (!command.MultyView)
             {
@@ -116,11 +111,15 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
+        public async UniTask<Entity> ShowUI<T>(T command, int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true) where T: struct, ICommand
+        {
+            var ui = await ShowUI(uiType, isMultiple, additionalCanvas, needInit, ispoolable, isLocked);
+            ui.Command(command);
+            return ui;
+        }
+
         public async UniTask<Entity> ShowUI(int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true)
         {
-            while (!isReady)
-                await Task.Delay(50);
-
             uiCurrents.ForceUpdateFilter();
 
             if (!isMultiple)
@@ -261,13 +260,9 @@ namespace Systems
             transformComponent.Transform.GetSiblingIndex();
         }
 
-        public void CommandGlobalReact(HideUICommand command)
+        public async void CommandGlobalReact(HideUICommand command)
         {
-            if (!isLoaded && !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
+            await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             uiCurrents.ForceUpdateFilter();
             foreach (var ui in uiCurrents)
@@ -298,28 +293,7 @@ namespace Systems
             isReady = true;
 
             if (isLoaded && isReady)
-                ProcessQueue();
-        }
-
-        private void ProcessQueue()
-        {
-            while (commandsQueue.Count > 0)
-            {
-                var command = commandsQueue.Dequeue();
-
-                switch (command)
-                {
-                    case ShowUICommand showUI:
-                        CommandGlobalReact(showUI);
-                        break;
-                    case HideUICommand hideUI:
-                        CommandGlobalReact(hideUI);
-                        break;
-                    case UIGroupCommand groupUI:
-                        CommandGlobalReact(groupUI);
-                        break;
-                }
-            }
+                Owner.RemoveComponent<UIBusyTagComponent>();
         }
 
         public void CommandGlobalReact(UIGroupCommand command)
@@ -330,13 +304,9 @@ namespace Systems
                 HideGroup(command);
         }
 
-        private void HideGroup(UIGroupCommand command)
+        private async void HideGroup(UIGroupCommand command)
         {
-            if (!isLoaded || !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
+            await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             foreach (var ui in uiCurrents)
             {
@@ -350,24 +320,29 @@ namespace Systems
 
         private void ShowGroup(UIGroupCommand command)
         {
-            if (!isLoaded || !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
-
             uiCurrents.ForceUpdateFilter();
             ShowUIGroup(command).Forget();
         }
 
+        public async UniTask ShowUIGroup<T>(UIGroupCommand command, T contextCommand) where T: struct, ICommand
+        {
+            await ShowUIGroup(command);
+            SendContextToGroup(command.UIGroup, contextCommand);
+        }
+
+        private void SendContextToGroup<T>(int groupID, T context) where T : struct, ICommand
+        {
+            using (var getGroup = GetGroup(groupID))
+            {
+                for (int i = 0; i < getGroup.Count; i++)
+                {
+                    getGroup.Items[i].Command(context);
+                }
+            }
+        }
+
         public async UniTask ShowUIGroup(UIGroupCommand command)
         {
-            if (!isLoaded || !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
-
             await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             Owner.GetOrAddComponent<UIBusyTagComponent>();
@@ -437,13 +412,9 @@ namespace Systems
             return false;
         }
 
-        public void CommandGlobalReact(ShowUIOnAdditionalCommand command)
+        public async void CommandGlobalReact(ShowUIOnAdditionalCommand command)
         {
-            if (!isLoaded || !isReady)
-            {
-                commandsQueue.Enqueue(command);
-                return;
-            }
+            await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
             if (!command.MultyView)
             {
