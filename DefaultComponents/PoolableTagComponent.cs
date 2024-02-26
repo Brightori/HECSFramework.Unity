@@ -4,7 +4,7 @@ using HECSFramework.Unity;
 
 namespace Components
 {
-    public partial class PoolableTagComponent : BaseComponent, IInitAfterView, IAfterEntityInit
+    public partial class PoolableTagComponent : BaseComponent, IInitAfterView 
     {
         private IStartOnPooling[] startOnPoolings = Array.Empty<IStartOnPooling>();
         private IStopOnPooling[] stopOnPoolings = Array.Empty<IStopOnPooling>();
@@ -32,7 +32,7 @@ namespace Components
                 sp.Start();
         }
 
-        public void AfterEntityInit()
+        public override void AfterInit()
         {
             if (!Owner.ContainsMask<SetupAfterViewTagComponent>())
                 GatherPoolables();

@@ -39,7 +39,7 @@ namespace Components
 
     [Serializable]
     [Documentation(Doc.Test, "we use this component on tests purpose")]
-    public sealed class TestWorldSingleComponent : ModifiableFloatCounterComponent, IAfterEntityInit, IWorldSingleComponent
+    public sealed class TestWorldSingleComponent : ModifiableFloatCounterComponent, IWorldSingleComponent
     {
         public Strategy Strategy;
 
@@ -49,6 +49,11 @@ namespace Components
         public int InitCount = 0;
 
         public void AfterEntityInit()
+        {
+            InitCount++;
+        }
+
+        public override void AfterInit()
         {
             InitCount++;
         }
