@@ -112,7 +112,7 @@ namespace HECSFramework.Unity
 
             foreach (var e in entityContainers)
             {
-                var fieldName = e.name.Replace("-", "").Replace(" ", "").Insert(0,"_");
+                var fieldName = e.name.Replace("-", "").Replace(" ", "").Insert(0, "_");
 
                 dicBody.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope} {e.ContainerIndex}, {CParse.Quote}{e.name}{CParse.Quote} {CParse.RightScope},"));
                 body.AddUnique(new TabSimpleSyntax(1, $"public const int {fieldName} = {e.ContainerIndex};"));
@@ -256,7 +256,13 @@ namespace HECSFramework.Unity
 
             foreach (var identifier in identifierContainers)
             {
-                var name = identifier.name.Replace("Container", "");
+                var name = identifier.name.Replace("Container", "").Replace("-", "_").Replace(" ", "");
+
+                if (int.TryParse(name[0].ToString(), out _))
+                {
+                    name.Insert(0, "_");
+                }
+
                 body.Add(new TabSimpleSyntax(1, $"public const int {name} = {identifier.Id};"));
             }
 
