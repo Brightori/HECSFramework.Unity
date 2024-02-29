@@ -235,7 +235,13 @@ namespace HECSFramework.Unity
 
             foreach (var identifier in identifierNames)
             {
-                var name = identifier.Replace("Container", "");
+                var name = identifier.Replace("Container", "").Replace("-", "_").Replace(" ", "");
+
+                if (int.TryParse(name[0].ToString(), out _))
+                {
+                    name.Insert(0, "_");
+                }
+
                 body.Add(new TabSimpleSyntax(1, $"public const string {name} = {CParse.Quote}{name}{CParse.Quote};"));
                 dictionaryIntToString.Add(new TabSimpleSyntax(2, $"{CParse.LeftScope} {IndexGenerator.GetIndexForType(name)}, {CParse.Quote}{name}{CParse.Quote}{CParse.RightScope},"));
             }
