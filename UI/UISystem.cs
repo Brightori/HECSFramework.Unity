@@ -62,7 +62,7 @@ namespace Systems
                 Owner.RemoveComponent<UIBusyTagComponent>();
         }
 
-        public  async void CommandGlobalReact(ShowUICommand command)
+        public async void CommandGlobalReact(ShowUICommand command)
         {
             await new WaitRemove<UIBusyTagComponent>(Owner).RunJob();
 
@@ -111,7 +111,7 @@ namespace Systems
             Addressables.InstantiateAsync(spawn.UIActor, mainTransform).Completed += a => LoadUI(a, action);
         }
 
-        public async UniTask<Entity> ShowUI<T>(T command, int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true) where T: struct, ICommand
+        public async UniTask<Entity> ShowUI<T>(T command, int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true) where T : struct, ICommand
         {
             var ui = await ShowUI(uiType, isMultiple, additionalCanvas, needInit, ispoolable, isLocked);
             ui.Command(command);
@@ -324,7 +324,7 @@ namespace Systems
             ShowUIGroup(command).Forget();
         }
 
-        public async UniTask ShowUIGroup<T>(UIGroupCommand command, T contextCommand) where T: struct, ICommand
+        public async UniTask ShowUIGroup<T>(UIGroupCommand command, T contextCommand) where T : struct, ICommand
         {
             await ShowUIGroup(command);
             SendContextToGroup(command.UIGroup, contextCommand);
@@ -356,12 +356,7 @@ namespace Systems
                         ui.Command(new ShowUICommand());
                         continue;
                     }
-
-                    else
-                        ui.Command(new HideUICommand());
                 }
-                else
-                    ui.Command(new HideUICommand());
             }
 
             for (int i = 0; i < uIBluePrints.Count; i++)
@@ -377,6 +372,18 @@ namespace Systems
             cached.Clear();
 
             command.OnLoadUI?.Invoke();
+
+            foreach (var ui in uiCurrents)
+            {
+                if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))
+                {
+                    if (!uIGroupTagComponent.IsHaveGroupIndex(command.UIGroup))
+                        ui.Command(new HideUICommand());
+                }
+                else
+                    ui.Command(new HideUICommand());
+            }
+
             Owner.RemoveComponent<UIBusyTagComponent>();
         }
 

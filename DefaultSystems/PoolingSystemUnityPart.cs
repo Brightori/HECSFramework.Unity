@@ -167,6 +167,13 @@ namespace Systems
 
         public async void Release(Actor actor)
         {
+            if (!actor.IsAlive())
+            {
+                Debug.LogError("we dont have actor here");
+                return;
+            }
+                
+
             if (actor.TryGetHECSComponent(out PoolableViewsProviderComponent poolableViewsProviderComponent))
             {
                 foreach (var pview in poolableViewsProviderComponent.Views)
