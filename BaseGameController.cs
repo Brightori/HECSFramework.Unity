@@ -57,7 +57,7 @@ namespace HECSFramework.Unity
             if (EntityManager.IsAlive)
             {
                 var entity = EntityManager.Default.GetEntityFromPool("OnQuit");
-                entity.AddComponent<OnApplicationQuitTagComponent>();
+                entity.AddComponent<OnApplicationQuitTagComponent>().AddComponentReactGlobal();
                 entity.Init();
             }
         }
