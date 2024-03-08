@@ -1,7 +1,6 @@
-﻿using HECSFramework.Core;
-using HECSFramework.Unity;
+﻿using System;
+using HECSFramework.Core;
 using Sirenix.OdinInspector;
-using System;
 using UnityEngine;
 
 namespace HECSFramework.Unity
@@ -10,9 +9,6 @@ namespace HECSFramework.Unity
     [Documentation(Doc.Animation, Doc.HECS, "Here we gather info when we need to check if animation done, we save here time and id event from animation clip")]
     public partial struct AnimationDoneCheckOutInfo
     {
-        //if animation event wont rise up, we force rise him by timing, but we need timing to be little more then timing of animation event
-        public const float ForceTimingOffset = 1.1f;
-
         [OnValueChanged("FillTiming")]
         public AnimationClip AnimationClip;
         [OnValueChanged("FillTiming")]
@@ -22,6 +18,9 @@ namespace HECSFramework.Unity
         [Header("This value should be calculated from animation clip")]
         public float Timing;
 
+        [ReadOnly]
+        [Header("This value should be calculated from animation clip")]
+        public float TimingNormalized;
 
         [ReadOnly]
         [Header("lenght at seconds of animation clip")]
@@ -42,7 +41,8 @@ namespace HECSFramework.Unity
             {
                 if (e.objectReferenceParameter == AnimationEventID)
                 {
-                    Timing = e.time * ForceTimingOffset;
+                    Timing = e.time;
+                    TimingNormalized = e.time/ClipLenght;
                     return;
                 }
             }
