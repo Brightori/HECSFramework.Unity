@@ -124,6 +124,28 @@ namespace HECSFramework.Unity
             return default;
         }
 
+        public virtual IComponent GetComponent(int typeIndex) 
+        {
+            foreach (var c in holder.components)
+            {
+                if (c.GetHECSComponent.GetTypeHashCode == typeIndex)
+                    return c.GetHECSComponent;
+            }
+
+            return default;
+        }
+
+        public virtual ComponentBluePrint GetComponentBluePrint(int typeIndex)
+        {
+            foreach (var c in holder.components)
+            {
+                if (c.GetHECSComponent.GetTypeHashCode == typeIndex)
+                    return c;
+            }
+
+            return default;
+        }
+
         public virtual T GetComponentInstance<T>() where T : IComponent
         {
             foreach (var c in holder.components)
