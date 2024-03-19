@@ -114,6 +114,7 @@ namespace Systems
         public async UniTask<Entity> ShowUI<T>(T command, int uiType, bool isMultiple = false, int additionalCanvas = 0, bool needInit = true, bool ispoolable = false, bool isLocked = true) where T : struct, ICommand
         {
             var ui = await ShowUI(uiType, isMultiple, additionalCanvas, needInit, ispoolable, isLocked);
+            ui.Command(new ShowUICommand());
             ui.Command(command);
             return ui;
         }
