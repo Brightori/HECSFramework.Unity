@@ -37,6 +37,9 @@ namespace Components
         {
             Views = null;
 
+            if (Owner.World.IsHaveSingleComponent<Components.OnApplicationQuitTagComponent>())
+                return;
+
             foreach (var view in RunTimeViews) 
                 Owner.World.GetSingleSystem<PoolingSystem>().ReleaseView(view);
 
