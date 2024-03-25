@@ -262,7 +262,7 @@ namespace HECSFramework.Unity
 
             foreach (var identifier in identifierContainers)
             {
-                var name = identifier.name.Replace("Container", "").Replace("-", "_").Replace(" ", "");
+                var name = identifier.name.Replace("Container", "").Replace("-", "_").Replace(" ", "").Replace(".","");
 
                 if (int.TryParse(name[0].ToString(), out _))
                 {
