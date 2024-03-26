@@ -13,7 +13,7 @@ public class UIAccessMonoComponent : MonoBehaviour
     public AccessToIdentifier<CanvasGroup>[] CanvasGroups = new AccessToIdentifier<CanvasGroup>[0];
     public AccessToIdentifier<RectTransform>[] RectTransforms = new AccessToIdentifier<RectTransform>[0];
     public AccessToIdentifier<TextMeshProUGUI>[] TextMeshProUGUIs = new AccessToIdentifier<TextMeshProUGUI>[0];
-    public AccessToIdentifier<UIAccessGenericPart>[] GenericAccess = new AccessToIdentifier<UIAccessGenericPart>[0];
+    public AccessToIdentifier<MonoBehaviour>[] GenericAccess = new AccessToIdentifier<MonoBehaviour>[0];
     public AccessToIdentifier<UIAccessMonoComponent>[] UIAccessMonoComponents = new AccessToIdentifier<UIAccessMonoComponent>[0];
 
     public Image GetImage(int id) => Get(id, Images);
