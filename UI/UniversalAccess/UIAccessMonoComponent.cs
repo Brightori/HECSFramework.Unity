@@ -1,5 +1,6 @@
 using System;
 using HECSFramework.Core;
+using HECSFramework.Unity;
 using Helpers;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 [Documentation(Doc.HECS, Doc.UI, "this component provides access to ui parts, by adding them to collections")]
 public class UIAccessMonoComponent : MonoBehaviour
 {
+    public AccessToIdentifier<Actor>[] Actors = new AccessToIdentifier<Actor>[0];
     public AccessToIdentifier<Image>[] Images = new AccessToIdentifier<Image>[0];
     public AccessToIdentifier<Button>[] Buttons = new AccessToIdentifier<Button>[0];
     public AccessToIdentifier<CanvasGroup>[] CanvasGroups = new AccessToIdentifier<CanvasGroup>[0];
@@ -17,18 +19,24 @@ public class UIAccessMonoComponent : MonoBehaviour
     public AccessToIdentifier<UIAccessMonoComponent>[] UIAccessMonoComponents = new AccessToIdentifier<UIAccessMonoComponent>[0];
 
     public Image GetImage(int id) => Get(id, Images);
+    public Actor GetActor(int id) => Get(id, Actors);
     public Button GetButton(int id) => Get(id, Buttons);
     public CanvasGroup GetCanvasGroup(int id) => Get(id, CanvasGroups);
     public RectTransform GetRectTransform(int id) => Get(id, RectTransforms);
     public TextMeshProUGUI GetTextMeshProUGUI(int id) => Get(id, TextMeshProUGUIs);
     public UIAccessMonoComponent GetUIAccessMonoComponent(int id) => Get(id, UIAccessMonoComponents);
 
-    public HECSPooledArray<RectTransform> GetRectTransformsById(int id)
+    public HECSPooledArray<RectTransform> GetRectTransforms(int id)
     {
         return GetArray(id, RectTransforms);
     }
 
-    public HECSPooledArray<UIAccessMonoComponent> GetUIAccess(int id)
+    public HECSPooledArray<Actor> GeActors(int id)
+    {
+        return GetArray(id, Actors);
+    }
+
+    public HECSPooledArray<UIAccessMonoComponent> GetUIAccessElements(int id)
     {
         return GetArray(id, UIAccessMonoComponents);
     }

@@ -25,6 +25,8 @@ namespace HECSFramework.Unity
 
         public void Command<T>(T command) where T : struct, ICommand => Entity.Command(command);
 
+        public bool IsInited => Entity != null && Entity.IsInited;
+
 
         private void Awake()
         {

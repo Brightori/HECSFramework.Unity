@@ -8,6 +8,11 @@ public class InitChildActors : MonoBehaviour
         var actorInChilds = GetComponentsInChildren<Actor>();
 
         foreach (var child in actorInChilds)
+        {
+            if (child.IsInited)
+                continue;
+
             child.InitWithContainer();
+        }
     }
 }
