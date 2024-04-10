@@ -27,11 +27,13 @@ namespace HECSFramework.Core
 
         public void Register(ICustomUpdatable updatable, bool add)
         {
-            if (add)
-                customUpdatables[updatable] = owner.StartCoroutine(Coroutine(updatable));
+            if (add && !customUpdatables.ContainsKey(updatable))
+                customUpdatables.Add(updatable, owner.StartCoroutine(Coroutine(updatable)));
             else
             {
-                owner.StopCoroutine(customUpdatables[updatable]);
+                if (customUpdatables.TryGetValue(updatable, out var coroutine))
+                    owner.StopCoroutine(coroutine);
+                
                 customUpdatables.Remove(updatable);
             }
         }

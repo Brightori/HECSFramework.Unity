@@ -13,6 +13,11 @@ namespace Helpers
         public static Vector3 AsV3(this Vector2 source, float height = 0)
             => new Vector3(source.x, height, source.y);
         
+        public static float GetRandomFloat(this Vector2 source)
+        {
+            return Random.Range(source.x, source.y);
+        }
+
         public static bool TryGetActorFromCollision(this Component component, out Actor actor)
         {
             actor = null;

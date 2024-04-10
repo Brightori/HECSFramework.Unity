@@ -31,7 +31,7 @@ public class TweenSequencer : MonoBehaviour, IGetScenarioTween
         {
             if (scenario.ActionIdentifier.Id == actionIdentifier)
             {
-                seq.Append(scenario.GetTween());
+                seq.Append(scenario.GetTween().SetUpdate(UpdateType.Late));
             }
         }
         
@@ -57,7 +57,7 @@ public class TweenSequencer : MonoBehaviour, IGetScenarioTween
         {
             if (scenario.ActionIdentifier.Id == actionidentifier)
             {
-                seq.Append(scenario.GetTween());
+                seq.Append(scenario.GetTween().SetUpdate(UpdateType.Late));
             }
         }
 

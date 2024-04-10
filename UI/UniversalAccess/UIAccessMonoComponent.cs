@@ -24,7 +24,7 @@ public class UIAccessMonoComponent : MonoBehaviour
     public CanvasGroup GetCanvasGroup(int id) => Get(id, CanvasGroups);
     public RectTransform GetRectTransform(int id) => Get(id, RectTransforms);
     public TextMeshProUGUI GetTextMeshProUGUI(int id) => Get(id, TextMeshProUGUIs);
-    public UIAccessMonoComponent GetUIAccessMonoComponent(int id) => Get(id, UIAccessMonoComponents);
+    public UIAccessMonoComponent GetUIAccess(int id) => Get(id, UIAccessMonoComponents);
 
     public HECSPooledArray<RectTransform> GetRectTransforms(int id)
     {
