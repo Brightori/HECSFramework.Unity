@@ -369,11 +369,13 @@ namespace Systems
                 }
             }
 
-            await UniTask.WhenAll(cached);
+            var result = await UniTask.WhenAll(cached);
+
+            foreach (var r in result)
+                r.Command(new ShowUICommand());
+
             cached.Clear();
-
             command.OnLoadUI?.Invoke();
-
             foreach (var ui in uiCurrents)
             {
                 if (ui.TryGetComponent(out UIGroupTagComponent uIGroupTagComponent))

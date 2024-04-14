@@ -276,6 +276,17 @@ namespace HECSFramework.Unity
             return list;
         }
 
+        public T GetComponentByType<T>()
+        {
+            foreach (var c in Components)
+            {
+                if (c.GetHECSComponent is T needed)
+                    return needed;
+            }
+
+            return default;
+        }
+
         public List<ISystem> GetSystemsInstances()
         {
             var list = new List<ISystem>(holder.systems.Count);
