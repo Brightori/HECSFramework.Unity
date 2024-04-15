@@ -205,6 +205,20 @@ namespace HECSFramework.Unity
             return false;
         }
 
+        public bool TryGetBaseComponent<T>(out T result)
+        {
+            foreach (var component in holder.components)
+            {
+                if (component.GetHECSComponent is T needed)
+                {
+                    result = needed;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
+        }
+
         protected void InitComponents(Entity entity, List<ComponentBluePrint> components, bool pure = false)
         {
             foreach (var component in components)
@@ -392,9 +406,18 @@ namespace HECSFramework.Unity
             EditorWindow.GetWindow<ImportFeatureWindow>().Init(this);
         }
 
-        public T GetOrAddComponent<T>() where T:  class, IComponent, new()
+        public T GetOrAddComponent<T>(bool onlyMain = false) where T:  class, IComponent, new()
         {
-            if (IsHaveComponent<T>())
+            if (onlyMain)
+            {
+                if (TryGetBaseComponent<T>(out var result))
+                {
+                    isEditorTimeChanged = true;
+                    return result;
+                }
+                    
+            }
+            else if (IsHaveComponent<T>())
                 return GetComponent<T>();
 
             var bpProvider = new BluePrintsProvider();
