@@ -5,6 +5,7 @@ using HECSFramework.Core;
 using Helpers;
 using Systems;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using ActorViewReference = Components.ActorViewReference;
 using Object = UnityEngine.Object;
 
@@ -26,7 +27,7 @@ namespace HECSFramework.Unity
             Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
             var assetsService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
-            var container = await assetsService.GetContainer<ActorViewReference, GameObject>(viewReferenceComponent.ViewReference);
+            var container = await assetsService.GetContainer<AssetReference, GameObject>(viewReferenceComponent.ViewReference);
             var actorPrfb = await container.CreateInstanceForComponent<Actor>(position, rotation, parent);
             assetsService.ReleaseContainer(container);
             return actorPrfb;
