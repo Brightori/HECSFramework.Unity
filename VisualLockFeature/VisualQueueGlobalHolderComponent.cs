@@ -12,5 +12,10 @@ namespace Components
         {
             CurrentLockQueue.Clear();
         }
+
+        public HECSJobRun<WaitForVisualQueueComplete> WaitQueueComplete()
+        {
+            return new WaitForVisualQueueComplete(this).RunJob(Owner.World);
+        }
     }
 }
