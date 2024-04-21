@@ -31,7 +31,7 @@ public class UIAccessMonoComponent : MonoBehaviour
         return GetArray(id, RectTransforms);
     }
 
-    public HECSPooledArray<Actor> GeActors(int id)
+    public HECSPooledArray<Actor> GetActors(int id)
     {
         return GetArray(id, Actors);
     }
