@@ -1,19 +1,19 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Commands;
 using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Systems
 {
+    [Feature("UIManager")]
     [Serializable, BluePrint]
     [Documentation(Doc.UI, Doc.HECS, "This system default for operating ui at hecs, this system have command for show and hide ui plus show or hide ui groups, this system still in progress")]
     public class UISystem : BaseSystem, IUISystem, IGlobalStart

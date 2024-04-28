@@ -5,7 +5,8 @@ using HECSFramework.Unity;
 namespace Systems
 {
     [Serializable]
-    [Documentation(Doc.HECS, Doc.Provider, Doc.GameLogic, "this system gather components providers from actor and inject them to current entity")]
+    [Feature("InjectComponentsFromActor")]
+    [Documentation(Doc.HECS, Doc.Provider, Doc.GameLogic, "this system gather components providers from actor and inject them to current entity, actor shoud have child or MonoBehs with implementation of interface IComponentsProvider")]
     public sealed class InjectComponentsFromActorSystem : BaseSystem, IHaveActor 
     {
         public Actor Actor { get; set; }

@@ -7,6 +7,7 @@ using Systems;
 
 namespace Components
 {
+    [Feature("MainCanvas")]
     [Serializable, RequiredAtContainer(typeof(UnityTransformComponent), typeof(AdditionalCanvasesSystem))]
     [Documentation(Doc.UI, Doc.Tag, "This component marks main canvas for placing ui")]
     public sealed class MainCanvasTagComponent : BaseComponent, IWorldSingleComponent, IHaveActor

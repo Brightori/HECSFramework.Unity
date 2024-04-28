@@ -9,8 +9,9 @@ using UnityEngine.InputSystem;
 
 namespace Systems
 {
-    [Documentation(Doc.Input, "Система прослушивает юнити инпут и передаёт данные в хекс системы и компоненты.")]
+    [Feature("InputManager")]
     [Serializable, BluePrint]
+    [Documentation(Doc.Input, "Система прослушивает юнити инпут и передаёт данные в хекс системы и компоненты.")]
     [RequiredAtContainer(typeof(InputActionsComponent))]
     public class InputListenSystem : BaseSystem, IPriorityUpdatable
     {
