@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Commands;
 using Components;
 using Cysharp.Threading.Tasks;
@@ -62,9 +61,7 @@ namespace Systems
         public override void Dispose()
         {
             if (!EntityManager.Default.TryGetSingleComponent<OnApplicationQuitTagComponent>(out _))
-            {
-                poolingSystem.ReleaseView(viewGameObject);
-            }
+                poolingSystem?.ReleaseView(viewGameObject);
         }
     }
 

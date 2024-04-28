@@ -13,7 +13,12 @@ namespace Components
         public NavMeshAgent NavMeshAgent => navmeshAgent;
 
         public Actor Actor { get; set; }
-     
+
+        /// <summary>
+        /// here we think owner have proportional scale and use 
+        /// </summary>
+        public float Radius => navmeshAgent.radius * Actor.Entity.GetTransform().localScale.x;
+
         public override void Init()
         {
             Actor.TryGetComponent(out navmeshAgent);
