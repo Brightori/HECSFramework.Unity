@@ -10,6 +10,7 @@ namespace HECSFramework.Unity
 {
     public class ImportFeatureWindow : OdinEditorWindow
     {
+        [Searchable]
         [ValueDropdown(nameof(GetFeatures))]
         public string Feature;
 
