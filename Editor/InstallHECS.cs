@@ -14,6 +14,7 @@ namespace HECSFramework.Unity.Editor
     {
         #region fields
         private static string Abilities = "/Abilities/";
+        private static string AdditionalAbilitiesIdentifiers = "/AdditionalAbilitiesIdentifiers/";
         private static string Actors = "/Actors/";
         public static string BluePrints = "/BluePrints/";
         private static string Predicates = "/Predicates/";
@@ -142,6 +143,7 @@ namespace HECSFrameWork
         {
             CheckFolder(ScriptPath);
             CheckFolder(ScriptPath + Actors);
+            CheckFolder(ScriptPath + Actions);
             CheckFolder(ScriptPath + BluePrints);
             CheckFolder(ScriptPath + Commands);
             CheckFolder(ScriptPath + Components);
@@ -158,6 +160,7 @@ namespace HECSFrameWork
             CheckFolder(ScriptPath + BluePrints + SystemsBluePrint);
             CheckFolder(ScriptPath + BluePrints + Actions);
             CheckFolder(ScriptPath + BluePrints + Identifiers);
+            CheckFolder(ScriptPath + BluePrints + Identifiers+AdditionalAbilitiesIdentifiers);
 
             //BluePrintsFolders
             CheckFolder(DataPath + BluePrints);
