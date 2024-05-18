@@ -80,7 +80,7 @@ namespace HECSFramework.Unity.Editor
         }
 
         public static void SaveToFile(string data, string path)
-{
+        {
             File.WriteAllText(path, data, Encoding.UTF8);
         }
 
@@ -160,7 +160,7 @@ namespace HECSFrameWork
             CheckFolder(ScriptPath + BluePrints + SystemsBluePrint);
             CheckFolder(ScriptPath + BluePrints + Actions);
             CheckFolder(ScriptPath + BluePrints + Identifiers);
-            CheckFolder(ScriptPath + BluePrints + Identifiers+AdditionalAbilitiesIdentifiers);
+            
 
             //BluePrintsFolders
             CheckFolder(DataPath + BluePrints);
@@ -173,7 +173,10 @@ namespace HECSFrameWork
             CheckFolder(DataPath + BluePrints + UIBluePrints);
             CheckFolder(DataPath + BluePrints + Actions);
             CheckFolder(DataPath + BluePrints + History);
-            CheckFolder(DataPath + BluePrints + History+AddressablesGroupsHistory);
+            CheckFolder(DataPath + BluePrints + Predicates);
+            CheckFolder(DataPath + BluePrints + History + AddressablesGroupsHistory);
+            CheckFolder(DataPath + BluePrints + Identifiers + AdditionalAbilitiesIdentifiers);
+            CheckFolder(DataPath + BluePrints + Identifiers + "/CounterIdentifiers/");
 
             //MonoBehaviourComponents
             CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
@@ -216,13 +219,13 @@ namespace HECSFrameWork
 
             if (!File.Exists(DataPath + ScriptTemplates + ActionTemplate))
                 CreateActionTemplate();
-            
+
             if (!File.Exists(DataPath + ScriptTemplates + InterDecision))
                 CreateInterDecisionTemplate();
 
             if (!File.Exists(DataPath + ScriptTemplates + DilemmaDecision))
                 CreateDilemmaDecisionTemplate();
-            
+
             if (!File.Exists(DataPath + ScriptTemplates + GenericNode))
                 CreateGenericNodeTemplate();
         }

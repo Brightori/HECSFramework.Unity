@@ -397,6 +397,7 @@ namespace HECSFramework.Unity
         [Button]
         public void Sort()
         {
+            holder.Parent = this;
             holder.SortComponents();
         }
 

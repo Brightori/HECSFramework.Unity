@@ -9,7 +9,7 @@ namespace Components
 {
     public sealed partial class AbilitiesHolderComponent : BaseComponent
     {
-        [ValueDropdown("GetAbilities")]
+        [ValueDropdown("GetAbilities", NumberOfItemsBeforeEnablingSearch = 3)]
         public EntityContainer[] AbilitiesContainers = new EntityContainer[0];
 
         private IEnumerable GetAbilities()
