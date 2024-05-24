@@ -74,6 +74,9 @@ namespace Systems
             where TRef : AssetReference
             where TObject : Object
         {
+            if (reference == null)
+                throw new InvalidOperationException("asset reference is null");
+
             if (loadingTCS == null)
             {
                 loadingTCS = new UniTaskCompletionSource();
