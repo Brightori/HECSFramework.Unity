@@ -23,6 +23,7 @@ namespace Components
         public void Dispose()
         {
             this.RemoveComponentReactGlobal();
+            LockCount = 0;
         }
 
         /// <summary>
