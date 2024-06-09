@@ -30,6 +30,11 @@ namespace Components
             NavMeshAgent.SetDestination(destination);
         }
 
+        public void Teleport(Vector3 destination) 
+        { 
+            NavMeshAgent.Warp(destination);
+        }
+
         public void Stop()
         {
             NavMeshAgent.isStopped = true;
