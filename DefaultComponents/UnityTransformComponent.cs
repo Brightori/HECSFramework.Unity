@@ -22,6 +22,13 @@ namespace Components
                 Actor.Entity.RemoveComponent(this);
         }
 
+        public void SetYAxisValue(float value)
+        {
+            var pos = Transform.position;
+            pos.y = value;
+            Transform.position = pos;
+        }
+
         public void Dispose()
         {
             Actor = null;
