@@ -8,7 +8,7 @@ using UnityEngine;
 public interface IHECSPool
 {
     void SetMaxCount(int maxCount);
-    UniTask<GameObject> Get();
+    UniTask<GameObject> Get(Vector3 position, Quaternion rotation);
     void Release(GameObject pooledObj);
     void Dispose();
 }
@@ -38,14 +38,16 @@ public class HECSPool<TContainer> : IDisposable, IHECSPool
         queue.Clear();
     }
 
-    public async UniTask<GameObject> Get()
+    public async UniTask<GameObject> Get(Vector3 position, Quaternion rotation)
     {
         if (queue.Count == 0)
         {
-            return await container.CreateInstance(Vector3.zero, Quaternion.identity);
+            return await container.CreateInstance(position, rotation);
         }
 
-        return queue.Dequeue();
+        var needed = queue.Dequeue();
+        needed.transform.SetPositionAndRotation(position, rotation);
+        return needed;
     }
 
     public void Release(GameObject pooledObj)

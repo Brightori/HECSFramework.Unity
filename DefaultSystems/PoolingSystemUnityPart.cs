@@ -80,10 +80,10 @@ namespace Systems
             return view;
         }
 
-        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference)
+        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default)
         {
             var pool = await GetPool(assetReference);
-            var view = await pool.Get();
+            var view = await pool.Get(position, rotation);
             view.SetActive(true);
 
             if (view.TryGetComponent(out IPoolableView poolableView))
@@ -92,10 +92,10 @@ namespace Systems
             return view;
         }
 
-        public async UniTask<GameObject> GetFastViewFromPool(AssetReference assetReference)
+        public async UniTask<GameObject> GetFastViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default)
         {
             var pool = await GetPool(assetReference);
-            var view = await pool.Get();
+            var view = await pool.Get(position, rotation);
             view.SetActive(true);
             return view;
         }
