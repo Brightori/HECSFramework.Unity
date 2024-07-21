@@ -31,7 +31,7 @@ public class ValidateWindow : OdinEditorWindow
             }
         }
 
-        foreach (var container in list) 
+        foreach (var container in list)
         {
             try
             {
@@ -62,7 +62,9 @@ public class ValidateWindow : OdinEditorWindow
 
             try
             {
-                foreach (var c in container.GetComponents<IValidate>())
+                var forValidation = ReflectionHelpers.GetPrivateFieldValue<ComponentsSystemsHolder>(container, "holder").components.Select(x => x.GetHECSComponent).OfType<IValidate>();
+
+                foreach (var c in forValidation)
                 {
                     try
                     {
