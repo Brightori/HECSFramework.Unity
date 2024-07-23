@@ -21,13 +21,8 @@ namespace Components
         
         public void UpdateAction()
         {
-            if (isPressed)
-            {
-                OnUpdate?.Invoke(index, cachedForUpdate);
-
-                if (action.phase != InputActionPhase.Performed)
-                    isPressed = false;
-            }
+            if (!isPressed) return;
+            OnUpdate?.Invoke(index, cachedForUpdate);
         }
 
         public UpdateableAction(int index, InputAction action)
@@ -35,6 +30,7 @@ namespace Components
             this.action = action;
             action.started += Started;
             action.performed += Updated;
+            action.performed += (x) => OnPerformed.Invoke(index, x);
             action.canceled += Ended;
             this.index = index;
         }
