@@ -1,6 +1,7 @@
 ﻿using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
+using Sirenix.OdinInspector;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Components
     [Documentation(Doc.HECS, Doc.Quests, "group of quests middle lvl unit for isolate thematic quests and exclude them from checking after completing group")]
     public class QuestGroup : ScriptableObject, IValidate
     {
-        public GroupQuestInfo GroupQuestInfo;
+        public QuestGroupInfo GroupQuestInfo;
         public PredicateBluePrint[] Predicates;
         public QuestData[] QuestDatas;
 
@@ -27,6 +28,7 @@ namespace Components
             return true;
         }
 
+        [Button]
         public bool IsValid()
         {
             QuestDatas = new SOProvider<QuestData>().GetCollection()
@@ -49,7 +51,7 @@ namespace Components
     }
 
     [Serializable]
-    public struct GroupQuestInfo : IEquatable<GroupQuestInfo>, IEquatable<QuestDataInfo>
+    public struct QuestGroupInfo : IEquatable<QuestGroupInfo>, IEquatable<QuestDataInfo>
     {
         public int QuestGroupIndex;
         public int QuestStageIndex;
@@ -57,13 +59,13 @@ namespace Components
 
         public override bool Equals(object obj)
         {
-            return obj is GroupQuestInfo info &&
+            return obj is QuestGroupInfo info &&
                    QuestGroupIndex == info.QuestGroupIndex &&
                    QuestStageIndex == info.QuestStageIndex &&
                    QuestsHolderIndex == info.QuestsHolderIndex;
         }
 
-        public bool Equals(GroupQuestInfo info)
+        public bool Equals(QuestGroupInfo info)
         {
             return QuestGroupIndex == info.QuestGroupIndex &&
                    QuestStageIndex == info.QuestStageIndex &&

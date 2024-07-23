@@ -10,7 +10,7 @@ namespace Components
     public sealed class QuestsHistoryComponent : BaseComponent
     {
         public HashSet<int> CompletedStages = new HashSet<int>();
-        public HashSet<int> CompletedGroups = new HashSet<int>();
-        public HashSet<int> CompletedQuests = new HashSet<int>();
+        public HashSet<QuestGroupInfo> CompletedGroups = new HashSet<QuestGroupInfo>();
+        public HashSet<QuestDataInfo> CompletedQuests = new HashSet<QuestDataInfo>();
     }
 }

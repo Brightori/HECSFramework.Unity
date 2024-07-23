@@ -13,8 +13,7 @@ namespace Components
     [Documentation(Doc.HECS, Doc.Quests, "its main unit of quests, its holds quests groups and predicates, main purpose of this - have high lvl checking or executing of quests branch, we look after  ")]
     public partial class QuestStage : ScriptableObject, IValidate
     {
-        public int QuestStageIndex;
-        public int QuestsHolderIndex;
+        public QuestStageInfo QuestStageInfo;
         public PredicateBluePrint[] Predicates;
         public QuestGroup[] QuestsGroups;
 
@@ -33,22 +32,33 @@ namespace Components
         [Button]
         public bool IsValid()
         {
-            var questsOnRow = new SOProvider<QuestGroup>().GetCollection().Where(x => 
-                x.GroupQuestInfo.QuestStageIndex == QuestStageIndex && QuestsHolderIndex == 
+            var questsOnRow = new SOProvider<QuestGroup>().GetCollection().Where(x =>
+                x.GroupQuestInfo.QuestStageIndex == QuestStageInfo.QuestStageIndex && QuestStageInfo.QuestsHolderIndex ==
                 x.GroupQuestInfo.QuestsHolderIndex).ToArray();
+
+            if (questsOnRow.Length == 0 )
+            {
+                Debug.LogWarning($"stage: we dont have any group in {this.name}", this);
+                return false;
+            }
 
             QuestsGroups = new QuestGroup[questsOnRow.Length];
 
-            foreach (var qg in questsOnRow)
+            foreach (var questGroup in questsOnRow)
             {
-                if (QuestsGroups[qg.GroupQuestInfo.QuestStageIndex] == null)
+                if (QuestsGroups.Length < questGroup.GroupQuestInfo.QuestGroupIndex+1)
                 {
-                    QuestsGroups[qg.GroupQuestInfo.QuestStageIndex] = qg;
+                    Array.Resize(ref QuestsGroups, questGroup.GroupQuestInfo.QuestGroupIndex + 1);
+                }
+
+                if (QuestsGroups[questGroup.GroupQuestInfo.QuestGroupIndex] == null)
+                {
+                    QuestsGroups[questGroup.GroupQuestInfo.QuestGroupIndex] = questGroup;
                 }
                 else
                 {
-                    Debug.LogWarning($"stage: this slot is busy by {QuestsGroups[qg.GroupQuestInfo.QuestStageIndex].name} " +
-                        $"we try put here {qg.GroupQuestInfo.QuestStageIndex} {qg.name}", qg);
+                    Debug.LogError($"stage: this slot is busy by {QuestsGroups[questGroup.GroupQuestInfo.QuestGroupIndex].name} " +
+                        $"we try put here {questGroup.GroupQuestInfo.QuestGroupIndex} {questGroup.name}", questGroup);
                     return false;
                 }
             }
@@ -61,6 +71,12 @@ namespace Components
 
             foreach (var q in QuestsGroups)
             {
+                if (q == null)
+                {
+                    Debug.LogError($"stage: we have null group at here ", this);
+                    return false;
+                }
+
                 if (q.QuestDatas.Length == 0)
                 {
                     Debug.LogWarning($"stage: we dont have quests in group in {q.name}", q);
@@ -71,5 +87,12 @@ namespace Components
             return true;
         }
         #endregion
+    }
+
+    [Serializable]
+    public struct QuestStageInfo
+    {
+        public int QuestStageIndex;
+        public int QuestsHolderIndex;
     }
 }

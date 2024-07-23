@@ -17,19 +17,19 @@ namespace Components
         [Button]
         public bool IsValid()
         {
-            var items = new SOProvider<QuestStage>().GetCollection().Where(x => x.QuestsHolderIndex == QuestsHolderIndex).ToArray();
+            var items = new SOProvider<QuestStage>().GetCollection().Where(x => x.QuestStageInfo.QuestsHolderIndex == QuestsHolderIndex).ToArray();
 
             QuestStages = new QuestStage[items.Length];
 
             foreach (var item in items)
             {
-                if (QuestStages[item.QuestStageIndex] == null)
+                if (QuestStages[item.QuestStageInfo.QuestStageIndex] == null)
                 {
-                    QuestStages[item.QuestStageIndex] = item;
+                    QuestStages[item.QuestStageInfo.QuestStageIndex] = item;
                 }
                 else
                 {
-                    Debug.LogWarning($"this slot is busy by {QuestStages[item.QuestStageIndex].name} we try put here {item.QuestStageIndex} {item.name}", item);
+                    Debug.LogWarning($"this slot is busy by {QuestStages[item.QuestStageInfo.QuestStageIndex].name} we try put here {item.QuestStageInfo.QuestStageIndex} {item.name}", item);
                     return false;
                 }
             }

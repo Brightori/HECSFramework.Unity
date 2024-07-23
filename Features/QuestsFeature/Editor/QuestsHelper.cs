@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Components;
@@ -9,6 +10,7 @@ using HECSFramework.Unity.Helpers;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using UnityEditor;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 [Documentation(Doc.HECS, Doc.Quests, Doc.Editor, "this ")]
@@ -37,6 +39,7 @@ public class QuestsHelper : OdinEditorWindow
         {
             ProcessQuest(quest);
             ProccessGroups(quest);
+            ProcessStages(quest);
         }
 
         new SOProvider<QuestData>().GetCollection().ForEach((x) => { x.IsValid(); EditorUtility.SetDirty(x); });
@@ -46,8 +49,63 @@ public class QuestsHelper : OdinEditorWindow
         AssetDatabase.SaveAssets();
     }
 
+    [MenuItem("HECS Options/Helpers/Quests/CleanQuestDatas", priority = 11)]
+    public static void CleanQuestData()
+    {
+        var quests = new SOProvider<QuestData>().GetCollection().ToArray();
+
+        foreach (var quest in quests)
+        {
+            var path = AssetDatabase.GUIDToAssetPath(quest.QuestContainer.AssetGUID);
+            var container = AssetDatabase.LoadAssetAtPath<EntityContainer>(path);
+
+            if (container.TryGetComponent(out QuestInfoComponent questInfoComponent))
+            {
+                if (quest.QuestDataInfo.Equals(questInfoComponent.QuestDataInfo))
+                {
+                    continue;
+                }
+
+                var pathQuest = AssetDatabase.GetAssetPath(quest);
+                AssetDatabase.DeleteAsset(pathQuest);
+            }
+        }
+
+        var groups = new SOProvider<QuestGroup>().GetCollection().ToArray();
+
+        foreach (var group in groups)
+        {
+            if (group.QuestDatas.Length == 0 && group.Predicates.Length == 0)
+            {
+                AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(group));
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+    }
 
 
+    private static void ProcessStages(EntityContainer container)
+    {
+        if (!container.TryGetBaseComponent(out QuestInfoComponent questInfoComponent))
+            return;
+
+        var fileName = $"{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_" +
+          $"{questInfoComponent.QuestDataInfo.QuestStageIndex}_" +
+          $"QuestStage.asset";
+
+        if (File.Exists(QuestStagesPath + fileName))
+            return;
+
+        var assetDBPath = (QuestStagesPath + fileName).Replace(InstallHECS.DataPath, "Assets/").Replace("//", "/");
+        var newData = ScriptableObject.CreateInstance<QuestStage>();
+
+        newData.QuestStageInfo.QuestsHolderIndex = questInfoComponent.QuestDataInfo.QuestsHolderIndex;
+        newData.QuestStageInfo.QuestStageIndex = questInfoComponent.QuestDataInfo.QuestStageIndex;
+
+        AssetDatabase.CreateAsset(newData, assetDBPath);
+        AddressablesHelpers.SetAddressableGroup(newData, "QuestsStages");
+    }
 
     private static void ProcessQuest(EntityContainer quest)
     {
@@ -70,8 +128,8 @@ public class QuestsHelper : OdinEditorWindow
         if (File.Exists(QuestDatasPath + fileName))
         {
             var data = AssetDatabase.LoadAssetAtPath<QuestData>(assetDBPath);
-            AddressablesHelpers.SetAddressableGroup(entityContainer, $"Quests_{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_{questInfoComponent.QuestDataInfo.QuestStageIndex}");
-            AddressablesHelpers.SetAddressableGroup(data, $"QuestsDatas_{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_{questInfoComponent.QuestDataInfo.QuestStageIndex}");
+            SetGroup(entityContainer, questInfoComponent);
+            SetGroup(data, questInfoComponent);
 
             data.Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(entityContainer.GetComponent<PredicatesComponent>(), "predicatesBP");
             questInfoComponent.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
@@ -86,7 +144,7 @@ public class QuestsHelper : OdinEditorWindow
         newData.QuestDataInfo = questInfoComponent.QuestDataInfo;
         newData.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
 
-        AddressablesHelpers.SetAddressableGroup(entityContainer, $"Quests_{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_{questInfoComponent.QuestDataInfo.QuestStageIndex}");
+        SetGroup(entityContainer, questInfoComponent);
 
         newData.QuestContainer = new UnityEngine.AddressableAssets.AssetReference(AddressablesHelpers.GetGuidOfObject(entityContainer));
         newData.Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(entityContainer.GetComponent<PredicatesComponent>(), "predicatesBP");
@@ -95,7 +153,7 @@ public class QuestsHelper : OdinEditorWindow
         EditorUtility.SetDirty(entityContainer.GetComponentBluePrint(IndexGenerator.GetIndexForType(typeof(QuestInfoComponent))));
 
         AssetDatabase.CreateAsset(newData, assetDBPath);
-        AddressablesHelpers.SetAddressableGroup(newData, $"QuestsDatas_{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_{questInfoComponent.QuestDataInfo.QuestStageIndex}");
+        SetGroup(newData, questInfoComponent);
     }
 
     private static void ProccessGroups(EntityContainer container)
@@ -114,12 +172,17 @@ public class QuestsHelper : OdinEditorWindow
 
         var assetDBPath = (QuestGroupsPath + fileName).Replace(InstallHECS.DataPath, "Assets/").Replace("//", "/");
         var newData = ScriptableObject.CreateInstance<QuestGroup>();
-        
+
         newData.GroupQuestInfo.QuestsHolderIndex = questInfoComponent.QuestDataInfo.QuestsHolderIndex;
         newData.GroupQuestInfo.QuestStageIndex = questInfoComponent.QuestDataInfo.QuestStageIndex;
         newData.GroupQuestInfo.QuestGroupIndex = questInfoComponent.QuestDataInfo.QuestGroupIndex;
-        
+
         AssetDatabase.CreateAsset(newData, assetDBPath);
+        SetGroup(newData, questInfoComponent);
+    }
+
+    private static void SetGroup(UnityEngine.Object newData, QuestInfoComponent questInfoComponent)
+    {
         AddressablesHelpers.SetAddressableGroup(newData, $"QuestsGroups_{questInfoComponent.QuestDataInfo.QuestsHolderIndex}_{questInfoComponent.QuestDataInfo.QuestStageIndex}");
     }
 }
