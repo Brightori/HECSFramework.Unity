@@ -13,6 +13,7 @@ public class QuestData : ScriptableObject, IValidate
 {
     public QuestDataInfo QuestDataInfo;
 
+    public RequiredQuest[] RequiredQuestsForStart = Array.Empty<RequiredQuest>();
     public PredicateBluePrint[] Predicates = new PredicateBluePrint[0];
     public AssetReference QuestContainer;
 

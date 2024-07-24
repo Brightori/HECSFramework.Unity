@@ -131,6 +131,7 @@ public class QuestsHelper : OdinEditorWindow
             SetGroup(entityContainer, questInfoComponent);
             SetGroup(data, questInfoComponent);
 
+            data.RequiredQuestsForStart = questInfoComponent.RequiredQuestsForStart;
             data.Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(entityContainer.GetComponent<PredicatesComponent>(), "predicatesBP");
             questInfoComponent.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
 
@@ -148,6 +149,7 @@ public class QuestsHelper : OdinEditorWindow
 
         newData.QuestContainer = new UnityEngine.AddressableAssets.AssetReference(AddressablesHelpers.GetGuidOfObject(entityContainer));
         newData.Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(entityContainer.GetComponent<PredicatesComponent>(), "predicatesBP");
+        newData.RequiredQuestsForStart = questInfoComponent.RequiredQuestsForStart;
 
         questInfoComponent.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
         EditorUtility.SetDirty(entityContainer.GetComponentBluePrint(IndexGenerator.GetIndexForType(typeof(QuestInfoComponent))));
