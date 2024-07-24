@@ -43,7 +43,7 @@ namespace Components
         private void Updated(InputAction.CallbackContext obj)
         {
             isPressed = true;
-            OnPerformed?.Invoke(index,obj);
+            //OnPerformed?.Invoke(index,obj);
             cachedForUpdate = obj;
         }
 
