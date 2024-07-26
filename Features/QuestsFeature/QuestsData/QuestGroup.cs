@@ -1,6 +1,7 @@
 ﻿using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
+using MessagePack;
 using Sirenix.OdinInspector;
 using System;
 using System.Linq;
@@ -28,6 +29,11 @@ namespace Components
             return true;
         }
 
+        public QuestData GetDataByContainerIndex(int containerIndex)
+        {
+            return QuestDatas.FirstOrDefault(x=> x.QuestDataInfo.QuestContainerIndex == containerIndex);
+        }
+
         [Button]
         public bool IsValid()
         {
@@ -51,10 +57,14 @@ namespace Components
     }
 
     [Serializable]
+    [MessagePackObject]
     public struct QuestGroupInfo : IEquatable<QuestGroupInfo>, IEquatable<QuestDataInfo>
     {
+        [Key(0)]
         public int QuestGroupIndex;
+        [Key(1)]
         public int QuestStageIndex;
+        [Key(2)]
         public int QuestsHolderIndex;
 
         public override bool Equals(object obj)

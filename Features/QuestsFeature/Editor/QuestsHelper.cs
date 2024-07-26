@@ -79,6 +79,8 @@ public class QuestsHelper : OdinEditorWindow
             {
                 AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(group));
             }
+
+            group.IsValid();
         }
 
         AssetDatabase.SaveAssets();

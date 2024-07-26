@@ -10,7 +10,7 @@ namespace Components
     [Serializable]
     [Feature(Doc.Quests)]
     [Documentation(Doc.Quests, Doc.HECS, "this is main component, holder for all quests data")]
-    public sealed class QuestsHolderComponent : BaseComponent, IValidate
+    public sealed class QuestsHolderComponent : BaseComponent, IValidate, IWorldSingleComponent
     {
         [SerializeField]
         private AssetReference QuestsHolderBluePrintReference;

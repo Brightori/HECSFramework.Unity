@@ -1,6 +1,7 @@
 ﻿using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
+using MessagePack;
 using Sirenix.OdinInspector;
 using System;
 using System.Linq;
@@ -90,9 +91,30 @@ namespace Components
     }
 
     [Serializable]
-    public struct QuestStageInfo
+    [MessagePackObject]
+    public struct QuestStageInfo : IEquatable<QuestStageInfo>
     {
+        [Key(0)]
         public int QuestStageIndex;
+        [Key(1)]
         public int QuestsHolderIndex;
+
+        public override bool Equals(object obj)
+        {
+            return obj is QuestStageInfo info &&
+                   QuestStageIndex == info.QuestStageIndex &&
+                   QuestsHolderIndex == info.QuestsHolderIndex;
+        }
+
+        public bool Equals(QuestStageInfo info)
+        {
+            return  QuestStageIndex == info.QuestStageIndex &&
+                    QuestsHolderIndex == info.QuestsHolderIndex;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(QuestStageIndex, QuestsHolderIndex);
+        }
     }
 }

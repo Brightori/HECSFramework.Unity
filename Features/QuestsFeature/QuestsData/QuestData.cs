@@ -1,8 +1,10 @@
 using System;
 using Components;
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using HECSFramework.Core.Helpers;
 using HECSFramework.Unity;
+using MessagePack;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -16,6 +18,11 @@ public class QuestData : ScriptableObject, IValidate
     public RequiredQuest[] RequiredQuestsForStart = Array.Empty<RequiredQuest>();
     public PredicateBluePrint[] Predicates = new PredicateBluePrint[0];
     public AssetReference QuestContainer;
+
+    public async UniTask<EntityContainer> GetContainer()
+    {
+        return await Addressables.LoadAssetAsync<EntityContainer>(QuestContainer);
+    }
 
     public bool IsValid()
     {
@@ -48,13 +55,18 @@ public class QuestData : ScriptableObject, IValidate
 }
 
 [Serializable]
+[MessagePackObject]
 public struct QuestDataInfo : IEquatable<QuestDataInfo>
 {
+    [Key(0)]
     public int QuestsHolderIndex;
+    [Key(1)]
     public int QuestStageIndex;
+    [Key(2)]
     public int QuestGroupIndex;
 
     [ReadOnly]
+    [Key(3)]
     public int QuestContainerIndex;
 
     public override bool Equals(object obj)
