@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace HECSFramework.Unity.Editor
 {
+    [InitializeOnLoad]
     public class ShowComponentsAndSystems : OdinEditorWindow
     {
         [ShowInInspector]
@@ -17,6 +18,17 @@ namespace HECSFramework.Unity.Editor
 
         [OdinSerialize]
         private ActorPresentation ActorPresentation;
+
+        static ShowComponentsAndSystems()
+        {
+            Actor.OpenWindow += ShowWindowFromActor;
+        }
+
+        private static void ShowWindowFromActor(Actor actor)
+        {
+            var window = GetWindow<ShowComponentsAndSystems>();
+            window.UpdateActorInfo(actor);
+        }
 
         [MenuItem("HECS Options/Debug/Show components and systems from actor")]
         public static void ShowWindow()
@@ -46,6 +58,11 @@ namespace HECSFramework.Unity.Editor
                 return;
             }
 
+            UpdateActorInfo(select);
+        }
+
+        public void UpdateActorInfo(Actor actor)
+        {
             ActorPresentation = new ActorPresentation(select.Entity);
             ActorPresentation.UpdateIfo();
         }
@@ -64,7 +81,7 @@ namespace HECSFramework.Unity.Editor
         public int EntityIndex;
 
         [ReadOnly]
-        public int WorldIndex; 
+        public int WorldIndex;
 
         [ListDrawerSettings(ShowFoldout = false, ShowPaging = false, CustomAddFunction = nameof(HandleAddingComponent), CustomRemoveElementFunction = nameof(HandleRemovingComponent))]
         public List<IComponent> Components;

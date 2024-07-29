@@ -238,5 +238,20 @@ namespace HECSFramework.Unity
         {
             return other.IsAlive() && this.IsAlive() && other.Entity.ID == Entity.ID;
         }
+
+#if UNITY_EDITOR
+        public static Action<Actor> OpenWindow;
+
+        [Button]
+        public void ShowDebugActorWindow()
+        {
+            if (Application.isPlaying)
+            {
+                OpenWindow?.Invoke(this);
+            }
+            else
+                Debug.LogError("this functionality works only in Play Mode");
+        }
+#endif
     }
 }
