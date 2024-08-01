@@ -139,12 +139,25 @@ namespace Systems
         {
             return QuestsStateComponent.ActiveQuests.Any(x => x.GetComponent<ActorContainerID>().ContainerIndex == questDataInfo.QuestContainerIndex);
         }
+
+        public void CommandGlobalReact(ForceCompleteQuestCommand command)
+        {
+            foreach (var activeQuest in QuestsStateComponent.ActiveQuests)
+            {
+                if (activeQuest.GetComponent<QuestInfoComponent>().QuestDataInfo.Equals(command.QuestDataInfo))
+                {
+                    activeQuest.Command(command);
+                    return;
+                }
+            }
+        }
     }
 
     public interface IQuestSystem : ISystem,
         IReactGlobalCommand<UpdateQuestGlobalCommand>,
         IReactGlobalCommand<QuestCompleteGlobalCommand>,
-        IReactGlobalCommand<CheckQuestsGlobalCommand>
+        IReactGlobalCommand<CheckQuestsGlobalCommand>,
+        IReactGlobalCommand<ForceCompleteQuestCommand>
     {
     }
 }

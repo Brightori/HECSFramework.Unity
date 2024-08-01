@@ -13,7 +13,7 @@ using UnityEditor;
 using UnityEditor.ShaderGraph;
 using UnityEngine;
 
-[Documentation(Doc.HECS, Doc.Quests, Doc.Editor, "this ")]
+[Documentation(Doc.HECS, Doc.Quests, Doc.Editor, "this window process and create all blueprints around quests")]
 public class QuestsHelper : OdinEditorWindow
 {
     private const string Quests = "Quests";
