@@ -1,5 +1,4 @@
 using Sirenix.OdinInspector;
-using UnityEngine;
 
 namespace Components
 {
@@ -10,32 +9,12 @@ namespace Components
         {
             get
             {
-#if UNITY_EDITOR
-
-                if (Application.isPlaying)
+                if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
                 {
-#if IdentifiersGenerated
-                    if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
-                    {
-                        return IdentifierToStringMap.IntToString[CurrentState];
-                    }
-                    else
-                    {
-                        Debug.LogError("we dont have state like this " + CurrentState.ToString());
-                        return "Wrong State";
-                    }
-#else
-
-                    return "";
-#endif
+                    return IdentifierToStringMap.IntToString[CurrentState];
                 }
-                else
-                    return "";
 
-
-#else
-                    return "";
-#endif
+                return "";
             }
         }
     }

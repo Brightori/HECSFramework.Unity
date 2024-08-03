@@ -51,4 +51,10 @@ public struct QuestDataInfo : IEquatable<QuestDataInfo>, IEquatable<QuestGroupIn
     {
         return HashCode.Combine(QuestsHolderIndex, QuestStageIndex, QuestGroupIndex, QuestContainerIndex);
     }
+
+    public override string ToString()
+    {
+        return $"QuestsHolderIndex: {QuestsHolderIndex}, QuestStageIndex: {QuestStageIndex}, " +
+            $"QuestGroupIndex {QuestGroupIndex}, QuestContainerIndex{QuestContainerIndex}";
+    }
 }

@@ -13,6 +13,25 @@ namespace Components
         public int QuestsHolderIndex;
         public QuestStage[] QuestStages;
 
+        public bool TryGetQuestData(QuestDataInfo questDataInfo, out QuestData questData)
+        {
+            questData = null;
+
+            try
+            {
+                questData = QuestStages[questDataInfo.QuestStageIndex].
+                    QuestsGroups[questDataInfo.QuestGroupIndex].
+                        QuestDatas.FirstOrDefault(x => x.QuestDataInfo.Equals(questDataInfo));
+                return questData != null;
+            }
+            catch
+            {
+                Debug.LogError("we dont have questData for " + questDataInfo.ToString());
+            }
+                
+            return false;
+        }
+
         #region Validation
         [Button]
         public bool IsValid()

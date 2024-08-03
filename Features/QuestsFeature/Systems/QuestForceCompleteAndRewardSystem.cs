@@ -20,6 +20,7 @@ namespace Systems
                 return;
 
             RewardsLocal.ExecuteRewards(new ExecuteReward { Owner = command.From, Target = command.To });
+            Owner.World.Command(new QuestCompleteGlobalCommand { Quest = Owner });
         }
 
         public override void InitSystem()

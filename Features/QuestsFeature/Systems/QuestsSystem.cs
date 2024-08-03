@@ -151,13 +151,23 @@ namespace Systems
                 }
             }
         }
+
+        public async void CommandGlobalReact(ForceStartQuestCommand command)
+        {
+           var questHolder =  await QuestsHolderComponent.GetQuestsHolder();
+            if (questHolder.TryGetQuestData(command.QuestDataInfo, out var questData))
+            {
+
+            }
+        }
     }
 
     public interface IQuestSystem : ISystem,
         IReactGlobalCommand<UpdateQuestGlobalCommand>,
         IReactGlobalCommand<QuestCompleteGlobalCommand>,
         IReactGlobalCommand<CheckQuestsGlobalCommand>,
-        IReactGlobalCommand<ForceCompleteQuestCommand>
+        IReactGlobalCommand<ForceCompleteQuestCommand>,
+        IReactGlobalCommand<ForceStartQuestCommand>
     {
     }
 }
