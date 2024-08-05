@@ -9,10 +9,12 @@ namespace Components
         {
             get
             {
+#if IdentifiersGenerated
                 if (IdentifierToStringMap.IntToString.ContainsKey(CurrentState))
                 {
                     return IdentifierToStringMap.IntToString[CurrentState];
                 }
+#endif
 
                 return "";
             }
