@@ -59,7 +59,7 @@ namespace Systems
 
         private void CompleteStage(QuestStage questStage)
         {
-            if (questStage.QuestsGroups.All(x=> QuestsHistoryComponent.CompletedGroups.Contains(x.GroupQuestInfo)))
+            if (questStage.QuestsGroups.All(x => QuestsHistoryComponent.CompletedGroups.Contains(x.GroupQuestInfo)))
             {
                 foreach (var questGroup in questStage.QuestsGroups)
                 {
@@ -126,12 +126,34 @@ namespace Systems
                         if (QuestsHistoryComponent.CompletedQuests.Contains(q.QuestDataInfo) || IsActiveQuest(q.QuestDataInfo))
                             continue;
 
-                        var container = await q.GetContainer();
-                        var quest = container.GetEntity();
-                        quest.Init();
-                        quest.Command(new StartQuestCommand());
+                        StartQuest(q);
                     }
                 }
+            }
+        }
+
+        private async void StartQuest(QuestData questData, bool addCompleteInfo = false)
+        {
+            var container = await questData.GetContainer();
+            var quest = container.GetEntity().Init();
+            quest.Command(new StartQuestCommand());
+            QuestsStateComponent.ActiveQuests.Add(quest);
+
+            if (addCompleteInfo)
+            {
+                var info = quest.GetComponent<QuestInfoComponent>().QuestDataInfo;
+                QuestsStateComponent.ActiveStages.Add(new QuestStageInfo
+                {
+                    QuestsHolderIndex = info.QuestsHolderIndex,
+                    QuestStageIndex = info.QuestStageIndex
+                });
+                
+                QuestsStateComponent.ActiveGroups.Add(new QuestGroupInfo
+                {
+                    QuestsHolderIndex = info.QuestsHolderIndex,
+                    QuestStageIndex = info.QuestStageIndex,
+                    QuestGroupIndex = info.QuestGroupIndex
+                });
             }
         }
 
@@ -154,10 +176,13 @@ namespace Systems
 
         public async void CommandGlobalReact(ForceStartQuestCommand command)
         {
-           var questHolder =  await QuestsHolderComponent.GetQuestsHolder();
+            var questHolder = await QuestsHolderComponent.GetQuestsHolder();
             if (questHolder.TryGetQuestData(command.QuestDataInfo, out var questData))
             {
+                if (IsActiveQuest(questData.QuestDataInfo))
+                    return;
 
+                StartQuest(questData, true);
             }
         }
     }
