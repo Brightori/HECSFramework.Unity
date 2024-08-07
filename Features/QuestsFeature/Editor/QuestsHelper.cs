@@ -133,6 +133,8 @@ public class QuestsHelper : OdinEditorWindow
             SetGroup(entityContainer, questInfoComponent);
             SetGroup(data, questInfoComponent);
 
+            data.IsManualyStarted = entityContainer.IsHaveComponent<QuestManualStartTagComponent>();
+            data.QuestDataInfo = questInfoComponent.QuestDataInfo;
             data.RequiredQuestsForStart = questInfoComponent.RequiredQuestsForStart;
             data.Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(entityContainer.GetComponent<PredicatesComponent>(), "predicatesBP");
             questInfoComponent.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
@@ -146,6 +148,7 @@ public class QuestsHelper : OdinEditorWindow
         var newData = ScriptableObject.CreateInstance<QuestData>();
         newData.QuestDataInfo = questInfoComponent.QuestDataInfo;
         newData.QuestDataInfo.QuestContainerIndex = entityContainer.ContainerIndex;
+        newData.IsManualyStarted = entityContainer.IsHaveComponent<QuestManualStartTagComponent>();
 
         SetGroup(entityContainer, questInfoComponent);
 

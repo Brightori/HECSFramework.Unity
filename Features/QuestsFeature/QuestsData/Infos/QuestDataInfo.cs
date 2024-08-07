@@ -18,6 +18,19 @@ public struct QuestDataInfo : IEquatable<QuestDataInfo>, IEquatable<QuestGroupIn
     [Key(3)]
     public int QuestContainerIndex;
 
+    public static implicit operator QuestGroupInfo(QuestDataInfo info) => new QuestGroupInfo
+    {
+        QuestGroupIndex = info.QuestGroupIndex,
+        QuestsHolderIndex = info.QuestsHolderIndex,
+        QuestStageIndex = info.QuestStageIndex
+    };
+
+    public static implicit operator QuestStageInfo(QuestDataInfo info) => new QuestStageInfo
+    {
+        QuestsHolderIndex = info.QuestsHolderIndex,
+        QuestStageIndex = info.QuestStageIndex
+    };
+
     public override bool Equals(object obj)
     {
         return obj is QuestDataInfo info &&

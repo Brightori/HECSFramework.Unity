@@ -36,6 +36,7 @@ namespace Components
     [Serializable]
     public struct RequiredQuest : IValidate
     {
+        [HideInInspector]
         public QuestDataInfo QuestDataInfo;
 
         [OnValueChanged(nameof(FillQuestData))]

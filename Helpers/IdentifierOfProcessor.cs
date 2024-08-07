@@ -30,11 +30,10 @@ namespace Helpers
         
         public static IEnumerable Get(string typeName)
         {
-            var type = Type.GetType(typeName);
             var list = new ValueDropdownList<int>();
             foreach (var container in containersProvider.GetCollection())
             {
-                if(container.GetType() == type)
+                if(container.GetType().Name == typeName)
                     list.Add(container.name, container.Id);
             }
             //if return empty list, check that your identifier does not have namespace 

@@ -16,10 +16,24 @@ public class QuestData : ScriptableObject, IValidate
     public RequiredQuest[] RequiredQuestsForStart = Array.Empty<RequiredQuest>();
     public PredicateBluePrint[] Predicates = new PredicateBluePrint[0];
     public AssetReference QuestContainer;
+    public bool IsManualyStarted;
 
     public async UniTask<EntityContainer> GetContainer()
     {
         return await Addressables.LoadAssetAsync<EntityContainer>(QuestContainer);
+    }
+
+    public bool IsRequiredCompleted(Entity questManager)
+    {
+        var history = questManager.GetComponent<QuestsHistoryComponent>();
+
+        foreach (var required in RequiredQuestsForStart)
+        {
+            if (!history.IsCompletedQuest(required.QuestDataInfo))
+                return false;
+        }
+
+        return true;
     }
 
     public bool IsValid()

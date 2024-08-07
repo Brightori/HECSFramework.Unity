@@ -123,7 +123,13 @@ namespace Systems
 
                     foreach (var q in g.QuestDatas)
                     {
+                        if (q.IsManualyStarted)
+                            continue;
+
                         if (QuestsHistoryComponent.CompletedQuests.Contains(q.QuestDataInfo) || IsActiveQuest(q.QuestDataInfo))
+                            continue;
+
+                        if (!q.IsRequiredCompleted(Owner))
                             continue;
 
                         StartQuest(q);
