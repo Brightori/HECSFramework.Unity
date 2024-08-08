@@ -134,7 +134,7 @@ namespace Systems
             }
         }
 
-        public async void Warmup(AssetReference viewReference, int count)
+        public async UniTask Warmup(AssetReference viewReference, int count)
         {
             var neededHandler = Addressables.LoadAssetAsync<GameObject>(viewReference);
             var needed = await neededHandler.Task;
@@ -144,12 +144,9 @@ namespace Systems
                 var instance = MonoBehaviour.Instantiate(needed.gameObject);
                 ReleaseView(viewReference, instance).Forget();
             }
-
-            await UniTask.NextFrame();
-            Addressables.Release(neededHandler);
         }
 
-        public async void Warmup(EntityContainer entityContainer, int count)
+        public async UniTask Warmup(EntityContainer entityContainer, int count)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
             {
@@ -160,8 +157,6 @@ namespace Systems
                     var instance = MonoBehaviour.Instantiate(needed.gameObject);
                     await ReleaseView(view.ViewReference, instance.gameObject);
                 }
-
-                needed.gameObject.SetActive(false);
             }
         }
 
@@ -256,7 +251,6 @@ namespace Systems
 
             var pool = await GetPool(assetReference);
             pool.Release(gameObject);
-
         }
 
         public GameObject GetNewInstance(GameObject actor)
