@@ -211,9 +211,9 @@ namespace HECSFramework.Unity
             return Entity;
         }
 
-        public void InjectContainer(EntityContainer container, bool isAdditive = false)
+        public Entity InjectContainer(EntityContainer container, bool isAdditive = false)
         {
-            InjectContainer(container, EntityManager.Default, isAdditive);
+            return InjectContainer(container, EntityManager.Default, isAdditive);
         }
 
         public void InjectContainer(EntityContainer container, World world, bool isAdditive = false, params IComponent[] additionalComponents)
