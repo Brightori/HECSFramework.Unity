@@ -17,4 +17,14 @@ namespace HECSFramework.Unity
             return action;
         }
     }
+
+    public class AsyncActionBluePrint<T> : AsyncActionBluePrint where T : IAsyncAction, new()
+    {
+        [SerializeField] private T action = new T();
+
+        public override IAsyncAction GetAction()
+        {
+            return action;
+        }
+    }
 }
