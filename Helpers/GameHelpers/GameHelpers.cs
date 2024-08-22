@@ -19,12 +19,12 @@ namespace Systems
         /// <param name="entity"></param>
         /// <param name="exclude"></param>
         /// <returns></returns>
-        public static bool TryGetClosestEntity(Collider[] colliders, Filter mask, Vector3 fromPosition, float radius, out Entity entity, Entity exclude = null)
+        public static bool TryGetClosestEntity(Collider[] colliders, Filter mask, Vector3 fromPosition, float radius, out Entity entity, int layermask = -1, Entity exclude = null)
         {
             entity = null;
             var dist = float.MaxValue;
 
-            var amount = Physics.OverlapSphereNonAlloc(fromPosition, radius, colliders);
+            var amount = Physics.OverlapSphereNonAlloc(fromPosition, radius, colliders, layermask);
 
             for (int i = 0; i < amount; i++)
             {
