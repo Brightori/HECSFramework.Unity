@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Joystick : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class Joystick : MonoBehaviour, IPointerUpHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public float Horizontal { get { return (snapX) ? SnapFloat(input.x, AxisOptions.Horizontal) : input.x; } }
     public float Vertical { get { return (snapY) ? SnapFloat(input.y, AxisOptions.Vertical) : input.y; } }
@@ -131,7 +131,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
 
     public virtual void OnPointerUp(PointerEventData eventData)
     {
-        
+        OnEndDrag(eventData);
     }
 
     protected Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)
