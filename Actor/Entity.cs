@@ -18,7 +18,10 @@ namespace HECSFramework.Core
                 if (ContainsMask<PoolableTagComponent>())
                     this.GetComponent<ActorProviderComponent>().Actor.RemoveActorToPool();
                 else
+                {
+                    Dispose();
                     MonoBehaviour.Destroy(actorProviderComponent.Actor.gameObject);
+                }
             }
         }
     }
