@@ -18,7 +18,11 @@ namespace HECSFramework.Core
                 if (ContainsMask<PoolableTagComponent>())
                     this.GetComponent<ActorProviderComponent>().Actor.RemoveActorToPool();
                 else
+                {
+                    //in this case we should dispose entity before destroy game object, bcz we can have diff pipeline from actor for views
+                    Dispose();
                     MonoBehaviour.Destroy(actorProviderComponent.Actor.gameObject);
+                }
             }
         }
     }

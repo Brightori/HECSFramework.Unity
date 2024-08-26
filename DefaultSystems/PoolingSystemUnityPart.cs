@@ -167,19 +167,9 @@ namespace Systems
                 Debug.LogError("we dont have actor here");
                 return;
             }
-                
-
-            if (actor.TryGetHECSComponent(out PoolableViewsProviderComponent poolableViewsProviderComponent))
-            {
-                foreach (var pview in poolableViewsProviderComponent.Views)
-                {
-                    ReleaseView(pview);
-                }
-            }
 
             if (actor.TryGetHECSComponent(out ViewReferenceComponent viewReferenceComponent))
             {
-                actor.Dispose();
                 actor.transform.SetParent(null);
                 actor.gameObject.SetActive(false);
 
