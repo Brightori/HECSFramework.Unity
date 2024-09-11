@@ -211,6 +211,21 @@ namespace HECSFramework.Unity
                     parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {p.name} = {Animator.StringToHash(p.name)};"));
                     bodyOfDic.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope}{CParse.Quote}{p.name}{CParse.Quote}, {Animator.StringToHash(p.name)}{CParse.RightScope},"));
                 }
+
+                foreach (var layer in a.layers)
+                {
+                    foreach (var t in layer.stateMachine.states)
+                    {
+                        if (!string.IsNullOrEmpty(t.state.tag))
+                        {
+                            var nameOfTag = t.state.tag;
+
+                            GenerateAnimationParameterIdentifier(nameOfTag);
+                            parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {nameOfTag} = {Animator.StringToHash(nameOfTag)};"));
+                            bodyOfDic.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope}{CParse.Quote}{nameOfTag}{CParse.Quote}, {Animator.StringToHash(nameOfTag)}{CParse.RightScope},"));
+                        }
+                    }
+                }
             }
 
             if (getAnimatorStatesBody.Tree.Count > 0 && getAnimatorStatesBody.Tree.Last() is ParagraphSyntax)

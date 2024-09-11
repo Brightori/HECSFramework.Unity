@@ -7,7 +7,7 @@ namespace Systems
 {
     [Documentation(Doc.Abilities, Doc.HECS, Doc.Helpers, "this class contains some heplers usable in various object")]
     [Documentation(Doc.Abilities, Doc.HECS, Doc.Helpers, "TryGetClosestEntity return closest entity by mask and physics sphere overlap")]
-    public static class GameHelpers
+    public static class HECSPhysicHelper
     {
         /// <summary>
         /// TryGetClosestEntity return closest entity by mask and physics sphere overlap

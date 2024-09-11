@@ -54,6 +54,7 @@ namespace HECSFramework.Unity.Editor
         private static string CommandTemplate = "/83a-HECS__HECSCommand-Command.cs.txt";
         private static string AbilityTemplate = "/84a-HECS__HECSAbility-Ability.cs.txt";
         private static string ActionTemplate = "/84b-HECS__Action-Action.cs.txt";
+        private static string AsyncActionTemplate = "/84c-HECS__AsyncAction-AsyncAction.cs.txt";
         private static string PredicateTemplate = "/85a-HECS__Predicate-Predicate.cs.txt";
         private static string InterDecision = "/86a-HECS__InterDecision-InterDecision.cs.txt";
         private static string DilemmaDecision = "/87a-HECS__DilemmaDecision-DilemmaDecision.cs.txt";
@@ -218,7 +219,10 @@ namespace HECSFrameWork
                 CreatePredicateTemplate();
 
             if (!File.Exists(DataPath + ScriptTemplates + ActionTemplate))
-                CreateActionTemplate();
+                CreateActionTemplate();    
+            
+            if (!File.Exists(DataPath + ScriptTemplates + AsyncActionTemplate))
+                CreateAsyncActionTemplate();
 
             if (!File.Exists(DataPath + ScriptTemplates + InterDecision))
                 CreateInterDecisionTemplate();
@@ -352,6 +356,33 @@ namespace Components
 }";
 
             var path = (DataPath + ScriptTemplates + ActionTemplate).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
+        }
+
+        private static void CreateAsyncActionTemplate()
+        {
+            var template =
+   @"using System;
+using Cysharp.Threading.Tasks;
+using HECSFramework.Core;
+
+namespace Components
+{
+    [Serializable]
+    [Documentation(Doc.AsyncAction, """")]
+    public sealed class #SCRIPTNAME# : IAsyncAction
+    {
+        public UniTask ActionAsync(Entity to, Entity from = null)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}";
+
+            var path = (DataPath + ScriptTemplates + AsyncActionTemplate).Replace("//", "/");
             File.WriteAllText(path, template, Encoding.UTF8);
 
             path = path.Replace(Application.dataPath, "Assets");
