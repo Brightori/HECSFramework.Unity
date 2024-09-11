@@ -5,6 +5,7 @@ using HECSFramework.Core;
 
 namespace Systems
 {
+    [Feature(Doc.VisualQueue)]
     [Serializable][Documentation(Doc.VisualQueue, "this system operates visual queue, we need this queue for waiting some visual logic and start ur own ")]
     public sealed class VisualQueueGlobalSystem : BaseSystem, IReactGlobalCommand<AddComponentReactGlobalCommand<VisualQueueLockComponent>>, IReactGlobalCommand<RemoveComponentReactGlobalCommand<VisualQueueLockComponent>> 
     {

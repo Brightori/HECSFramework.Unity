@@ -37,6 +37,14 @@ namespace Components
             return new WaitForVisualQueue(this).RunJob();
         }
 
+        /// <summary>
+        /// we should use this methid when we dont want wait others but want to lock queue by our visual scenario
+        /// </summary>
+        public void AddToWaitQueue()
+        {
+            ++LockCount;
+        }
+
         public void Remove()
         {
             --LockCount;
