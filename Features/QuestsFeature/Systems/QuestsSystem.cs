@@ -187,6 +187,9 @@ namespace Systems
             {
                 if (IsActiveQuest(questData.QuestDataInfo))
                     return;
+                
+                if (QuestsHistoryComponent.IsCompletedQuest(questData.QuestDataInfo))
+                    return;
 
                 StartQuest(questData, true);
             }
