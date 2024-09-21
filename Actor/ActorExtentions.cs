@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Components;
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using Helpers;
 using Systems;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using ActorViewReference = Components.ActorViewReference;
 using Object = UnityEngine.Object;
 
 namespace HECSFramework.Unity
@@ -23,7 +23,7 @@ namespace HECSFramework.Unity
             return entity.GetComponent<ActorProviderComponent>().Actor;
         }
 
-        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent,
+        public static async UniTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent,
             Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
             var assetsService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
@@ -33,7 +33,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static async ValueTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<Actor> callBack = null)
+        public static async UniTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<Actor> callBack = null)
         {
             var actorPrfb = await GetActor(viewReferenceComponent, Vector3.zero, Quaternion.identity, null);
             callBack?.Invoke(actorPrfb);
@@ -55,7 +55,7 @@ namespace HECSFramework.Unity
             return entity;
         }
 
-        public static async ValueTask<Actor> GetActor(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<Actor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
+        public static async UniTask<Actor> GetActor(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<Actor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.CachedName;
@@ -73,7 +73,7 @@ namespace HECSFramework.Unity
             return actorPrfb;
         }
 
-        public static async ValueTask<Actor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, bool initEntity = true, Action<Actor> callBack = null, Vector3 position = new Vector3())
+        public static async UniTask<Actor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, bool initEntity = true, Action<Actor> callBack = null, Vector3 position = new Vector3())
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
             var actorID = entityContainer.CachedName;
