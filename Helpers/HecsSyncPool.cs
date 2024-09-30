@@ -8,7 +8,7 @@ namespace Helpers
     {
         private GameObject prfb;
         private Stack<T> pool = new Stack<T>(4);
-        private HECSList<T> used = new HECSList<T>();
+        public HECSList<T> Items = new HECSList<T>();
 
         public HecsSyncPool(GameObject prfb)
         {
@@ -22,14 +22,14 @@ namespace Helpers
                 if (parent)
                     result.transform.SetParent(parent);
 
-                used.Add(result);
+                Items.Add(result);
                 result.gameObject.SetActive(true);
                 return result;
             }
 
             var needed = Object.Instantiate(prfb, parent).GetComponent<T>();
 
-            used.Add(needed);
+            Items.Add(needed);
             return needed;
         }
 
@@ -40,7 +40,7 @@ namespace Helpers
                 if (parent)
                     result.transform.SetParent(parent);
 
-                used.Add(result);
+                Items.Add(result);
                 result.transform.SetPositionAndRotation(pos, quaternion);
                 result.gameObject.SetActive(true);
                 return result;
@@ -48,7 +48,7 @@ namespace Helpers
 
             var needed = Object.Instantiate(prfb, parent).GetComponent<T>();
 
-            used.Add(needed);
+            Items.Add(needed);
             return needed;
         }
 
@@ -57,23 +57,26 @@ namespace Helpers
             if (unparent)
                 value.transform.SetParent(null);
 
-            used.RemoveSwap(value);
+            Items.RemoveSwap(value);
             value.gameObject.SetActive(false);
             pool.Push(value);
         }
 
-        public void ReleaseAll()
+        public void ReleaseAll(bool unparent = false)
         {
-            foreach (var item in used)
+            foreach (var item in Items)
             {
                 if (item != null)
                 {
+                    if (unparent)
+                        item.transform.SetParent(null);
+
                     item.gameObject.SetActive(false);
                     pool.Push(item);
                 }
             }
 
-            used.Clear();
+            Items.Clear();
         }
     }
 }
