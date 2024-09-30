@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
@@ -12,7 +11,8 @@ using UnityEngine;
 namespace Components
 {
     [Feature("Quest")]
-    [Serializable][Documentation(Doc.Quests, "we indicate here position of quests in overall quest hierarchy")]
+    [Serializable]
+    [Documentation(Doc.Quests, "we indicate here position of quests in overall quest hierarchy")]
     public sealed class QuestInfoComponent : BaseComponent, IValidate
     {
         public QuestDataInfo QuestDataInfo;
@@ -27,6 +27,28 @@ namespace Components
                     Debug.LogError("we have invalid id " + item.QuestContainerIndex);
                     return false;
                 }
+            }
+
+            return true;
+        }
+    }
+
+    public static class RequiredQuestHelper
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsQuestsReady(this RequiredQuest[] requiredQuests, Entity questManager)
+        {
+            if (requiredQuests == null)
+                return false;
+
+            var history = questManager.GetComponent<QuestsHistoryComponent>();
+
+            for (int i = 0; i < requiredQuests.Length; i++)
+            {
+                ref RequiredQuest required = ref requiredQuests[i];
+                
+                if (!history.IsCompletedQuest(required.QuestDataInfo))
+                    return false;
             }
 
             return true;

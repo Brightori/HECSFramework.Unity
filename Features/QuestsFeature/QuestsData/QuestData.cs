@@ -23,18 +23,7 @@ public class QuestData : ScriptableObject, IValidate
         return await Addressables.LoadAssetAsync<EntityContainer>(QuestContainer);
     }
 
-    public bool IsRequiredCompleted(Entity questManager)
-    {
-        var history = questManager.GetComponent<QuestsHistoryComponent>();
-
-        foreach (var required in RequiredQuestsForStart)
-        {
-            if (!history.IsCompletedQuest(required.QuestDataInfo))
-                return false;
-        }
-
-        return true;
-    }
+    public bool IsRequiredCompleted(Entity questManager) => RequiredQuestsForStart.IsQuestsReady(questManager);
 
     public bool IsValid()
     {
@@ -54,7 +43,7 @@ public class QuestData : ScriptableObject, IValidate
         var path = UnityEditor.AssetDatabase.GUIDToAssetPath(QuestContainer.AssetGUID);
         var container = UnityEditor.AssetDatabase.LoadAssetAtPath<EntityContainer>(path);
         QuestDataInfo.QuestContainerIndex = container.ContainerIndex;
-        
+
         if (container.TryGetComponent(out PredicatesComponent predicatesComponent))
         {
             Predicates = ReflectionHelpers.GetPrivateFieldValue<PredicateBluePrint[]>(predicatesComponent, "predicatesBP");

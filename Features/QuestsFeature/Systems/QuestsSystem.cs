@@ -138,11 +138,11 @@ namespace Systems
             }
         }
 
-        private async void StartQuest(QuestData questData, bool addCompleteInfo = false)
+        private async void StartQuest(QuestData questData, StartQuestCommand startQuestCommand = default, bool addCompleteInfo = false)
         {
             var container = await questData.GetContainer();
             var quest = container.GetEntity().Init();
-            quest.Command(new StartQuestCommand());
+            quest.Command(startQuestCommand);
             QuestsStateComponent.ActiveQuests.Add(quest);
 
             if (addCompleteInfo)
@@ -165,7 +165,7 @@ namespace Systems
 
         private bool IsActiveQuest(QuestDataInfo questDataInfo)
         {
-            return QuestsStateComponent.ActiveQuests.Any(x => x.GetComponent<ActorContainerID>().ContainerIndex == questDataInfo.QuestContainerIndex);
+            return QuestsStateComponent.IsActiveQuest(questDataInfo);
         }
 
         public void CommandGlobalReact(ForceCompleteQuestCommand command)
@@ -191,7 +191,7 @@ namespace Systems
                 if (QuestsHistoryComponent.IsCompletedQuest(questData.QuestDataInfo))
                     return;
 
-                StartQuest(questData, true);
+                StartQuest(questData, new StartQuestCommand { From = command.From, To = command.To }, true);
             }
         }
     }

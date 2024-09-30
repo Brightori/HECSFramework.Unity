@@ -9,7 +9,7 @@ namespace Components
     [Serializable]
     [Feature(Doc.Quests)]
     [Documentation(Doc.Quests, "here we hold completed quests, if whole group was completed, we remove quests indexes from completed quests, if all groups at stage was completed, we remove their indexes from cm")]
-    public sealed partial class QuestsHistoryComponent : BaseComponent, ISavebleComponent, IDirty
+    public sealed partial class QuestsHistoryComponent : BaseComponent, ISavebleComponent, IDirty, IWorldSingleComponent
     {
         [IdentifierDropDown(nameof(CounterIdentifierContainer))]
         public int Identifier;

@@ -10,7 +10,7 @@ namespace Commands
         /// <summary>
         /// this is optional data, for cases with npc or with rewards
         /// </summary>
-        public Entity From;
-        public Entity To;
+        public AliveEntity From;
+        public AliveEntity To;
     }
 }
