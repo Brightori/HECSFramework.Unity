@@ -1,8 +1,9 @@
 using System;
-using Assets.Scripts.HECSFramework.HECS.Unity.UI.UniversalAccess;
+using System.Linq;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using Helpers;
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -98,15 +99,73 @@ namespace Components
 
             return null;
         }
-    }
-}
 
-namespace Assets.Scripts.HECSFramework.HECS.Unity.UI.UniversalAccess
-{
+
+#if UNITY_EDITOR
+        [Button]
+        public void ProcessTags()
+        {
+            var allTags = GetComponentsInChildren<UIAccessGenericTagMonoComponent>();
+
+            foreach (var tag in allTags)
+            {
+                if (tag.GetComponentInParent<UIAccessMonoComponent>() == this)
+                {
+                    switch (tag.UIAccessType)
+                    {
+                        case UIAccessType.Image:
+                            var image = tag.GetComponent<Image>();
+                            var addImage = Images.ToHashSet();
+                            addImage.Add(new AccessToIdentifier<Image> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = image });
+                            Images = addImage.ToArray();
+                            break;
+                        case UIAccessType.Button:
+                            var button = tag.GetComponent<Button>();
+                            var addButton = Buttons.ToHashSet();
+                            addButton.Add(new AccessToIdentifier<Button> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = button });
+                            Buttons = addButton.ToArray();
+                            break;
+                        case UIAccessType.Text:
+                            var text = tag.GetComponent<TextMeshProUGUI>();
+                            var addtext = TextMeshProUGUIs.ToHashSet();
+                            addtext.Add(new AccessToIdentifier<TextMeshProUGUI> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = text });
+                            TextMeshProUGUIs = addtext.ToArray();
+                            break;
+                        case UIAccessType.UIAccess:
+                            var uiAccessMonoComponent = tag.GetComponent<UIAccessMonoComponent>();
+                            var addAccess = UIAccessMonoComponents.ToHashSet();
+                            addAccess.Add(new AccessToIdentifier<UIAccessMonoComponent> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = uiAccessMonoComponent });
+                            UIAccessMonoComponents = addAccess.ToArray();
+                            break;
+                        case UIAccessType.CanvasGroup:
+                            var canvasGroup = tag.GetComponent<CanvasGroup>();
+                            var addCanvasGroup = CanvasGroups.ToHashSet();
+                            addCanvasGroup.Add(new AccessToIdentifier<CanvasGroup> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = canvasGroup });
+                            CanvasGroups = addCanvasGroup.ToArray();
+                            break;
+                    }
+
+                    UnityEditor.EditorUtility.SetDirty(this);
+                }
+            }
+        }
+    }
+#endif
+
     [Serializable]
-    public struct AccessToIdentifier<T> where T : Component
+    public struct AccessToIdentifier<T> : IEquatable<AccessToIdentifier<T>> where T : Component
     {
         public UIAccessIdentifier UIAccessIdentifier;
         public T Value;
+
+        public bool Equals(AccessToIdentifier<T> other)
+        {
+            return Value.GetInstanceID() == other.Value.GetInstanceID();
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Value);
+        }
     }
 }

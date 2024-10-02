@@ -17,7 +17,7 @@ namespace Components
         [Field(1)]
         public HashSet<QuestGroupInfo> ActiveGroups = new HashSet<QuestGroupInfo>();
         
-        public HashSet<Entity> ActiveQuests = new HashSet<Entity>();
+        public HECSList<Entity> ActiveQuests = new HECSList<Entity>();
 
         [Field(2)]
         private List<QuestDataInfo> QuestIndeces = new List<QuestDataInfo>();
@@ -63,8 +63,22 @@ namespace Components
 
         public bool IsActiveQuest(QuestDataInfo questDataInfo)
         {
-            return ActiveQuests.Any(x => x.GetComponent<ActorContainerID>()
-                .ContainerIndex == questDataInfo.QuestContainerIndex);
+            return IsActiveQuest(questDataInfo, out _);
+        }
+
+        public bool IsActiveQuest(QuestDataInfo questDataInfo, out Entity activeQuest)
+        {
+            for (int i = 0; i < ActiveQuests.Count; i++)
+            {
+                if (ActiveQuests[i].GetContainerIndex() == questDataInfo.QuestContainerIndex)
+                {
+                    activeQuest = ActiveQuests[i];
+                    return true;
+                }
+            } 
+
+            activeQuest = null;
+            return false;
         }
 
         public bool IsActiveAndReadyForManualCompleteQuest(QuestDataInfo questDataInfo)

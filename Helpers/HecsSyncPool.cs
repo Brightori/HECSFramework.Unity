@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Helpers
 {
-    public class HecsSyncPool<T> where T : Component
+    public class HECSSyncPool<T> where T : Component
     {
         private GameObject prfb;
         private Stack<T> pool = new Stack<T>(4);
         public HECSList<T> Items = new HECSList<T>();
 
-        public HecsSyncPool(GameObject prfb)
+        public HECSSyncPool(GameObject prfb)
         {
             this.prfb = prfb;
         }

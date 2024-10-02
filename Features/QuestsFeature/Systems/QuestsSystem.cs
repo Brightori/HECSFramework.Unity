@@ -36,11 +36,11 @@ namespace Systems
 
         public async void CommandGlobalReact(QuestCompleteGlobalCommand command)
         {
-            this.QuestsStateComponent.ActiveQuests.Remove(command.Quest);
+            this.QuestsStateComponent.ActiveQuests.RemoveSwap(command.Quest);
 
             var questDataInfo = command.Quest.GetComponent<QuestInfoComponent>().QuestDataInfo;
             QuestsHistoryComponent.CompletedQuests.Add(questDataInfo);
-            QuestsStateComponent.ActiveQuests.Remove(command.Quest);
+            QuestsStateComponent.ActiveQuests.RemoveSwap(command.Quest);
 
             var holder = await QuestsHolderComponent.GetQuestsHolder();
 
