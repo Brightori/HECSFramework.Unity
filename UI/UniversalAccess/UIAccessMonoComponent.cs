@@ -143,6 +143,12 @@ namespace Components
                             addCanvasGroup.Add(new AccessToIdentifier<CanvasGroup> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = canvasGroup });
                             CanvasGroups = addCanvasGroup.ToArray();
                             break;
+                        case UIAccessType.RectTransform:
+                            var rectTransform = tag.GetComponent<RectTransform>();
+                            var addRectTransform = RectTransforms.ToHashSet();
+                            addRectTransform.Add(new AccessToIdentifier<RectTransform> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = rectTransform });
+                            RectTransforms = addRectTransform.ToArray();
+                            break;
                     }
 
                     UnityEditor.EditorUtility.SetDirty(this);
