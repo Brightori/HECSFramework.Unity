@@ -16,8 +16,8 @@ namespace Components
         public HashSet<QuestStageInfo> ActiveStages = new HashSet<QuestStageInfo>();
         [Field(1)]
         public HashSet<QuestGroupInfo> ActiveGroups = new HashSet<QuestGroupInfo>();
-        
-        public HECSList<Entity> ActiveQuests = new HECSList<Entity>();
+
+        public HashSet<Entity> ActiveQuests = new HashSet<Entity>();
 
         [Field(2)]
         private List<QuestDataInfo> QuestIndeces = new List<QuestDataInfo>();
@@ -56,7 +56,7 @@ namespace Components
             {
                 if (q.ContainsMask<RunTimeQuestTagComponent>())
                     continue;
-                
+
                 QuestIndeces.Add(q.GetComponent<QuestInfoComponent>().QuestDataInfo);
             }
         }
@@ -68,14 +68,14 @@ namespace Components
 
         public bool IsActiveQuest(QuestDataInfo questDataInfo, out Entity activeQuest)
         {
-            for (int i = 0; i < ActiveQuests.Count; i++)
+            foreach (var q in ActiveQuests)
             {
-                if (ActiveQuests[i].GetContainerIndex() == questDataInfo.QuestContainerIndex)
+                if (q.GetContainerIndex() == questDataInfo.QuestContainerIndex)
                 {
-                    activeQuest = ActiveQuests[i];
+                    activeQuest = q;
                     return true;
                 }
-            } 
+            }
 
             activeQuest = null;
             return false;
@@ -83,8 +83,14 @@ namespace Components
 
         public bool IsActiveAndReadyForManualCompleteQuest(QuestDataInfo questDataInfo)
         {
-            return ActiveQuests.Any(x => x.GetComponent<ActorContainerID>()
-               .ContainerIndex == questDataInfo.QuestContainerIndex && x.ContainsMask<QuestCompletedTagComponent>());
+            foreach (var q in ActiveQuests)
+            {
+                if (q.GetContainerIndex() == questDataInfo.QuestContainerIndex &&
+                        q.ContainsMask<QuestCompletedTagComponent>())
+                    return true;
+            }
+
+            return false;
         }
     }
 }

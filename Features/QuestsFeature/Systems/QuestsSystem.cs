@@ -36,11 +36,9 @@ namespace Systems
 
         public async void CommandGlobalReact(QuestCompleteGlobalCommand command)
         {
-            this.QuestsStateComponent.ActiveQuests.RemoveSwap(command.Quest);
-
+            QuestsStateComponent.ActiveQuests.Remove(command.Quest);
             var questDataInfo = command.Quest.GetComponent<QuestInfoComponent>().QuestDataInfo;
             QuestsHistoryComponent.CompletedQuests.Add(questDataInfo);
-            QuestsStateComponent.ActiveQuests.RemoveSwap(command.Quest);
 
             var holder = await QuestsHolderComponent.GetQuestsHolder();
 
@@ -55,6 +53,7 @@ namespace Systems
 
             CompleteStage(holder.QuestStages[questDataInfo.QuestStageIndex]);
             command.Quest.HECSDestroyEndOfFrame();
+            Owner.World.Command(new CheckQuestsGlobalCommand());
         }
 
         private void CompleteStage(QuestStage questStage)
@@ -142,7 +141,6 @@ namespace Systems
         {
             var container = await questData.GetContainer();
             var quest = container.GetEntity().Init();
-            quest.Command(startQuestCommand);
             QuestsStateComponent.ActiveQuests.Add(quest);
 
             if (addCompleteInfo)
@@ -161,6 +159,11 @@ namespace Systems
                     QuestGroupIndex = info.QuestGroupIndex
                 });
             }
+
+            quest.Command(startQuestCommand);
+
+            if (quest.IsAlive())
+                Owner.World.Command(new AfterCommand<StartQuestCommand>());
         }
 
         private bool IsActiveQuest(QuestDataInfo questDataInfo)
@@ -178,6 +181,8 @@ namespace Systems
                     return;
                 }
             }
+
+            Owner.World.Command(new CheckQuestsGlobalCommand());
         }
 
         public async void CommandGlobalReact(ForceStartQuestCommand command)
