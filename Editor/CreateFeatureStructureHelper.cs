@@ -27,6 +27,8 @@ public class CreateFeatureStructureHelper : OdinEditorWindow
         InstallHECS.CheckFolder(path + "Commands/");
         InstallHECS.CheckFolder(path + "Actions/");
         InstallHECS.CheckFolder(path + "Identifiers/");
+        InstallHECS.CheckFolder(path + "Content/");
+        InstallHECS.CheckFolder(path + "Containers/");
         AssetDatabase.Refresh();
     }
 }
