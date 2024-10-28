@@ -2,7 +2,7 @@ using HECSFramework.Core;
 using UnityEngine;
 
 [Documentation(Doc.Poolable, Doc.FX, Doc.Visual, "We tagging poolable fx with this component")]
-public class EnableFxComponent : MonoBehaviour, IStartOnPooling, IStopOnPooling
+public class EnableFxOnPoolingComponent : MonoBehaviour, IStartOnPooling, IStopOnPooling
 {
     public enum ObjectsToEnable { ParticlesOnly, ParticlesAndAnimationClip, AnimationClipOnly }
     
