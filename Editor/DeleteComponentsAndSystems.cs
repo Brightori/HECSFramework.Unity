@@ -77,6 +77,9 @@ public class DeleteComponentsAndSystems : OdinEditorWindow
                 {
                     foreach (var systemBP in c.Systems)
                     {
+                        if (systemBP == null || systemBP.GetSystem == null)
+                            continue;
+
                         if (systemBP.GetSystem.GetType() == sys)
                         {
                             c.Systems.Remove(systemBP);
