@@ -1,26 +1,20 @@
+using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using Systems;
 using UnityEngine;
 
-public class RemoveToPoolAfterDelay : MonoBehaviour, IStartOnPooling
+namespace Components
 {
-
-    [SerializeField] private float delay = 4;
-    private float currentDelay;
-
-    public void Start()
+    [Documentation(Doc.Visual, "Return to pool after delay")]
+    public class RemoveToPoolAfterDelay : MonoBehaviour, IStartOnPooling
     {
-        currentDelay = delay;
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (currentDelay <= 0)
+        [SerializeField] private float delay = 4;
+
+        public async void Start()
         {
+            await UniTask.Delay(delay.ToMilliseconds());
             EntityManager.GetSingleSystem<PoolingSystem>().ReleaseView(gameObject);
         }
-        else
-            currentDelay -= Time.deltaTime;
     }
 }
