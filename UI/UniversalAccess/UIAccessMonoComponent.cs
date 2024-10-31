@@ -155,8 +155,8 @@ namespace Components
                 }
             }
         }
-    }
 #endif
+    }
 
     [Serializable]
     public struct AccessToIdentifier<T> : IEquatable<AccessToIdentifier<T>> where T : Component
