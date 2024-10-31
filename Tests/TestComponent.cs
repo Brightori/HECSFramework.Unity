@@ -16,6 +16,7 @@ namespace Components
 
         public override void Init()
         {
+            base.Init();
             InitCount++;
         }
 

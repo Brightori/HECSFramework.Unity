@@ -363,7 +363,6 @@ internal class CountersTests
         Assert.IsTrue(check.GetCalculatedValue() == 9);
     }
 
-
     [Test]
     public void TestAddSubtractModifier()
     {
@@ -399,5 +398,38 @@ internal class CountersTests
         });
 
         Assert.IsTrue(check.GetCalculatedValue() == 2);
+    }
+
+    [Test]
+    public void TestRemoveFloatModifier()
+    {
+        var check = new ModifiersFloatContainer();
+
+        check.SetBaseValue(2);
+
+        check.AddModifier(Guid.NewGuid(), new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 2,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        });
+
+        var guid = Guid.NewGuid();
+
+        var modifier = new DefaultFloatModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 2,
+            GetModifierType = ModifierValueType.Value,
+            ID = 1,
+            ModifierGuid = Guid.NewGuid(),
+        };
+
+        check.AddModifier(guid, modifier);
+
+        check.RemoveModifier(guid);
+        Assert.IsTrue(check.GetCalculatedValue() == 4);
     }
 }
