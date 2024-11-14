@@ -58,6 +58,10 @@ public class HECSPool<TContainer> : IDisposable, IHECSPool
             return;
         }
 
+        foreach (var g in queue)
+            if (g == pooledObj)
+                return;
+
         queue.Enqueue(pooledObj);
     }
 }

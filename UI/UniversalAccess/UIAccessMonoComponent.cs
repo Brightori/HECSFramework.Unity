@@ -19,7 +19,7 @@ namespace Components
         public AccessToIdentifier<CanvasGroup>[] CanvasGroups = new AccessToIdentifier<CanvasGroup>[0];
         public AccessToIdentifier<RectTransform>[] RectTransforms = new AccessToIdentifier<RectTransform>[0];
         public AccessToIdentifier<TextMeshProUGUI>[] TextMeshProUGUIs = new AccessToIdentifier<TextMeshProUGUI>[0];
-        public AccessToIdentifier<MonoBehaviour>[] GenericAccess = new AccessToIdentifier<MonoBehaviour>[0];
+        public AccessToIdentifier<Transform>[] GenericAccess = new AccessToIdentifier<Transform>[0];
         public AccessToIdentifier<UIAccessMonoComponent>[] UIAccessMonoComponents = new AccessToIdentifier<UIAccessMonoComponent>[0];
 
         public Image GetImage(int id) => Get(id, Images);
@@ -148,6 +148,12 @@ namespace Components
                             var addRectTransform = RectTransforms.ToHashSet();
                             addRectTransform.Add(new AccessToIdentifier<RectTransform> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = rectTransform });
                             RectTransforms = addRectTransform.ToArray();
+                            break;
+                        case UIAccessType.Generic:
+                            var obj = tag.GetComponent<Transform>();
+                            var generics = GenericAccess.ToHashSet();
+                            generics.Add(new AccessToIdentifier<Transform> { UIAccessIdentifier = tag.UIAccessIdentifier, Value = obj });
+                            GenericAccess = generics.ToArray();
                             break;
                     }
 
