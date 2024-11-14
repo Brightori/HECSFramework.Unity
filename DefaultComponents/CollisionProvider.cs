@@ -19,6 +19,15 @@ namespace Components
                 Actor = GetComponentInParent<Actor>();
         }
 
+        public void StartOnPooling()
+        {
+            if (Actor == null)
+                Actor = GetComponent<Actor>();
+
+            if (Actor == null)
+                Actor = GetComponentInParent<Actor>();
+        }
+
         private void OnCollisionEnter(Collision collision)
         {
             if (Actor.IsAlive())
