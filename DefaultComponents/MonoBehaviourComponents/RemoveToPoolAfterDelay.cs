@@ -11,7 +11,7 @@ namespace Components
 
         [SerializeField] private float delay = 4;
 
-        public async void Start()
+        public async void StartOnPooling()
         {
             await UniTask.Delay(delay.ToMilliseconds());
             EntityManager.GetSingleSystem<PoolingSystem>().ReleaseView(gameObject);

@@ -29,7 +29,7 @@ namespace Components
         public void StartOnPooling()
         {
             foreach(var sp in startOnPoolings)
-                sp.Start();
+                sp.StartOnPooling();
         }
 
         public override void AfterInit()

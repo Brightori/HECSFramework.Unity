@@ -17,7 +17,7 @@ public class EnableFxOnPoolingComponent : MonoBehaviour, IStartOnPooling, IStopO
         particleSystems = GetComponentsInChildren<ParticleSystem>();
     }
 
-    public void Start()
+    public void StartOnPooling()
     {
         switch (objectsToEnable)
         {

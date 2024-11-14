@@ -27,7 +27,7 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
         var needForStart = GetComponentsInChildren<IStartOnPooling>();
 
         foreach (var needed in needForStart)
-            needed.Start();
+            needed.StartOnPooling();
     }
 }
 
@@ -38,7 +38,7 @@ public interface IStopOnPooling
 
 public interface IStartOnPooling
 {
-    void Start();
+    void StartOnPooling();
 }
 
 public interface IPoolableView
