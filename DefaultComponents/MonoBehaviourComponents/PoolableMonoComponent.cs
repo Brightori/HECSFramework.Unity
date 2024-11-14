@@ -14,7 +14,7 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 
     public AssetReference AssetRef => AssetReference;
 
-    public void Stop()
+    void IPoolableView.Stop()
     {
         var needForStop = GetComponentsInChildren<IStopOnPooling>();
 
@@ -22,7 +22,7 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
             needed.Stop();
     }
 
-    public void Start()
+    void IPoolableView.Start()
     {
         var needForStart = GetComponentsInChildren<IStartOnPooling>();
 
