@@ -1,5 +1,6 @@
 ﻿using Components;
 using HECSFramework.Core;
+using HECSFramework.Unity;
 using Helpers;
 using UnityEngine;
 
@@ -76,6 +77,25 @@ namespace Systems
             }
 
             return entity != null;
+        }
+
+        public static int BoxRayCast(Vector3 center, Vector3 halfExtents, Vector3 direction, HECSList<Actor> targets, Filter filter, RaycastHit[] results, Quaternion orientation, float maxDistance, int layerMask)
+        {
+            targets.ClearFast();
+            var result = Physics.BoxCastNonAlloc(center, halfExtents, direction, results, orientation, maxDistance, layerMask);
+
+            for (int i = 0; i < result; i++)
+            {
+                if (results[i].collider.TryGetActorFromCollision(out var actor))
+                {
+                    if (actor.Entity.ContainsMask(filter))
+                        targets.Add(actor);
+                    else if (filter.Lenght == 0)
+                        targets.Add(actor);
+                }
+            }
+
+            return result;
         }
     }
 }
