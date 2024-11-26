@@ -17,6 +17,7 @@ namespace HECSFramework.Unity.Editor
         private static string AdditionalAbilitiesIdentifiers = "/AdditionalAbilitiesIdentifiers/";
         private static string Actors = "/Actors/";
         public static string BluePrints = "/BluePrints/";
+        public static string GameStateIdentifiers = "/GameStateIdentifiers/";
         private static string Predicates = "/Predicates/";
         private static string Commands = "/Commands/";
         private static string Components = "/Components/";
@@ -178,6 +179,9 @@ namespace HECSFrameWork
             CheckFolder(DataPath + BluePrints + History + AddressablesGroupsHistory);
             CheckFolder(DataPath + BluePrints + Identifiers + AdditionalAbilitiesIdentifiers);
             CheckFolder(DataPath + BluePrints + Identifiers + "/CounterIdentifiers/");
+            CheckFolder(DataPath + BluePrints + Identifiers + GameStateIdentifiers);
+            CheckFolder(DataPath + BluePrints + Identifiers + "/UIAccessIdentifiers/");
+            CheckFolder(DataPath + BluePrints + Identifiers + "/ActionsIdentifiers/");
 
             //MonoBehaviourComponents
             CheckFolder(ScriptPath + Components + MonoBehaviourComponents);
