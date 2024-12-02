@@ -202,8 +202,8 @@ namespace HECSFramework.Unity
 
             foreach (var a in animators)
             {
-                if (SerializationAnimatorState)
-                    PutAnimatorStateCommandSyntax(getAnimatorStatesBody, a);
+                //if (SerializationAnimatorState)
+                //    PutAnimatorStateCommandSyntax(getAnimatorStatesBody, a);
 
                 foreach (var p in a.parameters)
                 {

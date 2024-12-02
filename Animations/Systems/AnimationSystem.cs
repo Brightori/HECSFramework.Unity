@@ -18,7 +18,7 @@ namespace Systems
         public void CommandReact(BoolAnimationCommand command)
         {
             if (isReady)
-                AnimatorStateComponent.State.SetBool(command.Index, command.Value, command.ForceSet);
+                AnimatorStateComponent.State.SetBool(command.Index, command.Value);
         }
         public void CommandReact(TriggerAnimationCommand command)
         {
@@ -29,13 +29,7 @@ namespace Systems
         public void CommandReact(FloatAnimationCommand command)
         {
             if (isReady)
-                AnimatorStateComponent.State.SetFloat(command.Index, command.Value, command.ForceSet);
-        }
-
-        public void CommandReact(IntAnimationCommand command)
-        {
-            if (isReady)
-                AnimatorStateComponent.State.SetInt(command.Index, command.Value, command.ForceSet);
+                AnimatorStateComponent.State.SetFloat(command.Index, command.Value);
         }
 
         protected override void InitAfterViewLocal()
@@ -50,7 +44,6 @@ namespace Systems
     public interface IAnimationSystem : ISystem,
         IReactCommand<BoolAnimationCommand>,
         IReactCommand<FloatAnimationCommand>,
-        IReactCommand<IntAnimationCommand>,
         IReactCommand<TriggerAnimationCommand>
     { }
 }
