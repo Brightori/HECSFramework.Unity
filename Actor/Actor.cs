@@ -236,7 +236,7 @@ namespace HECSFramework.Unity
         /// <returns></returns>
         public bool Equals(Actor other)
         {
-            return other.IsAlive() && this.IsAlive() && other.Entity.ID == Entity.ID;
+            return other.IsAlive() && this.IsAlive() && other.Entity.GUID == Entity.GUID;
         }
 
 #if UNITY_EDITOR

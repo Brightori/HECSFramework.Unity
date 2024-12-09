@@ -40,8 +40,14 @@ namespace Components
 
         public void Dispose()
         {
-            foreach (var e in rewards)
-                Owner.World.Command(new DestroyEntityWorldCommand { Entity = e });  
+            if (EntityManager.IsAlive)
+            {
+                if (rewards != null)
+                {
+                    foreach (var e in rewards)
+                        Owner.World.Command(new DestroyEntityWorldCommand { Entity = e });
+                }
+            }
         }
     }
 }
