@@ -7,7 +7,9 @@ namespace Systems
 {
     [Serializable]
     [Documentation(Doc.Test, Doc.HECS, "this system test components react functionality")]
-    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IAfterEntityInit,
+    public sealed class StressTestReactsSystem : BaseSystem, IReactEntity, IAfterEntityInit, 
+        IRequestProvider<StressTestReactsSystem, StressTestGlobalCommand>,
+        IRequestProvider<StressTestGlobalCommand>,
         IReactCommand<StressTestLocalCommand>, 
         IReactGlobalCommand<StressTestGlobalCommand>
     {
@@ -113,6 +115,16 @@ namespace Systems
 
         public override void InitSystem()
         {
+        }
+
+        public StressTestReactsSystem Request(StressTestGlobalCommand command)
+        {
+            return this;
+        }
+
+        public StressTestGlobalCommand Request()
+        {
+            return new StressTestGlobalCommand { Param = true };
         }
     }
 }
