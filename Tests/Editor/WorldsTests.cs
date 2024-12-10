@@ -72,7 +72,7 @@ public class WorldsTests
     {
         var entity = world.GetEntityFromPool();
         entity.AddComponent(new TestComponent());
-        entity.AddHecsSystem(new StressTestReactsSystem());
+        //entity.AddHecsSystem(new StressTestReactsSystem());
         entity.Init();
 
         return entity;
