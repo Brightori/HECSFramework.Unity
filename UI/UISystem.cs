@@ -471,6 +471,7 @@ namespace Systems
         public async UniTask<Entity> Request(ShowUICommand command)
         {
             var neededUi =  await ShowUI(command.UIViewType, command.MultyView);
+            neededUi.Command(command);
             return neededUi;
         }
     }
