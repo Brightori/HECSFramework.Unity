@@ -16,7 +16,7 @@ namespace Systems
     [Feature("UIManager")]
     [Serializable, BluePrint]
     [Documentation(Doc.UI, Doc.HECS, "This system default for operating ui at hecs, this system have command for show and hide ui plus show or hide ui groups, this system still in progress")]
-    public class UISystem : BaseSystem, IUISystem, IGlobalStart
+    public class UISystem : BaseSystem, IUISystem, IGlobalStart, IRequestProvider<UniTask<Entity>, ShowUICommand>
     {
         public const string UIBluePrints = "UIBluePrints";
 
@@ -466,6 +466,12 @@ namespace Systems
                 SpawnUIFromBluePrint(spawn, command.OnUILoad, unityTransformComponent.Transform);
             else
                 HECSDebug.LogError("we dont have unityTransform on " + neededCanvas.ID);
+        }
+
+        public async UniTask<Entity> Request(ShowUICommand command)
+        {
+            var neededUi =  await ShowUI(command.UIViewType, command.MultyView);
+            return neededUi;
         }
     }
 
