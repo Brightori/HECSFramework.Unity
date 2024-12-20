@@ -11,7 +11,7 @@ namespace Components
 
     public abstract partial class BaseActionsHolderComponent : BaseComponent 
     {
-        public ActionBPToIdentifier[] ActionBPToIdentifiers;
+        public ActionBPToIdentifier[] ActionBPToIdentifiers = Array.Empty<ActionBPToIdentifier>();
 
         public override void Init()
         {
