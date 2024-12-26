@@ -379,7 +379,7 @@ namespace Components
     [Documentation(Doc.AsyncAction, """")]
     public sealed class #SCRIPTNAME# : IAsyncAction
     {
-        public UniTask ActionAsync(Entity to, Entity from = null)
+        public UniTask ActionAsync(Entity to, Entity from = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
