@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Components;
+using Systems;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
 
@@ -15,14 +16,7 @@ namespace HECSFramework.Core
         {
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
             {
-                if (ContainsMask<PoolableTagComponent>())
-                    this.GetComponent<ActorProviderComponent>().Actor.RemoveActorToPool();
-                else
-                {
-                    //in this case we should dispose entity before destroy game object, bcz we can have diff pipeline from actor for views
-                    Dispose();
-                    MonoBehaviour.Destroy(actorProviderComponent.Actor.gameObject);
-                }
+                World.GetSingleSystem<PoolingSystem>().Release(actorProviderComponent.Actor);
             }
         }
     }

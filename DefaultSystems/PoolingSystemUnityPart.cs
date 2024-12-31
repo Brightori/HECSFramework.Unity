@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using AssetsManagement.Containers;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
@@ -18,37 +18,39 @@ namespace Systems
         public const int minPoolSize = 5;
         public const int maxPoolSize = 512;
 
-        private readonly Dictionary<string, IHECSPool> pools = new(64);
-        private readonly Dictionary<string, UniTask> poolsLoadMap = new();
-        private readonly Dictionary<string, EntityContainer> pooledContainers = new(16);
+        private readonly Dictionary<string, HECSPool> pools = new(64);
+        private Dictionary<int, HECSPool> objectIDToPool = new Dictionary<int, HECSPool>(64);
 
-        private bool IsPoolExistsFor(AssetReference assetReference)
+        private async UniTask<HECSPool> GetPool(AssetReference assetReference)
         {
-            return pools.ContainsKey(assetReference.AssetGUID) || poolsLoadMap.ContainsKey(assetReference.AssetGUID);
-        }
-        private async UniTask<IHECSPool> GetPool(AssetReference assetReference)
-        {
-            if (poolsLoadMap.TryGetValue(assetReference.AssetGUID, out var load))
-            {
-                await load;
-            }
-            else if (!pools.ContainsKey(assetReference.AssetGUID))
-            {
-                var loadingTCS = new UniTaskCompletionSource();
-                poolsLoadMap[assetReference.AssetGUID] = loadingTCS.Task.Preserve();
-                var assetService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
-                var container = await assetService.GetContainer<AssetReference, GameObject>(assetReference);
-                pools.Add(assetReference.AssetGUID, new HECSPool<IAssetContainer<GameObject>>(container, maxPoolSize));
-                poolsLoadMap.Remove(assetReference.AssetGUID);
-                loadingTCS.TrySetResult();
-            }
+        getPool:
 
+            if (pools.TryGetValue(assetReference.AssetGUID, out var pool))
+                return pool;
+
+            var assetService = EntityManager.Default.GetSingleSystem<AssetService>();
+            await assetService.GetAsset<GameObject>(assetReference, isForceRelease: true);
+            var container = AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference];
+
+            if (pools.ContainsKey(assetReference.AssetGUID))
+                goto getPool;
+
+            pools.Add(assetReference.AssetGUID, new HECSPool(container, objectIDToPool, maxPoolSize));
             return pools[assetReference.AssetGUID];
         }
-        public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true) where T : Actor
+
+        public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true, Vector3 position = default,
+            Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
             var view = await GetViewFromPool(assetReference);
-            var actor = view.GetOrAddMonoComponent<Actor>();
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                ReleaseView(view);
+                throw new OperationCanceledException("[Pooling] GetActor canceled");
+            }
+
+            var actor = view.GetOrAddMonoComponent<T>();
 
             if (actor.Entity != null)
             {
@@ -63,13 +65,15 @@ namespace Systems
             if (init)
                 actor.Init(world);
 
-            return (T)actor;
+            return actor;
         }
 
-        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, World world = null, bool init = true) where T : Actor
+        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, 
+            World world = null, bool init = true, Vector3 position = default, 
+            Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
-            var view = await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false);
+            var view = await GetActorFromPool<T>(viewReferenceComponent.ViewReference, world, false, position, rotation, parent, cancellationToken);
 
             if (init)
             {
@@ -80,10 +84,10 @@ namespace Systems
             return view;
         }
 
-        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default)
+        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default, Transform parent = default, CancellationToken cancellationToken = default)
         {
             var pool = await GetPool(assetReference);
-            var view = await pool.Get(position, rotation);
+            var view = await pool.Get(position, rotation, parent, cancellationToken);
             view.SetActive(true);
 
             if (view.TryGetComponent(out IPoolableView poolableView))
@@ -92,129 +96,52 @@ namespace Systems
             return view;
         }
 
-        public async UniTask<GameObject> GetFastViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default)
+        public async UniTask Warmup(AssetReference viewReference, int count, CancellationToken token = default)
         {
-            var pool = await GetPool(assetReference);
-            var view = await pool.Get(position, rotation);
-            view.SetActive(true);
-            return view;
-        }
-
-        public async Task<EntityContainer> GetEntityContainerFromPool(string key)
-        {
-            if (pooledContainers.TryGetValue(key, out var container))
-            {
-                return container;
-            }
-            else
-            {
-                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(key).Task;
-
-                if (pooledContainers.ContainsKey(key)) return loaded;
-
-                pooledContainers.Add(key, loaded);
-                return loaded;
-            }
-        }
-
-        public async Task<EntityContainer> GetEntityContainerFromPool(AssetReference assetReference)
-        {
-            if (pooledContainers.TryGetValue(assetReference.AssetGUID, out var container))
-            {
-                return container;
-            }
-            else
-            {
-                var loaded = await Addressables.LoadAssetAsync<EntityContainer>(assetReference).Task;
-
-                if (pooledContainers.ContainsKey(assetReference.AssetGUID)) return loaded;
-
-                pooledContainers.Add(assetReference.AssetGUID, loaded);
-                return loaded;
-            }
-        }
-
-        public async UniTask Warmup(AssetReference viewReference, int count)
-        {
-            var neededHandler = Addressables.LoadAssetAsync<GameObject>(viewReference);
-            var needed = await neededHandler.Task;
+            var neededHandler = await GetPool(viewReference);
 
             for (int i = 0; i < count; i++)
             {
-                var instance = MonoBehaviour.Instantiate(needed.gameObject);
-                ReleaseView(viewReference, instance).Forget();
+                var go = await  neededHandler.Get(default, default, null, token);
+                this.objectIDToPool[go.GetInstanceID()] = neededHandler;
+                ReleaseView(viewReference, go).Forget();
             }
         }
 
-        public async UniTask Warmup(EntityContainer entityContainer, int count)
+        public async UniTask Warmup(EntityContainer entityContainer, int count, CancellationToken token = default)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
-            {
-                var needed = await Addressables.LoadAssetAsync<GameObject>(view.ViewReference).Task;
-
-                for (int i = 0; i < count; i++)
-                {
-                    var instance = MonoBehaviour.Instantiate(needed.gameObject);
-                    await ReleaseView(view.ViewReference, instance.gameObject);
-                }
-            }
+               await Warmup(view.ViewReference, count, token); 
+            else
+                throw new InvalidOperationException("we dont have view ref on this container " + entityContainer);
         }
 
-        public async void Release(Actor actor)
+        public void Release(Actor actor)
         {
-            if (!actor.IsAlive())
-            {
-                Debug.LogError("we dont have actor here");
+            ReleaseView(actor.gameObject);
+        }
+
+        public void ReleaseView(IPoolableView poolableView)
+        {
+            ReleaseView(poolableView.View);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReleaseView(GameObject gameObject)
+        {
+            if (gameObject == null)
                 return;
-            }
 
-            if (actor.TryGetHECSComponent(out ViewReferenceComponent viewReferenceComponent))
+            if (objectIDToPool.TryGetValue(gameObject.GetInstanceID(), out var poolContainer))
             {
-                actor.transform.SetParent(null);
-                actor.gameObject.SetActive(false);
-
-                if (IsPoolExistsFor(viewReferenceComponent.ViewReference))
-                {
-                    var pool = await GetPool(viewReferenceComponent.ViewReference);
-                    pool.Release(actor.gameObject);
-                    return;
-                }
-            }
-
-            MonoBehaviour.Destroy(actor.gameObject);
-        }
-
-        public async void ReleaseView(IPoolableView poolableView)
-        {
-            poolableView.Stop();
-
-            if (IsPoolExistsFor(poolableView.AssetRef))
-            {
-                poolableView.View.transform.SetParent(null);
-                poolableView.View.SetActive(false);
-                (await GetPool(poolableView.AssetRef)).Release(poolableView.View);
+                gameObject.transform.SetParent(null);
+                gameObject.SetActive(false);
+                poolContainer.Release(gameObject);
             }
             else
             {
-                MonoBehaviour.Destroy(poolableView.View);
+                MonoBehaviour.Destroy(gameObject);
             }
-        }
-
-        public async void ReleaseView(GameObject gameObject)
-        {
-            if (gameObject.TryGetComponent(out IPoolableView poolableView))
-            {
-                poolableView.Stop();
-
-                if (IsPoolExistsFor(poolableView.AssetRef))
-                {
-                    (await GetPool(poolableView.AssetRef)).Release(gameObject);
-                    poolableView.View.transform.SetParent(null);
-                    poolableView.View.SetActive(false);
-                    return;
-                }
-            }
-            MonoBehaviour.Destroy(gameObject);
         }
 
         public async UniTask ReleaseView(AssetReference assetReference, GameObject gameObject)
@@ -241,11 +168,6 @@ namespace Systems
 
             var pool = await GetPool(assetReference);
             pool.Release(gameObject);
-        }
-
-        public GameObject GetNewInstance(GameObject actor)
-        {
-            return MonoBehaviour.Instantiate(actor);
         }
 
         public override void Dispose()

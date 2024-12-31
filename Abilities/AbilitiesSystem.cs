@@ -1,7 +1,6 @@
 ﻿using Commands;
 using Components;
 using HECSFramework.Core;
-using HECSFramework.Unity;
 
 namespace Systems
 {
@@ -17,12 +16,7 @@ namespace Systems
 
         partial void ClientInit()
         {
-            foreach (var abilityContainer in abilitiesHolderComponent.AbilitiesContainers)
-            {
-                var newAbil = abilityContainer.GetEntity(world: Owner.World);
-                newAbil.GetOrAddComponent<AbilityOwnerComponent>().AbilityOwner = Owner;
-                abilitiesHolderComponent.AddAbility(newAbil);
-            }
+            abilitiesHolderComponent.LoadDefaultAbilities();
         }
     }
 }

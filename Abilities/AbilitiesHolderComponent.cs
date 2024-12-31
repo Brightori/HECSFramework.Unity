@@ -21,9 +21,12 @@ namespace Components
         {
             foreach (var ability in AbilitiesContainers)
             {
-                var newAbility = ability.GetEntity(needInit: false);
-                newAbility.GetOrAddComponent<AbilityOwnerComponent>().AbilityOwner = Owner;
-                AddAbility(newAbility, true);
+                var newAbility = ability.GetEntity();
+
+                if (ability.IsHaveComponent<InitOnAddAbilityTagComponent>())
+                    AddAbility(newAbility, true);
+                else
+                    AddAvailableAbility(newAbility);
             }
         }
     }

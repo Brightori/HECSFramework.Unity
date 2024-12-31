@@ -44,7 +44,7 @@ namespace Systems
 
         private async void GetView(AssetReference assetReference, ViewWithRendererCallBack viewWithRendererCallBack)
         {
-            var needed = await assetReference.InstantiateAsync().Task;
+            var needed = await GetViewFromPool(assetReference);
             var pooledView = needed.GetComponent<PoolViewWithRender>();
             viewWithRendererCallBack?.Invoke(pooledView);
         }

@@ -12,7 +12,7 @@ namespace HECSFramework.Core
     {
         partial void AddUnityWorldPart(Entity worldService)
         {
-            worldService.AddHecsSystem(new AssetsServiceSystem());
+            worldService.AddHecsSystem(new AssetService());
         }
 
         partial void ComponentAdditionalProcessing(IComponent component, Entity owner, bool add)

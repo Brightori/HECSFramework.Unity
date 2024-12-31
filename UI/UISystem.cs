@@ -25,6 +25,11 @@ namespace Systems
 
         private UnityTransformComponent mainCanvasTransform;
         private List<UIBluePrint> uIBluePrints = new List<UIBluePrint>();
+
+        [Single]
+        private AssetService assetService;
+
+        [Single]
         private PoolingSystem poolingSystem;
 
         private bool isReady;
@@ -42,8 +47,6 @@ namespace Systems
 
         public void GlobalStart()
         {
-            poolingSystem = Owner.World.GetSingleSystem<PoolingSystem>();
-
             if (Owner.World.TryGetSingleComponent(out MainCanvasTagComponent mainCanvasTagComponent))
             {
                 isReady = true;
@@ -162,7 +165,7 @@ namespace Systems
 
             if (ispoolable)
             {
-                var container = await poolingSystem.GetEntityContainerFromPool(bluePrint.Container);
+                var container = await assetService.GetAsset<ActorContainer>(bluePrint.Container);
                 var uiActorFromPool = await poolingSystem.GetActorFromPool<UIActor>(container);
                 uiActorFromPool.Entity.Init();
                 uiActorFromPool.GetHECSComponent<UnityTransformComponent>().Transform.SetParent(canvas);
