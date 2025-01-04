@@ -2,6 +2,7 @@
 using Components;
 using HECSFramework.Core;
 using System;
+using UnityEngine;
 
 namespace Systems
 {
@@ -29,7 +30,7 @@ namespace Systems
         public void CommandReact(FloatAnimationCommand command)
         {
             if (isReady)
-                AnimatorStateComponent.State.SetFloat(command.Index, command.Value);
+                AnimatorStateComponent.State.SetFloat(command.Index, command.Value, Time.deltaTime, command.Damp);
         }
 
         protected override void InitAfterViewLocal()
