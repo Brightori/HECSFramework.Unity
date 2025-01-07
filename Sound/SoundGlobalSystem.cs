@@ -15,7 +15,8 @@ namespace Systems
     public sealed partial class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IReactEntity,
         IReactGlobalCommand<PlaySoundCommand>,
         IReactGlobalCommand<StopSoundCommand>,
-        IReactGlobalCommand<UpdateSoundOptionsCommand>
+        IReactGlobalCommand<UpdateSoundOptionsCommand>,
+        IReactGlobalCommand<ChangeVolumeCommand>
     {
         [SerializeField] private AudioMixerGroup audioMixerGroup;
         
@@ -208,6 +209,24 @@ namespace Systems
         public void CommandGlobalReact(UpdateSoundOptionsCommand command)
         {
             volumeComponent.IsSoundOn = command.IsSoundOn;
+        }
+
+        public void CommandGlobalReact(ChangeVolumeCommand command)
+        {
+            if (command.IsMusic)
+            {
+                volumeComponent.MusicVolume = command.Volume;
+            }
+            else
+                volumeComponent.SoundVolume = command.Volume;
+
+            foreach (var s in soundSources)
+            {
+                if (command.IsMusic && s.AudioType == SoundType.Music)
+                    s.AudioSource.volume = command.Volume;
+                else
+                    s.AudioSource.volume = command.Volume;
+            }
         }
     }
 

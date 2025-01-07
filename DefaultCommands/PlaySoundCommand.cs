@@ -20,4 +20,11 @@ namespace Commands
         public Guid Owner;
         public AudioClip Clip;
     }
+
+    [Documentation(Doc.Audio, "this command change volume on listeners")]
+    public struct ChangeVolumeCommand : IGlobalCommand
+    {
+        public bool IsMusic;
+        public float Volume;
+    }
 }
