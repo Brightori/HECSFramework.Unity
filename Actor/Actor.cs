@@ -184,8 +184,8 @@ namespace HECSFramework.Unity
             if (Entity != null && !Entity.IsDisposed)
                 Entity.Dispose();
 
+            Entity.World.GetSingleSystem<PoolingSystem>().Release(this);
             Entity = null;
-            Destroy(gameObject);
         }
 
         public void RemoveActorToPool()

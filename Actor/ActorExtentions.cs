@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Threading;
 using Components;
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
 using Helpers;
 using Systems;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
 namespace HECSFramework.Unity
@@ -24,13 +23,11 @@ namespace HECSFramework.Unity
         }
 
         public static async UniTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent,
-            Vector3 position = default, Quaternion rotation = default, Transform parent = null)
+            Vector3 position = default, Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default)
         {
-            var assetsService = EntityManager.Default.GetSingleSystem<AssetsServiceSystem>();
-            var container = await assetsService.GetContainer<AssetReference, GameObject>(viewReferenceComponent.ViewReference);
-            var actorPrfb = await container.CreateInstanceForComponent<Actor>(position, rotation, parent);
-            assetsService.ReleaseContainer(container);
-            return actorPrfb;
+            var assetsService = EntityManager.Default.GetSingleSystem<AssetService>();
+            var actorPrfb = await assetsService.GetAssetInstance(viewReferenceComponent.ViewReference, position, rotation, parent, cancellationToken: cancellationToken);
+            return actorPrfb.GetComponent<Actor>();
         }
 
         public static async UniTask<Actor> GetActor(this ViewReferenceComponent viewReferenceComponent, Action<Actor> callBack = null)
@@ -69,6 +66,26 @@ namespace HECSFramework.Unity
                 actorPrfb.Init(world, initEntity: false);
                 entityContainer.Init(actorPrfb.Entity);
             }
+            callBack?.Invoke(actorPrfb);
+            return actorPrfb;
+        }
+
+        public static async UniTask<T> GetActorFromPool<T>(this EntityContainer entityContainer, 
+            World world = null, bool needLoadContainer = true, Action<Actor> callBack = null, 
+            Vector3 position = default, Quaternion rotation = default, Transform parent = null, 
+            CancellationToken cancellationToken = default) where T: Actor
+        {
+            if (world == null)
+                world = EntityManager.Default;
+
+            var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
+            var actorID = entityContainer.CachedName;
+
+            if (viewReferenceComponent == null)
+                throw new Exception($"[Pooling] container {actorID} doesnt have viewrefence");
+
+            var actorPrfb = await world.GetSingleSystem<PoolingSystem>().GetActorFromPool<T>(entityContainer, world, needLoadContainer, position, rotation, parent, cancellationToken);
+            
             callBack?.Invoke(actorPrfb);
             return actorPrfb;
         }

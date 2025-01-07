@@ -42,10 +42,10 @@ namespace Systems
             Owner.GetOrAddComponent<PoolableViewsProviderComponent>();
             
             viewGameObject = await poolingSystem.GetViewFromPool(viewReferenceGameObject.ViewReference);
-            viewGameObject.transform.position = unityTransform.Transform.position;
-            viewGameObject.transform.rotation = unityTransform.Transform.rotation;
+
             viewGameObject.transform.SetParent(unityTransform.Transform);
             viewGameObject.transform.localPosition = Vector3.zero;
+            viewGameObject.transform.localRotation = Quaternion.identity;
             
             var injectActor = viewGameObject.GetComponentsInChildren<IHaveActor>();
             
