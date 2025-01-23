@@ -517,14 +517,17 @@ namespace Systems
             if (objectToContainer.TryGetValue(obj.GetInstanceID(), out var container))
             {
                 objectToContainer.Remove(obj.GetInstanceID());
-                container.ReleaseObject(obj);
+                var release = container.ReleaseObject(obj);
 
                 if (container.IsReleased)
                 {
                     ReleaseContainer(container);
                 }
+
+                return release;
             }
 
+            UnityEngine.Object.Destroy(obj);
             return false;
         }
 
