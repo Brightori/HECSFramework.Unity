@@ -1,8 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using Components;
+using Cysharp.Threading.Tasks;
+using HECSFramework.Unity;
 using Systems;
 using Unity.IL2CPP.CompilerServices;
-using UnityEngine;
 
 namespace HECSFramework.Core
 {
@@ -16,8 +17,14 @@ namespace HECSFramework.Core
         {
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
             {
-                World.GetSingleSystem<PoolingSystem>().Release(actorProviderComponent.Actor);
+                Release(actorProviderComponent.Actor).Forget();
             }
+        }
+
+        private async UniTaskVoid Release(Actor actor)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            World.GetSingleSystem<PoolingSystem>().Release(actor);
         }
     }
 }
