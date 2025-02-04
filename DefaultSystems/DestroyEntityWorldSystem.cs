@@ -16,7 +16,7 @@ namespace Systems
         partial void UnityInit()
         {
             poolingSystem = Owner.World.GetSingleSystem<PoolingSystem>();
-            Owner.World.GlobalUpdateSystem.PreFinishUpdate += ReactUnityPart;
+            Owner.World.GlobalUpdateSystem.FinishUpdate += ReactUnityPart;
         }
 
         private void ReactUnityPart()
@@ -30,7 +30,7 @@ namespace Systems
 
         partial void UnityDispose()
         {
-            Owner.World.GlobalUpdateSystem.PreFinishUpdate -= ReactUnityPart;
+            Owner.World.GlobalUpdateSystem.FinishUpdate -= ReactUnityPart;
         }
 
         public void CommandGlobalReact(DeleteActorCommand command)
