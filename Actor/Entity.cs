@@ -1,8 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using Commands;
 using Components;
-using Cysharp.Threading.Tasks;
-using HECSFramework.Unity;
-using Systems;
 using Unity.IL2CPP.CompilerServices;
 
 namespace HECSFramework.Core
@@ -16,15 +14,7 @@ namespace HECSFramework.Core
         partial void UnityPart()
         {
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
-            {
-                Release(actorProviderComponent.Actor).Forget();
-            }
-        }
-
-        private async UniTaskVoid Release(Actor actor)
-        {
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            World.GetSingleSystem<PoolingSystem>().Release(actor);
+                World.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
         }
     }
 }
