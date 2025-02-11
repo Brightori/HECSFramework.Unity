@@ -2,6 +2,7 @@
 using Commands;
 using Components;
 using Unity.IL2CPP.CompilerServices;
+using UnityEngine;
 
 namespace HECSFramework.Core
 {
@@ -14,7 +15,10 @@ namespace HECSFramework.Core
         partial void UnityPart()
         {
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
-                World.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
+            {
+                this.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
+                MonoBehaviour.Destroy(actorProviderComponent.Actor);
+            }
         }
     }
 }

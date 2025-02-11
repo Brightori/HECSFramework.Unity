@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Systems
 {
     [Serializable][Documentation(Doc.Visual, "this system spawn view to actor and report when spawn view complete")]
-    public sealed class SpawnViewSystem : BaseSystem, IAfterEntityInit, IReactCommand<RespawnViewCommand>
+    public sealed class SpawnViewSystem : BaseSystem, IAfterEntityInit, IReactCommand<RespawnViewCommand>, IReactCommand<DeleteActorCommand>
     {
         [Required]
         public ViewReferenceGameObjectComponent viewReferenceGameObject;
@@ -62,6 +62,11 @@ namespace Systems
         {
             if (!EntityManager.Default.TryGetSingleComponent<OnApplicationQuitTagComponent>(out _))
                 poolingSystem?.ReleaseView(viewGameObject);
+        }
+
+        public void CommandReact(DeleteActorCommand command)
+        {
+            poolingSystem?.ReleaseView(viewGameObject);
         }
     }
 
