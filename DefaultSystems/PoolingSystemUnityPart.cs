@@ -179,7 +179,21 @@ namespace Systems
                 pool.Dispose();
             }
 
+            objectIDToPool.Clear();
             pools.Clear();
+        }
+
+        public void Clear()
+        {
+            foreach (var pool in pools.Values)
+            {
+                pool.Dispose();
+            }
+
+            objectIDToPool.Clear();
+            pools.Clear();
+            
+            Owner.World.GetSingleSystem<AssetService>().UnloadUnusedResources();
         }
     }
 }

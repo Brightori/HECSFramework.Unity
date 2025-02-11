@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace Helpers
 {
+    [Documentation(Doc.HECS, Doc.Poolable, "this is additional helper for getting go with component with sync way")]
     public class HECSSyncPool<T> where T : Component
     {
         private GameObject prfb;
         private Stack<T> pool = new Stack<T>(4);
         public HECSList<T> Items = new HECSList<T>();
         private Queue<T> releaseQueue = new Queue<T>();
+        
         public HECSSyncPool(GameObject prfb)
         {
             this.prfb = prfb;
