@@ -17,7 +17,7 @@ namespace HECSFramework.Core
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
             {
                 this.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
-                MonoBehaviour.Destroy(actorProviderComponent.Actor);
+                MonoBehaviour.Destroy(actorProviderComponent.Actor.gameObject);
             }
         }
     }
