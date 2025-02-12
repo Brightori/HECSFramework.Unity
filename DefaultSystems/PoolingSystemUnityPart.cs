@@ -39,6 +39,15 @@ namespace Systems
             return pools[assetReference.AssetGUID];
         }
 
+        public void ReleasePool(AssetReference assetReference)
+        {
+            if (pools.TryGetValue(assetReference.AssetGUID, out var pool))
+            {
+                pool.Dispose();
+                pools.Remove(assetReference.AssetGUID);
+            }
+        }
+
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true, Vector3 position = default,
             Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
