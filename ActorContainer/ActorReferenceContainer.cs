@@ -152,6 +152,13 @@ namespace HECSFramework.Unity
             }
         }
 
+        public override void Sort()
+        {
+            base.Sort();
+            isInited = false;
+            InitActorReferenceContainer();
+        }
+
         public override T GetComponent<T>()
         {
             foreach (var c in Components)
@@ -176,6 +183,8 @@ namespace HECSFramework.Unity
             result = default;
             return false;
         }
+
+    
 
         public override bool IsValid()
         {
