@@ -64,6 +64,9 @@ namespace HECSFramework.Unity
         {
             if (!isInited || isEditorTimeChanged)
             {
+                componentsBluePrints.Clear();
+                systemBaseBluePrints.Clear();
+
                 foreach (var component in holder.components)
                 {
                     componentsBluePrints.Add(component);
@@ -138,6 +141,19 @@ namespace HECSFramework.Unity
             return false;
         }
 
+        public override void AddComponent<T>(T component)
+        {
+            isInited = false;
+            isEditorTimeChanged = true;
+            base.AddComponent(component);
+        }
+
+        public override T GetOrAddComponent<T>(bool onlyMain = false)
+        {
+            isInited = false;
+            isEditorTimeChanged = true;
+            return base.GetOrAddComponent<T>(onlyMain);
+        }
 
         public override void OnEnable()
         {
@@ -210,6 +226,7 @@ namespace HECSFramework.Unity
 
             return false;
         }
+
 
         public override bool IsHaveComponent(int bluePrintTypeHashCode)
         {

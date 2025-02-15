@@ -407,7 +407,7 @@ namespace HECSFramework.Unity
             EditorWindow.GetWindow<ImportFeatureWindow>().Init(this);
         }
 
-        public T GetOrAddComponent<T>(bool onlyMain = false) where T:  class, IComponent, new()
+        public virtual T GetOrAddComponent<T>(bool onlyMain = false) where T:  class, IComponent, new()
         {
             if (onlyMain)
             {
@@ -428,7 +428,7 @@ namespace HECSFramework.Unity
             return GetComponent<T>();
         }
 
-        public void AddComponent<T>(T component) where T : class, IComponent, new()
+        public virtual void AddComponent<T>(T component) where T : class, IComponent, new()
         {
             var bpProvider = new BluePrintsProvider();
             var key = component.GetType();
