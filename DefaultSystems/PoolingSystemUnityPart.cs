@@ -108,10 +108,11 @@ namespace Systems
         public async UniTask Warmup(AssetReference viewReference, int count, CancellationToken token = default)
         {
             var neededHandler = await GetPool(viewReference);
-
+            var assetService = Owner.World.GetSingleSystem<AssetService>(); 
+            
             for (int i = 0; i < count; i++)
             {
-                var go = await  neededHandler.Get(default, default, null, token);
+                var go = await assetService.GetAssetInstance(viewReference);
                 this.objectIDToPool[go.GetInstanceID()] = neededHandler;
                 ReleaseView(viewReference, go).Forget();
             }
