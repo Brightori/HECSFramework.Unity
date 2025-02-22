@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using HECSFramework.Core;
-using HECSFramework.Unity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -10,51 +8,40 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Input, "this component holds bool  - on this moment we over ui or not")]
-    public sealed partial class InputOverUIComponent : BaseComponent, IWorldSingleComponent 
+    public sealed partial class InputOverUIComponent : BaseComponent, IWorldSingleComponent
     {
-        [SerializeField]
-        private InputIdentifier inputIdentifier;
-
-        [NonSerialized]
-        public List<RaycastResult> raycastResults = new List<RaycastResult>(32);
-
         private bool isOverUI;
         private int frameCount;
-        private PointerEventData pointerEventData;
 
-        private InputAction inputAction;
-
-        public bool InputOverUI(Vector2 screenPos)
+        public bool IsOverUI
         {
-            if (Time.frameCount == frameCount)
-                return isOverUI;
+            get
+            {
+                if (Time.frameCount == frameCount)
+                    return isOverUI;
 
-            pointerEventData.position = screenPos;
-            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
-            isOverUI = raycastResults.Count > 0;
-            frameCount = Time.frameCount;
-            return isOverUI;
-        }
+                frameCount = Time.frameCount;
 
-        public bool InputOverUI()
-        {
-            if (Time.frameCount == frameCount)
-                return isOverUI;
+                if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0)
+                {
+                    foreach (var t in Touchscreen.current.touches)
+                    {
+                        if (EventSystem.current.IsPointerOverGameObject(t.touchId.ReadValue()))
+                        {
+                            isOverUI = true;
+                            return true;
+                        }
+                    }
+                }
 
-            pointerEventData.position = inputAction.ReadValue<Vector2>();
-            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
-            isOverUI = raycastResults.Count > 0;
-            frameCount = Time.frameCount;
-            return isOverUI;
-        }
+                if (EventSystem.current.IsPointerOverGameObject())
+                {
+                    isOverUI = true;
+                    return true;
+                }
 
-        public override void Init()
-        {
-            pointerEventData = new PointerEventData(EventSystem.current);
-
-            if (inputIdentifier != null) 
-            { 
-                Owner.GetComponent<Components.InputActionsComponent>().TryGetInputAction(inputIdentifier.name, out inputAction);
+                isOverUI = false;
+                return false;
             }
         }
     }
