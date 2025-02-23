@@ -7,10 +7,11 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.Camera, "Component with main Camera")]
-    public sealed class CameraComponent : BaseComponent, IHaveActor, IWorldSingleComponent
+    public sealed class CameraTagComponent : BaseComponent, IHaveActor 
     {
         public Actor Actor { get; set; }
         public Camera Camera;
+        public IdentifierContainer CameraIdentifier;
 
         public override void Init()
         {
