@@ -52,4 +52,20 @@ internal class CommandsTests
         EntityManager.Command(new StressTestGlobalCommand { Param = true }, 8);
         Assert.Pass();
     }
+
+    [Test]
+    public void TestCommandQueue()
+    {
+        EntityManager.RecreateInstance();
+
+        var entity = Entity.Get("Check");
+        var sys = new StressTestReactsSystem();
+        entity.AddHecsSystem(sys);
+        entity.Init();
+
+        CommandQueueManager<StressTestGlobalCommand>.AddToQueue(new StressTestGlobalCommand { Param = true });
+        EntityManager.Default.GlobalUpdateSystem.Update();
+        EntityManager.Default.GlobalUpdateSystem.PreFinishUpdate?.Invoke();
+        Assert.IsTrue(sys.GlobalReact);
+    }
 }
