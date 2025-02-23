@@ -1,7 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using Commands;
 using Components;
+using Systems;
 using Unity.IL2CPP.CompilerServices;
+using UnityEngine;
 
 namespace HECSFramework.Core
 {
@@ -14,7 +16,17 @@ namespace HECSFramework.Core
         partial void UnityPart()
         {
             if (this.TryGetComponent(out ActorProviderComponent actorProviderComponent))
-                World.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
+            {
+                this.Command(new DeleteActorCommand { Actor = actorProviderComponent.Actor });
+                
+                if (!this.ContainsMask<PoolableTagComponent>())
+                    MonoBehaviour.Destroy(actorProviderComponent.Actor.gameObject);
+                else
+                {
+                    this.World.GetSingleSystem<PoolingSystem>().ReleaseView(actorProviderComponent.Actor.gameObject);
+                    actorProviderComponent.Actor.Dispose();
+                }
+            }
         }
     }
 }

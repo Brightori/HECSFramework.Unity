@@ -113,7 +113,7 @@ namespace HECSFramework.Unity
 
         public void Dispose()
         {
-            Entity.Dispose();
+            Entity?.Dispose();
             Entity = null;
         }
 

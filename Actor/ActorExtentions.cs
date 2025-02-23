@@ -84,10 +84,14 @@ namespace HECSFramework.Unity
             if (viewReferenceComponent == null)
                 throw new Exception($"[Pooling] container {actorID} doesnt have viewrefence");
 
-            var actorPrfb = await world.GetSingleSystem<PoolingSystem>().GetActorFromPool<T>(entityContainer, world, needLoadContainer, position, rotation, parent, cancellationToken);
-            
-            callBack?.Invoke(actorPrfb);
-            return actorPrfb;
+            var actorPrfb = await world.GetSingleSystem<PoolingSystem>().GetViewFromPool(viewReferenceComponent.ViewReference, position, rotation, parent, cancellationToken);
+            var needed = actorPrfb.GetComponent<T>();
+
+            needed.InitActorWithoutEntity(world);
+            entityContainer.Init(needed.Entity);
+
+            callBack?.Invoke(needed);
+            return needed;
         }
 
         public static async UniTask<Actor> GetActorExluding<Exluding>(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, bool initEntity = true, Action<Actor> callBack = null, Vector3 position = new Vector3())

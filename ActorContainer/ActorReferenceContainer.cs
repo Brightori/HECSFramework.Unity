@@ -64,6 +64,9 @@ namespace HECSFramework.Unity
         {
             if (!isInited || isEditorTimeChanged)
             {
+                componentsBluePrints.Clear();
+                systemBaseBluePrints.Clear();
+
                 foreach (var component in holder.components)
                 {
                     componentsBluePrints.Add(component);
@@ -139,6 +142,7 @@ namespace HECSFramework.Unity
         }
 
 
+
         public override void OnEnable()
         {
             base.OnEnable();
@@ -152,6 +156,7 @@ namespace HECSFramework.Unity
             }
         }
 
+    
         public override T GetComponent<T>()
         {
             foreach (var c in Components)
@@ -222,6 +227,29 @@ namespace HECSFramework.Unity
         }
 
         public IEnumerable<EntityContainer> ReferenceContainers() => References;
+
+#if UNITY_EDITOR
+        public override void AddComponent<T>(T component)
+        {
+            isInited = false;
+            isEditorTimeChanged = true;
+            base.AddComponent(component);
+        }
+
+        public override T GetOrAddComponent<T>(bool onlyMain = false)
+        {
+            isInited = false;
+            isEditorTimeChanged = true;
+            return base.GetOrAddComponent<T>(onlyMain);
+        }
+
+        public override void Sort()
+        {
+            base.Sort();
+            isInited = false;
+            InitActorReferenceContainer();
+        }
+#endif
     }
 
     public interface IReferenceContainer

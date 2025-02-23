@@ -39,6 +39,15 @@ namespace Systems
             return pools[assetReference.AssetGUID];
         }
 
+        public void ReleasePool(AssetReference assetReference)
+        {
+            if (pools.TryGetValue(assetReference.AssetGUID, out var pool))
+            {
+                pool.Dispose();
+                pools.Remove(assetReference.AssetGUID);
+            }
+        }
+
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true, Vector3 position = default,
             Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
@@ -99,10 +108,11 @@ namespace Systems
         public async UniTask Warmup(AssetReference viewReference, int count, CancellationToken token = default)
         {
             var neededHandler = await GetPool(viewReference);
-
+            var assetService = Owner.World.GetSingleSystem<AssetService>(); 
+            
             for (int i = 0; i < count; i++)
             {
-                var go = await  neededHandler.Get(default, default, null, token);
+                var go = await assetService.GetAssetInstance(viewReference);
                 this.objectIDToPool[go.GetInstanceID()] = neededHandler;
                 ReleaseView(viewReference, go).Forget();
             }
@@ -179,7 +189,21 @@ namespace Systems
                 pool.Dispose();
             }
 
+            objectIDToPool.Clear();
             pools.Clear();
+        }
+
+        public void Clear()
+        {
+            foreach (var pool in pools.Values)
+            {
+                pool.Dispose();
+            }
+
+            objectIDToPool.Clear();
+            pools.Clear();
+            
+            Owner.World.GetSingleSystem<AssetService>().UnloadUnusedResources();
         }
     }
 }
