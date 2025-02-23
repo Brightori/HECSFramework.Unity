@@ -87,6 +87,9 @@ namespace HECSFramework.Unity
             var actorPrfb = await world.GetSingleSystem<PoolingSystem>().GetViewFromPool(viewReferenceComponent.ViewReference, position, rotation, parent, cancellationToken);
             var needed = actorPrfb.GetComponent<T>();
 
+            needed.InitActorWithoutEntity(world);
+            entityContainer.Init(needed.Entity);
+
             callBack?.Invoke(needed);
             return needed;
         }
