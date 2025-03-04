@@ -269,7 +269,7 @@ namespace HECSFramework.Unity
                     name.Insert(0, "_");
                 }
 
-                body.Add(new TabSimpleSyntax(1, $"public const int {name} = {identifier.Id};"));
+                body.AddUnique(new TabSimpleSyntax(1, $"public const int {name} = {identifier.Id};"));
             }
 
             return composeIdentifiersMap.ToString();
