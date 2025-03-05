@@ -45,22 +45,22 @@ namespace HECSFramework.Unity.Editor
 
         private static void SetCheckBox()
         {
-            Menu.SetChecked(Developer, false);
-            Menu.SetChecked(Modify, false);
-            Menu.SetChecked(Basic, false);
+            UnityEditor.Menu.SetChecked(Developer, false);
+            UnityEditor.Menu.SetChecked(Modify, false);
+            UnityEditor.Menu.SetChecked(Basic, false);
             switch (EditorMode)
             {
                 case HecsEditorMode.Basic:
                     SetDefines(BuildTargetGroup.Standalone, "BasicMode");
-                    Menu.SetChecked(Basic, true);
+                    UnityEditor.Menu.SetChecked(Basic, true);
                     break;
                 case HecsEditorMode.Modify:
                     SetDefines(BuildTargetGroup.Standalone, "ModifyMode");
-                    Menu.SetChecked(Modify, true);
+                    UnityEditor.Menu.SetChecked(Modify, true);
                     break;
                 case HecsEditorMode.Developer:
                     SetDefines(BuildTargetGroup.Standalone, "DeveloperMode");
-                    Menu.SetChecked(Developer, true);
+                    UnityEditor.Menu.SetChecked(Developer, true);
                     break;
                 default: throw new ArgumentOutOfRangeException();
             }

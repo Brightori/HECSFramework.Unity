@@ -30,6 +30,7 @@ public class CreateUIHelperWindow : OdinEditorWindow
     public GameObject UIprfb;
 
     public UIGroupIdentifier[] Groups;
+    public AdditionalCanvasIdentifier AdditionalCanvas;
     
     public bool IsNeedContainer = true;
 
@@ -98,6 +99,7 @@ public class CreateUIHelperWindow : OdinEditorWindow
         //assign fields of blueprints
         uibluePrint.UIType = uiidentifier;
         uibluePrint.UIActor = new UIActorReference(uiActorentry.guid);
+        uibluePrint.AdditionalCanvasIdentifier = this.AdditionalCanvas;
         var uiGroupsType = uibluePrint.Groups.GetType();
 
         var fields = uiGroupsType.GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
@@ -132,6 +134,10 @@ public class CreateUIHelperWindow : OdinEditorWindow
             newContainer.GetOrAddComponent<UITagComponent>().ViewType = uiidentifier;
             newContainer.GetOrAddComponent<UnityTransformComponent>();
             newContainer.GetOrAddComponent<UnityRectTransformComponent>();
+
+            if (this.AdditionalCanvas != null)
+                newContainer.GetOrAddComponent<AdditionalCanvasTagComponent>().AdditionalCanvasIdentifier = AdditionalCanvas;
+
             ReflectionHelpers.SetPrivateFieldValue(newContainer.GetOrAddComponent<UIGroupTagComponent>(), "Groups", Groups);
             newContainer.AddSystemToContainer<HideUISystem>();
         }
