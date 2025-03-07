@@ -125,7 +125,7 @@ namespace HECSFramework.Unity
             actorInitModule.SetGuid(Entity.GUID);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (Entity.IsAlive() && Entity.World != null && Entity.World.IsAlive && EntityManager.IsAlive)
                 Entity.Dispose();
