@@ -7,6 +7,24 @@ using Systems;
 internal class CountersTests
 {
     [Test]
+    public void TestGetIntCounter()
+    {
+        EntityManager.RecreateInstance();
+        var entity = Entity.Get("Test");
+        entity.AddComponent(new CountersHolderComponent());
+        entity.AddHecsSystem(new CountersHolderSystem());
+        entity.Init();
+        entity.AddComponent(new TestComponent()).ComponentReactByTypeLocal<ICounter>();
+
+        EntityManager.Default.GlobalUpdateSystem.Update();
+
+        var counterValue = entity.GetComponent<CountersHolderComponent>().GetIntValue(10);
+        var counterFloatValue = entity.GetComponent<CountersHolderComponent>().GetFloatValue(10);
+
+        Assert.IsTrue(counterValue == 11 && counterFloatValue == 11);
+    }
+
+    [Test]
     public void TestAddComponentCounter()
     {
         EntityManager.RecreateInstance();
