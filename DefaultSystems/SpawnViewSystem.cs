@@ -41,7 +41,14 @@ namespace Systems
             //after ProcessAfterView component collect all poolable views to release on destroy
             Owner.GetOrAddComponent<PoolableViewsProviderComponent>();
             
+            var ownerAlive = Owner.GetAliveEntity();
             viewGameObject = await poolingSystem.GetViewFromPool(viewReferenceGameObject.ViewReference);
+
+            if (!ownerAlive.IsAlive)
+            {
+                MonoBehaviour.Destroy(viewGameObject);
+                return;
+            }
 
             viewGameObject.transform.SetParent(unityTransform.Transform);
             viewGameObject.transform.localPosition = Vector3.zero;
