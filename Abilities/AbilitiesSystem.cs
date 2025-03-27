@@ -14,6 +14,14 @@ namespace Systems
             }
         }
 
+        partial void ProcessViewReady(Entity entity)
+        {
+            if (Owner.TryGetComponent(out ViewReadyTagComponent viewReadyTagComponent))
+            {
+                entity.GetOrAddComponent<ViewReadyTagComponent>().View = viewReadyTagComponent.View;
+            }
+        }
+
         partial void ClientInit()
         {
             abilitiesHolderComponent.LoadDefaultAbilities();

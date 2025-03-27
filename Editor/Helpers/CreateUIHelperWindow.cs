@@ -14,6 +14,7 @@ using UnityEditor;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [Documentation(Doc.Editor, Doc.HECS, Doc.UI, "Its helper for create ui, this window create ui identifier, ui blueprint, and set ui actor to prfb if needed, after this ui blueprint and uiactor will be added to addressables")]
 public class CreateUIHelperWindow : OdinEditorWindow
@@ -94,7 +95,7 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
         //take guid from bluePrint and save prfb to addressables groupd
         var uiBluePrintEntry = AddressablesHelpers.SetAddressableGroup(uibluePrint, UIBluePrints);
-        uiBluePrintEntry.SetLabel(UISystem.UIBluePrints, true);
+        AddressablesHelpers.AddLabel(uiBluePrintEntry, UISystem.UIBluePrints);
 
         //assign fields of blueprints
         uibluePrint.UIType = uiidentifier;
@@ -178,21 +179,7 @@ public class CreateUIHelperWindow : OdinEditorWindow
 
     public AddressableAssetEntry AddAssetToGroup(UnityEngine.Object asset, string group)
     {
-        var addressablesSettings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
-        var neededGroup = addressablesSettings.groups.FirstOrDefault(x => x.name == group);
-
-        var addressablesSchemas = CreateInstance<PlayerDataGroupSchema>();
-        if (neededGroup == null)
-        {
-            neededGroup = addressablesSettings.CreateGroup(group, false, false, false,
-                new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>()
-                    { addressablesSchemas }, new System.Type[0]);
-        }
-
-        var path = AssetDatabase.GetAssetPath(asset);
-        var prfbGuid = AssetDatabase.GUIDFromAssetPath(path);
-        var entry = addressablesSettings.CreateOrMoveEntry(prfbGuid.ToString(), neededGroup);
-
+        var entry = AddressablesHelpers.SetAddressableGroup(asset, group);
         return entry;
     }
 
