@@ -15,29 +15,13 @@ namespace HECSFramework.Unity
     [Serializable, HideLabel]
     public class ComponentsSystemsHolder
     {
-#if DeveloperMode
-        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
-        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), CustomRemoveElementFunction = nameof(RemoveComponent), NumberOfItemsPerPage = 99)]
-#elif ModifyMode
-        [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), CustomRemoveElementFunction = nameof(RemoveComponent), NumberOfItemsPerPage = 99)]
-#else
-        [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, ElementColor = nameof(GetColor), HideRemoveButton = true, DraggableItems = false, NumberOfItemsPerPage = 99)]
-#endif
+        [InlineEditor(InlineEditorObjectFieldModes.Boxed)]
+        [ListDrawerSettings(HideAddButton = true, DraggableItems = false, ShowFoldout = false, ElementColor = nameof(GetColor), CustomRemoveElementFunction = nameof(RemoveComponent), NumberOfItemsPerPage = 99)]
         [Searchable, HideIf("@this.components.Count == 0")]
         public List<ComponentBluePrint> components = new List<ComponentBluePrint>();
 
-#if DeveloperMode
-        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), NumberOfItemsPerPage = 99)]
-#elif ModifyMode
-        [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, CustomRemoveElementFunction = nameof(RemoveSystem), ShowFoldout = false, NumberOfItemsPerPage = 99)]
-#else
-        [InlineEditor(InlineEditorObjectFieldModes.Hidden)]
-        [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true, DraggableItems = false, ShowFoldout = false, NumberOfItemsPerPage = 99)]
-#endif
+        [InlineEditor(InlineEditorObjectFieldModes.Boxed)]
+        [ListDrawerSettings(HideAddButton = true, DraggableItems = false, ShowFoldout = false, CustomRemoveElementFunction = nameof(RemoveSystem), NumberOfItemsPerPage = 99)]
         [Searchable, HideIf("@this.systems.Count == 0")]
         public List<SystemBaseBluePrint> systems = new List<SystemBaseBluePrint>();
 
@@ -57,7 +41,6 @@ namespace HECSFramework.Unity
         }
 
 #if UNITY_EDITOR
-
         [HideInInspector]
 #endif
         public EntityContainer Parent;
@@ -70,7 +53,7 @@ namespace HECSFramework.Unity
 #endif
         }
 
-        public void RemoveComponentBluePrint<T> (T component) where T: IComponent
+        public void RemoveComponentBluePrint<T>(T component) where T : IComponent
         {
             var typeID = TypesMap.GetComponentInfo<T>().ComponentsMask.TypeHashCode;
 
@@ -93,9 +76,7 @@ namespace HECSFramework.Unity
         }
 
 #if UNITY_EDITOR
-#if DeveloperMode
         [Button]
-#endif
         public void ClearDeletedBluePrints()
         {
             if (Parent == null) return;
@@ -128,9 +109,7 @@ namespace HECSFramework.Unity
             AssetDatabase.SaveAssets();
         }
 
-#if DeveloperMode
         [Button]
-#endif
         private void ClearBrokenSubAssets()
         {
             if (Parent == null) return;
@@ -209,15 +188,11 @@ namespace HECSFramework.Unity
             AssetDatabase.Refresh();
         }
 
-#if DeveloperMode
         [Button]
-#endif
         private void CheckRequirements()
             => RequirementChecker.CheckRequirements(Parent);
 
-#if DeveloperMode
         [Button]
-#endif
         private void FixNullContainers()
         {
             var path = AssetDatabase.GetAssetPath(Parent);
