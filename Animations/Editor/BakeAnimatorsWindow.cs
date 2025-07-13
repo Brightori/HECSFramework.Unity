@@ -221,8 +221,12 @@ namespace HECSFramework.Unity
                             var nameOfTag = t.state.tag;
 
                             GenerateAnimationParameterIdentifier(nameOfTag);
+                            GenerateAnimationParameterIdentifier(t.state.name);
+
                             parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {nameOfTag} = {Animator.StringToHash(nameOfTag)};"));
+                            parametersMapBody.AddUnique(new TabSimpleSyntax(1, $"public static readonly int {t.state.name} = {Animator.StringToHash(t.state.name)};"));
                             bodyOfDic.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope}{CParse.Quote}{nameOfTag}{CParse.Quote}, {Animator.StringToHash(nameOfTag)}{CParse.RightScope},"));
+                            bodyOfDic.AddUnique(new TabSimpleSyntax(3, $"{CParse.LeftScope}{CParse.Quote}{t.state.name}{CParse.Quote}, {Animator.StringToHash(t.state.name)}{CParse.RightScope},"));
                         }
                     }
                 }

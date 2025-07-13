@@ -39,12 +39,20 @@ namespace Systems
 
         protected override void ResetLocal()
         {
+            
+        }
+
+        public void CommandReact(PlayAnimationCommand command)
+        {
+            if (isReady)
+                AnimatorStateComponent.Animator.Play(command.Index, command.Layer, command.NormalizedTime);
         }
     }
 
     public interface IAnimationSystem : ISystem,
         IReactCommand<BoolAnimationCommand>,
         IReactCommand<FloatAnimationCommand>,
-        IReactCommand<TriggerAnimationCommand>
+        IReactCommand<TriggerAnimationCommand>,
+        IReactCommand<PlayAnimationCommand>
     { }
 }
