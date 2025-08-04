@@ -249,6 +249,19 @@ namespace HECSFramework.Unity
             return stringIdentifiersMap.ToString();
         }
 
+
+        public static string GetIdentifierValidName(string identifier)
+        {
+            var name = identifier.Replace("Container", "").Replace("-", "_").Replace(" ", "");
+
+            if (int.TryParse(name[0].ToString(), out _))
+            {
+                name.Insert(0, "_");
+            }
+
+            return name;
+        }
+
         private static string GetIdentifiersMap(Type type, HashSet<IdentifierContainer> identifierContainers)
         {
             var composeIdentifiersMap = new TreeSyntaxNode();
