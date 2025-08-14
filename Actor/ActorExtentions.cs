@@ -52,6 +52,18 @@ namespace HECSFramework.Unity
             return entity;
         }
 
+        /// <summary>
+        /// default method to create actor from container
+        /// </summary>
+        /// <param name="entityContainer"></param>
+        /// <param name="world"></param>
+        /// <param name="needLoadContainer">by default this true, this is default scenario for init actor with data from operated container, if u want custom scenarios, u should make it false and proceed to custom scenario for initing actor (with container on actor for example)</param>
+        /// <param name="callBack"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static async UniTask<Actor> GetActor(this EntityContainer entityContainer, World world = null, bool needLoadContainer = true, Action<Actor> callBack = null, Vector3 position = default, Quaternion rotation = default, Transform transform = null)
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
