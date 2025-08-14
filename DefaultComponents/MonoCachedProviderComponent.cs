@@ -8,7 +8,7 @@ namespace Components
 {
     [Serializable]
     [Documentation(Doc.HECS, Doc.Monobehaviour, Doc.Provider, "this component cache request for mono component and provide fast repeatable access")]
-    public sealed class MonoCacheProviderComponent : BaseComponent, IHaveActor, IDisposable
+    public sealed class MonoCachedProviderComponent : BaseComponent, IHaveActor, IDisposable
     {
         private List<CacheComponentBase> cached = new List<CacheComponentBase>(2);
 
