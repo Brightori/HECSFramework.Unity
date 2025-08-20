@@ -97,5 +97,39 @@ namespace Systems
 
             return result;
         }
+
+        /// <summary>
+        /// TryGetClosestEntity return closest entity by mask and raycast from screen point
+        /// </summary>
+        public static bool TryGetClosestEntity(RaycastHit[] buffer, Filter mask, Vector2 screenPoint, Camera camera,
+            float distance, out Entity entity, int layerMask = -1, Entity exclude = null)
+        {
+            entity = null;
+            var dist = float.MaxValue;
+
+            var ray = camera.ScreenPointToRay(screenPoint);
+            var amount = Physics.RaycastNonAlloc(ray, buffer, distance, layerMask);
+
+            for (int i = 0; i < amount; i++)
+            {
+                var hit = buffer[i];
+                if (hit.collider.TryGetActorFromCollision(out var actor))
+                {
+                    if (actor.IsInited && actor.Entity != exclude)
+                    {
+                        if (actor.Entity.ContainsMask(mask))
+                        {
+                            if (dist > hit.distance)
+                            {
+                                entity = actor.Entity;
+                                dist = hit.distance;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return entity != null;
+        }
     }
 }
