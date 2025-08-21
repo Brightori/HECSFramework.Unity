@@ -16,7 +16,7 @@ namespace Components
         private InputIdentifier inputIdentifier;
 
         [NonSerialized]
-        public List<RaycastResult> raycastResults = new List<RaycastResult>(32);
+        public List<RaycastResult> RaycastResults = new List<RaycastResult>(32);
 
         private bool isOverUI;
         private int frameCount;
@@ -30,8 +30,8 @@ namespace Components
                 return isOverUI;
 
             pointerEventData.position = screenPos;
-            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
-            isOverUI = raycastResults.Count > 0;
+            RaycastAll(pointerEventData, RaycastResults);
+            isOverUI = RaycastResults.Count > 0;
             frameCount = Time.frameCount;
             return isOverUI;
         }
@@ -42,10 +42,25 @@ namespace Components
                 return isOverUI;
 
             pointerEventData.position = inputAction.ReadValue<Vector2>();
-            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
-            isOverUI = raycastResults.Count > 0;
+            RaycastAll(pointerEventData, RaycastResults);
+            isOverUI = RaycastResults.Count > 0;
             frameCount = Time.frameCount;
             return isOverUI;
+        }
+
+        private void RaycastAll(PointerEventData eventData, List<RaycastResult> raycastResults)
+        {
+            raycastResults.Clear();
+            var modules = RaycasterManager.GetRaycasters();
+            var modulesCount = modules.Count;
+            for (int i = 0; i < modulesCount; ++i)
+            {
+                var module = modules[i];
+                if (module == null || !module.IsActive())
+                    continue;
+
+                module.Raycast(eventData, raycastResults);
+            }
         }
 
         public override void Init()
