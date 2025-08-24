@@ -18,6 +18,11 @@ namespace Helpers
             return Random.Range(source.x, source.y);
         }
 
+        public static RectTransform AsRectTransform(this Transform transform)
+        {
+            return transform as RectTransform;
+        }
+
         public static bool TryGetActorFromCollision(this Component component, out Actor actor)
         {
             actor = null;
