@@ -60,6 +60,7 @@ namespace HECSFramework.Unity.Editor
         private static string InterDecision = "/86a-HECS__InterDecision-InterDecision.cs.txt";
         private static string DilemmaDecision = "/87a-HECS__DilemmaDecision-DilemmaDecision.cs.txt";
         private static string GenericNode = "/88a-HECS__GenericNode-GenericNode.cs.txt";
+        private static string Identifier = "/89a-HECS__Identifier-Identifier.cs.txt";
 
         public static string DataPath => Application.dataPath;
         public static string ScriptPath => Application.dataPath + "/Scripts/";
@@ -236,6 +237,29 @@ namespace HECSFrameWork
 
             if (!File.Exists(DataPath + ScriptTemplates + GenericNode))
                 CreateGenericNodeTemplate();
+
+            if (!File.Exists(DataPath + ScriptTemplates + Identifier))
+                CreateIdentifierTemplate();
+        }
+
+        private static void CreateIdentifierTemplate()
+        {
+            var template =
+@"using UnityEngine;
+
+namespace HECSFramework.Unity
+{
+    [CreateAssetMenu(fileName = ""#SCRIPTNAME#"", menuName = ""Identifiers/#SCRIPTNAME#"")]
+    public class #SCRIPTNAME# : IdentifierContainer
+    {
+    }
+}
+";
+            var path = (DataPath + ScriptTemplates + Identifier).Replace("//", "/");
+            File.WriteAllText(path, template, Encoding.UTF8);
+
+            path = path.Replace(Application.dataPath, "Assets");
+            AssetDatabase.ImportAsset(path);
         }
 
         private static void CreateGenericNodeTemplate()
