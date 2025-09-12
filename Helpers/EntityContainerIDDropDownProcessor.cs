@@ -9,6 +9,7 @@ using HECSFramework.Unity;
 using HECSFramework.Unity.Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
+using UnityEngine;
 
 namespace Helpers
 {
@@ -35,16 +36,23 @@ namespace Helpers
             var list = new ValueDropdownList<int>();
             foreach (var container in containersProvider.GetCollection())
             {
-                if (container is PresetContainer)
-                    continue;
-
-                if (container.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true))
-                    continue;
-
-                foreach (var c in container.Components)
+                try
                 {
-                    if (string.IsNullOrEmpty(typeName) || c.GetHECSComponent.GetType().Name == typeName)
-                        list.Add(container.name, container.ContainerIndex);
+                    if (container is PresetContainer)
+                        continue;
+
+                    if (container.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true))
+                        continue;
+
+                    foreach (var c in container.Components)
+                    {
+                        if (string.IsNullOrEmpty(typeName) || c.GetHECSComponent.GetType().Name == typeName)
+                            list.Add(container.name, container.ContainerIndex);
+                    }
+                }
+                catch (Exception ex) 
+                { 
+                    Debug.LogError($"{container.name} {ex.ToString()}");
                 }
             }
             //if return empty list, check that your identifier does not have namespace 
