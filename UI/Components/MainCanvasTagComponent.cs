@@ -19,7 +19,7 @@ namespace Components
         public void GatherAdditionalCanvases()
         {
             Owner.World.Command(new CanvasReadyCommand());
-            if ( Actor.TryGetComponents(out Actor[] uiActors))
+            if (Actor.TryGetComponents(out Actor[] uiActors))
             {
                 foreach (var actor in uiActors)
                 {
@@ -28,6 +28,21 @@ namespace Components
                             AdditionalCanvases.Add(actor);
                 }
             }
+        }
+
+        public Actor GetCanvas(int canvasID) 
+        {
+            foreach (var actor in AdditionalCanvases)
+            {
+                if (actor.TryGetHECSComponent(out AdditionalCanvasTagComponent additionalCanvasTagComponent))
+                {
+                    if (additionalCanvasTagComponent.AdditionalCanvasIdentifier == canvasID)
+                        return actor;
+
+                }
+            }
+
+            return null;
         }
     }
 }

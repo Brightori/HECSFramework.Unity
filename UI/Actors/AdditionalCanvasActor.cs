@@ -6,7 +6,7 @@ public class AdditionalCanvasActor : Actor
 {
     public AdditionalCanvasIdentifier AdditionalCanvasIdentifier;
 
-    protected override void Start()
+    private void Awake()
     {
         InitActorWithoutEntity();
         Entity.AddComponent(new UnityTransformComponent());
