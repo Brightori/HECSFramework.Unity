@@ -62,6 +62,13 @@ namespace Systems
             }
 
             await UniTask.WaitUntil(() => Owner.IsInited);
+
+            if (!ownerAlive.IsAlive)
+            {
+                poolingSystem.ReleaseView(viewGameObject);
+                return;
+            }
+
             AfterViewService.ProcessAfterView(Owner, viewGameObject);
         }
 

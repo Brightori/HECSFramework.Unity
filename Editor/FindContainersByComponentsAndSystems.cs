@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace HECSFramework.Unity.Editor
 {
@@ -55,33 +56,40 @@ namespace HECSFramework.Unity.Editor
 
             foreach (var e in entityContainers)
             {
-                bool needed = true;
+                try
+                {
+                    bool needed = true;
 
-                if (components.Count != 0)
-                    foreach (var c in components)
-                    {
-                        if (c == null)
-                            continue;
+                    if (components.Count != 0)
+                        foreach (var c in components)
+                        {
+                            if (c == null)
+                                continue;
 
-                        if (e.Components.Any(x => x.GetHECSComponent.GetType() == c))
-                            continue;
+                            if (e.Components.Any(x => x.GetHECSComponent.GetType() == c))
+                                continue;
 
-                        needed = false;
-                        break;
-                    }
+                            needed = false;
+                            break;
+                        }
 
-                if (systems.Count != 0)
-                    foreach (var s in systems)
-                    {
-                        if (e.Systems.Any(x => x.GetSystem.GetType() == s))
-                            continue;
+                    if (systems.Count != 0)
+                        foreach (var s in systems)
+                        {
+                            if (e.Systems.Any(x => x.GetSystem.GetType() == s))
+                                continue;
 
-                        needed = false;
-                        break;
-                    }
+                            needed = false;
+                            break;
+                        }
 
-                if (needed)
-                    containers.Add(e);
+                    if (needed)
+                        containers.Add(e);
+                }
+                catch (Exception ex) 
+                {
+                    Debug.LogError($"we have problem with {e.name} {ex}");
+                }
             }
         }
 
