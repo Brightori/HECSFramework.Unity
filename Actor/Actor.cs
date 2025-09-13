@@ -181,10 +181,20 @@ namespace HECSFramework.Unity
 
         public void HecsDestroy()
         {
+            if (Entity == null)
+            {
+                if (this.gameObject.activeInHierarchy)
+                {
+                    MonoBehaviour.Destroy(gameObject);
+                }
+                return;
+            }
+
             if (Entity != null && !Entity.IsDisposed)
                 Entity.Dispose();
 
-            Entity.World.GetSingleSystem<PoolingSystem>().Release(this);
+            if (Entity.World.IsAlive)
+                Entity.World.GetSingleSystem<PoolingSystem>().Release(this);
             Entity = null;
         }
 
