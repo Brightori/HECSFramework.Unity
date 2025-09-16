@@ -66,7 +66,11 @@ public class HECSPool : IDisposable
             goto again;
 
         alrdyInpool.Remove(needed.GetInstanceID());
-        needed.transform.SetPositionAndRotation(position, rotation);
+        var neededTransform = needed.transform;
+
+        neededTransform.SetPositionAndRotation(position, rotation);
+        neededTransform.SetParent(transform);
+
         return needed;
     }
 
