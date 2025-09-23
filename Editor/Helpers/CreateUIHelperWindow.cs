@@ -136,8 +136,8 @@ public class CreateUIHelperWindow : OdinEditorWindow
             newContainer.GetOrAddComponent<UnityTransformComponent>();
             newContainer.GetOrAddComponent<UnityRectTransformComponent>();
 
-            if (this.AdditionalCanvas != null)
-                newContainer.GetOrAddComponent<AdditionalCanvasTagComponent>().AdditionalCanvasIdentifier = AdditionalCanvas;
+            //if (this.AdditionalCanvas != null)
+            //    newContainer.GetOrAddComponent<AdditionalCanvasTagComponent>().AdditionalCanvasIdentifier = AdditionalCanvas;
 
             ReflectionHelpers.SetPrivateFieldValue(newContainer.GetOrAddComponent<UIGroupTagComponent>(), "Groups", Groups);
             newContainer.AddSystemToContainer<HideUISystem>();
