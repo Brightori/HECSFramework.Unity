@@ -1,18 +1,11 @@
 ﻿using HECSFramework.Core;
 using Systems;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 [Documentation(Doc.GameLogic, Doc.Visual, Doc.Poolable, "Main monobeh component for tagging poolable view" + nameof(PoolingSystem))]
 public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 {
-    public AssetReference AssetReference;
-
-    public string AddressableKey => AssetReference.AssetGUID;
-
     public GameObject View => gameObject;
-
-    public AssetReference AssetRef => AssetReference;
 
     void IPoolableView.Stop()
     {
@@ -43,9 +36,7 @@ public interface IStartOnPooling
 
 public interface IPoolableView
 {
-    string AddressableKey { get; }
     GameObject View { get; }
-    AssetReference AssetRef { get; }
     void Stop();
     void Start();
 }
