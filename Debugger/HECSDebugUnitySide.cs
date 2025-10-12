@@ -34,7 +34,7 @@ namespace HECSFramework.Unity
         public void LogWarning(string info)
         {
 #if DEBUG_FRAMECOUNT
-            UnityEngine.LogError.LogWarning($"[{Time.frameCount}] {info}");
+            UnityEngine.Debug.LogWarning($"[{Time.frameCount}] {info}");
 #else
             UnityEngine.Debug.LogWarning(info);
 #endif
