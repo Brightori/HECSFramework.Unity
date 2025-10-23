@@ -10,6 +10,7 @@ namespace HECSFramework.Unity
     [DefaultExecutionOrder(-50000), RequireComponent(typeof(LateStartProvider))]
     public abstract partial class BaseGameController : MonoBehaviour
     {
+        [SerializeField] private int entitiesStartingCount = 128;
         [SerializeField, Range(1, 99)] private int worldCount = 1;
 
         [SerializeField] private ActorContainer playerContainer = default;
@@ -34,7 +35,7 @@ namespace HECSFramework.Unity
         {
             HECSDebug.Init(new HECSDebugUnitySide());
 
-            entityManager = new EntityManager(worldCount);
+            entityManager = new EntityManager(worldCount, entitiesStartingCount);
             EntityManager.OnNewWorldAdded += NewWorldReact;
 
             updateSystem = EntityManager.Default.GlobalUpdateSystem;
