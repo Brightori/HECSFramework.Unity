@@ -16,6 +16,9 @@ public class SaveLoadContainerToJSONWindow : OdinEditorWindow
     [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
     public string PathToSave = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "/SavedContainers/";
 
+    [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
+    public string PathToLoad = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "/SavedContainers/";
+
     private BluePrintsProvider bluePrintsProvider = new BluePrintsProvider();
     public bool overWriteData = true;
 
@@ -36,7 +39,7 @@ public class SaveLoadContainerToJSONWindow : OdinEditorWindow
     [Button]
     public void LoadData()
     {
-        if (SaveManager.TryLoadJson(PathToSave, out var json))
+        if (SaveManager.TryLoadJson(PathToLoad, out var json))
         {
             var jsonContainer = JsonUtility.FromJson<JSONSaveContainer>(json);
 

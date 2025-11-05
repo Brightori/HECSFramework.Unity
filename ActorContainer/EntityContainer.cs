@@ -4,8 +4,9 @@ using System.Linq;
 using HECSFramework.Core;
 using Components;
 using System;
-using System.ComponentModel;
 using IComponent = HECSFramework.Core.IComponent;
+using UnityEngine.InputSystem;
+
 
 
 #if UNITY_EDITOR
@@ -29,11 +30,11 @@ namespace HECSFramework.Unity
 
         public int ContainerIndex => containerIndex;
 
-        public string CachedName 
+        public string CachedName
         {
 
-            get 
-            { 
+            get
+            {
                 if (string.IsNullOrEmpty(cachedName))
                     cachedName = name;
 
@@ -86,7 +87,7 @@ namespace HECSFramework.Unity
                 HECSDebug.LogError($"{name}.EntityContainer:components == null");
                 return false;
             }
-            
+
             return Components.Any(x =>
             {
                 if (x == null || x.GetHECSComponent == null)
@@ -124,7 +125,7 @@ namespace HECSFramework.Unity
             return default;
         }
 
-        public virtual IComponent GetComponent(int typeIndex) 
+        public virtual IComponent GetComponent(int typeIndex)
         {
             foreach (var c in holder.components)
             {
@@ -315,13 +316,13 @@ namespace HECSFramework.Unity
         {
 #if UNITY_EDITOR
 
-            if (Components == null || Components.Any(x=> x == null))
+            if (Components == null || Components.Any(x => x == null))
             {
                 Debug.LogError($"we have null component on {name}", this);
                 return false;
             }
 
-            if (Systems == null || Systems.Any(x=> x == null))
+            if (Systems == null || Systems.Any(x => x == null))
             {
                 Debug.LogError($"we have null system on {name}", this);
                 return false;
@@ -407,7 +408,7 @@ namespace HECSFramework.Unity
             EditorWindow.GetWindow<ImportFeatureWindow>().Init(this);
         }
 
-        public virtual T GetOrAddComponent<T>(bool onlyMain = false) where T:  class, IComponent, new()
+        public virtual T GetOrAddComponent<T>(bool onlyMain = false) where T : class, IComponent, new()
         {
             if (onlyMain)
             {
@@ -416,7 +417,7 @@ namespace HECSFramework.Unity
                     isEditorTimeChanged = true;
                     return result;
                 }
-                    
+
             }
             else if (IsHaveComponent<T>())
                 return GetComponent<T>();
@@ -440,6 +441,38 @@ namespace HECSFramework.Unity
             }
             else
                 Debug.LogError($"we dont have bp for {key.Name} mby u should codogen first");
+        }
+
+        public virtual void AddComponent(Type component) //blueprint type
+        {
+            var bpProvider = new BluePrintsProvider();
+
+            if (!bpProvider.Components.Values.Contains(component))
+            {
+                Debug.LogError($"we dont have bp for {component.Name} mby u should codogen first");
+                return;
+            }
+
+            var componentNode = new ComponentBluePrintNode(component.Name, component, new List<EntityContainer> { this });
+            componentNode.AddBluePrint();
+        }
+
+        /// <summary>
+        /// add system by blue print type
+        /// </summary>
+        /// <param name="system">blueprint type</param>
+        public virtual void AddSystem(Type system)
+        {
+            var bpProvider = new BluePrintsProvider();
+
+            if (!bpProvider.Systems.Values.Contains(system))
+            {
+                Debug.LogError($"we dont have bp for {system.Name} mby u should codogen first");
+                return;
+            }
+
+            var systemNode = new SystemBluePrintNode(system.Name, system, new List<EntityContainer> { this });
+            systemNode.AddBluePrint();
         }
 
         /// <summary>

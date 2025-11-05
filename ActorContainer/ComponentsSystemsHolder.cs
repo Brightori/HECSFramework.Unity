@@ -5,6 +5,10 @@ using Object = UnityEngine.Object;
 using HECSFramework.Core;
 using UnityEngine;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.IO;
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -195,6 +199,9 @@ namespace HECSFramework.Unity
         [Button]
         private void FixNullContainers()
         {
+            components.Clear();
+            systems.Clear();
+
             var path = AssetDatabase.GetAssetPath(Parent);
             var allSo = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
 
@@ -206,6 +213,66 @@ namespace HECSFramework.Unity
                 if (go is SystemBaseBluePrint system && !systems.Contains(system))
                     systems.Add(system);
             }
+
+            var names = GetSubAssetNamesFromYaml(path);
+
+            var bluePrintProvider = new BluePrintsProvider();
+
+            foreach (var name in names)
+            {
+                foreach (var cb in bluePrintProvider.Components)
+                {
+                    if (cb.Value.Name.Contains(name))
+                    {
+                        if (components.Any(x => x!= null && x.GetType().Name.Contains(name)))
+                            continue;
+
+                        Parent.AddComponent(cb.Value);
+                        continue;
+                    }
+                }
+
+                foreach (var cb in bluePrintProvider.Systems)
+                {
+                    if (cb.Value.Name.Contains(name))
+                    {
+                        if (systems.Any(x => x != null && x.GetType().Name.Contains(name)))
+                            continue;
+
+                        Parent.AddSystem(cb.Value);
+                        continue;
+                    }
+                }
+
+
+                Debug.LogWarning("we dont have blueprint for type " + name);
+            }
+        }
+
+        private string[] GetSubAssetNamesFromYaml(string assetPath)
+        {
+            string fullPath = Path.Combine(Application.dataPath, assetPath.Substring("Assets/".Length));
+            if (!File.Exists(fullPath))
+            {
+                Debug.LogError("Файл не найден: " + fullPath);
+                return new string[0];
+            }
+
+            List<string> subAssetNames = new List<string>();
+            string[] lines = File.ReadAllLines(fullPath);
+            Regex nameRegex = new Regex(@"^\s*m_Name:\s*(.+)$");
+
+            foreach (string line in lines)
+            {
+                Match match = nameRegex.Match(line);
+                if (match.Success)
+                {
+                    string name = match.Groups[1].Value.Trim();
+                    subAssetNames.Add(name);
+                }
+            }
+
+            return subAssetNames.ToArray();
         }
 
         public void OnValidate(EntityContainer parent)
