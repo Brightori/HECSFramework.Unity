@@ -372,7 +372,7 @@ namespace Components
     [Documentation(Doc.Action, """")]
     public sealed class #SCRIPTNAME# : IAction
     {
-        public void Action(Entity entity)
+        public void Action(Entity entity, Entity target = null)
         {
             throw new System.NotImplementedException();
         }

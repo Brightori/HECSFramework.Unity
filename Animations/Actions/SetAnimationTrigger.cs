@@ -7,7 +7,7 @@ public class SetAnimationTrigger : IAction
 {
     public AnimatorParameterIdentifier TriggerParameter;
 
-    public void Action(Entity entity)
+    public void Action(Entity entity, Entity target = null)
     {
         if (entity.ContainsMask<AbilityTagComponent>())
         {

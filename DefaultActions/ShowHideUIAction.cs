@@ -13,7 +13,7 @@ namespace Components
         public bool IsMultyple;
         public bool Show = true;
 
-        public void Action(Entity entity)
+        public void Action(Entity entity, Entity target = null)
         {
             if (Show)
                 entity.World.Command(new ShowUICommand { UIViewType = UIIdentifier, MultyView = IsMultyple });

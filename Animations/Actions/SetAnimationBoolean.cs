@@ -8,7 +8,7 @@ public class SetAnimationBoolean : IAction
     public AnimatorParameterIdentifier TriggerParameter;
     public bool Value;
 
-    public void Action(Entity entity)
+    public void Action(Entity entity, Entity target = null)
     {
         if (entity.ContainsMask<AbilityTagComponent>())
         {
