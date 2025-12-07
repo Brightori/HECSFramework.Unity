@@ -18,7 +18,7 @@ public sealed class RuntimeFilterWindow : OdinEditorWindow
 
     public int WorldIndex = 0;
 
-    public List<Entity> entities = new List<Entity>(6);
+    public List<DrawEntity> entities = new List<DrawEntity>(6);
 
     [MenuItem("HECS Options/Runtime Filter", priority = 2)]
     public static void ShowRuntimeFilterWindow()
@@ -52,7 +52,7 @@ public sealed class RuntimeFilterWindow : OdinEditorWindow
 
         foreach (var e in filter)
         {
-            entities.Add(e);
+            entities.Add(new DrawEntity(e));
         }
     }
 

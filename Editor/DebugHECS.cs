@@ -1,11 +1,12 @@
+using System;
+using System.Collections.Generic;
 using HECSFramework.Core;
 using HECSFramework.Core.Helpers;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using static UnityEditor.Search.SearchColumn;
 
 public class DebugHECS : OdinEditorWindow
 {
@@ -70,28 +71,7 @@ public class DebugHECS : OdinEditorWindow
             if (e == null || !e.IsAlive || !e.IsInited)
                 continue;
 
-            var drawEntity = new DrawEntity();
-
-            drawEntity.ID = e.ID;
-            drawEntity.Index = e.Index;
-            drawEntity.Guid = e.GUID.ToString();
-            drawEntity.ContainerID = e.ContainerID;
-            drawEntity.IsAlive = e.IsAlive;
-            drawEntity.IsPaused = e.IsPaused;
-
-            foreach (var c in e.GetComponentsByType<IComponent>())
-            {
-                if (c == null)
-                    continue;
-
-                drawEntity.drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
-            }
-
-            foreach (var s in e.Systems)
-            {
-                drawEntity.drawSystems.Add(new DrawSystem { Name = s.GetType().Name });
-            }
-
+            var drawEntity = new DrawEntity(e);
             Entities.Add(drawEntity);
         }
     }
@@ -124,6 +104,30 @@ public class DrawEntity
 
     [ShowInInspector, FoldoutGroup("$ID"), ListDrawerSettings(ShowFoldout = false, IsReadOnly = true), LabelText("Systems")]
     public List<DrawSystem> drawSystems = new List<DrawSystem>();
+
+
+    public DrawEntity(Entity e)
+    {
+        ID = e.ID;
+        Index = e.Index;
+        Guid = e.GUID.ToString();
+        ContainerID = e.ContainerID;
+        IsAlive = e.IsAlive;
+        IsPaused = e.IsPaused;
+
+        foreach (var c in e.GetComponentsByType<IComponent>())
+        {
+            if (c == null)
+                continue;
+
+            drawComponents.Add(new DrawComponent { Component = c, Name = c.GetType().Name });
+        }
+
+        foreach (var s in e.Systems)
+        {
+            drawSystems.Add(new DrawSystem { Name = s.GetType().Name });
+        }
+    }
 }
 
 [Serializable]
