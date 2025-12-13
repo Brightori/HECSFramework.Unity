@@ -68,7 +68,8 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
+            ModifierCounterID = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -77,7 +78,8 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
+            ModifierCounterID = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -96,7 +98,8 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 50,
             GetModifierType = ModifierValueType.Percent,
-            ID = 1,
+            ModifierType = 1,
+            ModifierCounterID = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -105,7 +108,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 50,
             GetModifierType = ModifierValueType.Percent,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -124,7 +127,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -133,7 +136,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 50,
             GetModifierType = ModifierValueType.Percent,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -152,7 +155,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 8,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -171,7 +174,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -180,7 +183,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -199,7 +202,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -208,7 +211,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -227,7 +230,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 1,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -236,7 +239,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 50,
             GetModifierType = ModifierValueType.Percent,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -255,7 +258,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Multiply,
             GetValue = 4,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -264,7 +267,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Multiply,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -283,7 +286,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Divide,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -292,7 +295,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Divide,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -311,7 +314,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 3,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -320,7 +323,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 6,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -329,7 +332,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 3,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -338,7 +341,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 3,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -347,7 +350,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Multiply,
             GetValue = 3,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -356,7 +359,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Multiply,
             GetValue = 0.5f,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -365,7 +368,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Divide,
             GetValue = 0.5f,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -374,7 +377,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Divide,
             GetValue = 2f,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -393,7 +396,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 5,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -402,7 +405,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -411,7 +414,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Subtract,
             GetValue = 3,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -430,7 +433,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         });
 
@@ -441,7 +444,7 @@ internal class CountersTests
             GetCalculationType = ModifierCalculationType.Add,
             GetValue = 2,
             GetModifierType = ModifierValueType.Value,
-            ID = 1,
+            ModifierType = 1,
             ModifierGuid = Guid.NewGuid(),
         };
 

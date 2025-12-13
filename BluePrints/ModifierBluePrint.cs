@@ -11,7 +11,7 @@ namespace HECSFramework.Unity
 
         private void OnEnable()
         {
-            modifier.ModifierID = Id;
+            modifier.ModifierCounterID = Id;
         }
 
         public override IModifier GetModifier()

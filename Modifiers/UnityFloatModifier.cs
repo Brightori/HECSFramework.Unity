@@ -26,7 +26,7 @@ namespace HECSFramework.Unity
 
         private Guid currentGuid;
 
-        public override int ModifierID { get=> modifierIdentifier; set=> modifierIdentifier = value; }
+        public override int ModifierCounterID { get=> modifierIdentifier; set=> modifierIdentifier = value; }
 
         public override float GetValue { get => value; set => this.value = value; }
         public override ModifierCalculationType GetCalculationType { get => calculationType; set => calculationType = value; }
