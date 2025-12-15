@@ -14,6 +14,8 @@ namespace Systems
         {
             if (Owner.ContainsMask<ViewReadyTagComponent>() || !Owner.ContainsMask<ViewReferenceGameObjectComponent>())
                 InitAfterView();
+
+            LocalAfterEntityInit();
         }
 
         public void InitAfterView()
@@ -29,6 +31,11 @@ namespace Systems
         }
 
         protected abstract void InitAfterViewLocal();
+        
+        protected virtual void LocalAfterEntityInit()
+        {
+        }
+
         protected abstract void ResetLocal();
     }
 }
