@@ -290,6 +290,12 @@ namespace HECSFramework.Unity
         {
             components = components.OrderBy(x => x.name).ToList();
             systems = systems.OrderBy(x => x.name).ToList();
+
+            foreach (var component in components)
+                EditorUtility.SetDirty(component);
+
+            foreach (var sys in systems)
+                EditorUtility.SetDirty(sys);
         }
 #endif
     }
