@@ -20,11 +20,13 @@ namespace Components
 
         public bool IsValid()
         {
-            foreach (var item in RequiredQuestsForStart)
+            for (int i = 0; i < RequiredQuestsForStart.Length; i++)
             {
-                if (!item.IsValid())
+                ref var value = ref RequiredQuestsForStart[i];
+
+                if (!value.IsValid())
                 {
-                    Debug.LogError("we have invalid id " + item.QuestContainerIndex);
+                    Debug.LogError("we have invalid id " + RequiredQuestsForStart[i].QuestContainerIndex);
                     return false;
                 }
             }
@@ -67,6 +69,7 @@ namespace Components
 
         public bool IsValid()
         {
+            FillQuestData();
             return EntityContainersMap.EntityContainersIDtoString.ContainsKey(QuestContainerIndex);
         }
 

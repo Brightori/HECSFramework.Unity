@@ -13,7 +13,7 @@ public class QuestData : ScriptableObject, IValidate
 {
     public QuestDataInfo QuestDataInfo;
 
-    public RequiredQuest[] RequiredQuestsForStart = Array.Empty<RequiredQuest>();
+    public RequiredQuest[] RequiredQuestsForStart = new RequiredQuest[0];
     public PredicateBluePrint[] Predicates = new PredicateBluePrint[0];
     public AssetReference QuestContainer;
     public bool IsManualyStarted;
@@ -43,6 +43,12 @@ public class QuestData : ScriptableObject, IValidate
         var path = UnityEditor.AssetDatabase.GUIDToAssetPath(QuestContainer.AssetGUID);
         var container = UnityEditor.AssetDatabase.LoadAssetAtPath<EntityContainer>(path);
         QuestDataInfo.QuestContainerIndex = container.ContainerIndex;
+
+        var containerRequestData = container.GetComponent<QuestInfoComponent>();
+        RequiredQuestsForStart = new RequiredQuest[containerRequestData.RequiredQuestsForStart.Length];
+
+        Array.Copy(containerRequestData.RequiredQuestsForStart, RequiredQuestsForStart, containerRequestData.RequiredQuestsForStart.Length);
+
 
         if (container.TryGetComponent(out PredicatesComponent predicatesComponent))
         {
