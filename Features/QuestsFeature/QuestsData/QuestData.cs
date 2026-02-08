@@ -25,6 +25,17 @@ public class QuestData : ScriptableObject, IValidate
 
     public bool IsRequiredCompleted(Entity questManager) => RequiredQuestsForStart.IsQuestsReady(questManager);
 
+    public bool IsPredicatesReady(Entity owner)
+    {
+        foreach (var bpPredicate in Predicates) 
+        { 
+            if (!bpPredicate.GetPredicate.IsReady(owner))
+                return false;
+        }
+
+        return true;
+    }
+
     public bool IsValid()
     {
         if (QuestContainer == null)

@@ -131,6 +131,9 @@ namespace Systems
                         if (!q.IsRequiredCompleted(Owner))
                             continue;
 
+                        if (!q.IsPredicatesReady(Owner))
+                            continue;
+
                         StartQuest(q);
                     }
                 }
