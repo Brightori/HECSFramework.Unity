@@ -51,7 +51,7 @@ namespace Systems
         public async UniTask<T> GetActorFromPool<T>(AssetReference assetReference, World world = null, bool init = true, Vector3 position = default,
             Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
-            var view = await GetViewFromPool(assetReference);
+            var view = await GetViewFromPool(assetReference, position, rotation, parent, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested)
             {
@@ -93,11 +93,11 @@ namespace Systems
             return view;
         }
 
-        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default, Transform parent = default, CancellationToken cancellationToken = default)
+        public async UniTask<GameObject> GetViewFromPool(AssetReference assetReference, Vector3 position = default, Quaternion rotation = default, Transform parent = default, CancellationToken cancellationToken = default, bool active = true)
         {
             var pool = await GetPool(assetReference);
             var view = await pool.Get(position, rotation, parent, cancellationToken);
-            view.SetActive(true);
+            view.SetActive(active);
 
             if (view.TryGetComponent(out IPoolableView poolableView))
                 poolableView.Start();
