@@ -1,3 +1,4 @@
+using HECSFramework.Unity.Editor;
 using HECSFramework.Unity.Helpers;
 using Helpers;
 using Sirenix.OdinInspector;
@@ -103,6 +104,8 @@ public class CreateNewContainerFinderDrawler
 
         newConfig.ContainersFilter = FilterParameters;
         newConfig.ShowingComponents = ShowingComponents;
+
+        InstallHECS.CheckFolder("Assets/BluePrints/ContainersFinders/");
 
         AssetDatabase.CreateAsset(newConfig, "Assets/BluePrints/ContainersFinders/" + name + ".asset");
         AssetDatabase.SaveAssets();
