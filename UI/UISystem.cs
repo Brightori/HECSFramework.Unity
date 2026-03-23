@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Commands;
 using Components;
 using Cysharp.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Systems
     [Feature("UIManager")]
     [Serializable, BluePrint]
     [Documentation(Doc.UI, Doc.HECS, "This system default for operating ui at hecs, this system have command for show and hide ui plus show or hide ui groups, this system still in progress")]
-    public class UISystem : BaseSystem, IUISystem, IGlobalStart, IRequestProvider<UniTask<Entity>, ShowUICommand>
+    public partial class UISystem : BaseSystem, IUISystem, IGlobalStart, IRequestProvider<UniTask<Entity>, ShowUICommand>
     {
         public const string UIBluePrints = "UIBluePrints";
 
@@ -473,9 +474,16 @@ namespace Systems
 
         public async UniTask<Entity> Request(ShowUICommand command)
         {
-            var neededUi =  await ShowUI(command.UIViewType, command.MultyView);
+            var neededUi = await ShowUI(command.UIViewType, command.MultyView);
             neededUi.Command(command);
             return neededUi;
+        }
+
+        public void CommandGlobalReact(WarmUpUICommand command)
+        {
+            var bp = GetUIBluePrint(command.UIViewType);
+            Addressables.LoadAssetAsync<GameObject>(bp.UIActor);
+            //assetService.GetAsset<UIActor>(bp.UIActor).Forget();
         }
     }
 
@@ -483,6 +491,7 @@ namespace Systems
         IReactGlobalCommand<ShowUICommand>,
         IReactGlobalCommand<HideUICommand>,
         IReactGlobalCommand<UIGroupCommand>,
+        IReactGlobalCommand<WarmUpUICommand>,
         IReactGlobalCommand<CanvasReadyCommand>
     { }
 }
