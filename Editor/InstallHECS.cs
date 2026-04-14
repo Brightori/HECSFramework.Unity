@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Text;
 using HECSFramework.Core.Generator;
 using UnityEditor;
@@ -76,6 +77,34 @@ namespace HECSFramework.Unity.Editor
             CreateGameController();
             //CreatePartialRegisterService();
             CreateReserveNamespace();
+        }
+
+        public static void AddDefine(string define)
+        {
+            if (string.IsNullOrWhiteSpace(define))
+            {
+                Debug.LogWarning("Define is null or empty");
+                return;
+            }
+
+            var buildTarget = EditorUserBuildSettings.selectedBuildTargetGroup;
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTarget);
+
+            // Проверяем, есть ли уже такой define
+            var list = defines.Split(';').ToList();
+            if (list.Contains(define))
+            {
+                Debug.Log($"Define '{define}' уже существует");
+                return;
+            }
+
+            // Добавляем
+            list.Add(define);
+            string newDefines = string.Join(";", list);
+
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTarget, newDefines);
+
+            Debug.Log($"Define '{define}' добавлен");
         }
 
         public static void SaveToFile(string data, string path)
