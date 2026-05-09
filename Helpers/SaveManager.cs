@@ -113,6 +113,17 @@ namespace HECSFramework.Unity
             if (File.Exists(DefaultSaveDataPath))
                 File.Delete(DefaultSaveDataPath);
 
+
+            var files = Directory.GetFiles(Application.persistentDataPath);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (files[i].Contains("dat") || files[i].Contains("data"))
+                {
+                    File.Delete(files[i]);
+                }
+            }
+
             Debug.Log("удалили сейв");
         }
     }
