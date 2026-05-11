@@ -230,7 +230,7 @@ namespace Systems
         }
     }
 
-    public struct SoundSourceContainer
+    public class SoundSourceContainer
     {
         public AudioSource AudioSource;
         public Guid Owner;
@@ -242,7 +242,7 @@ namespace Systems
 
         public bool IsBusy { get => isBusy && AudioSource.isPlaying; set => isBusy = value; }
 
-        public SoundSourceContainer(AudioSource audioSource) : this()
+        public SoundSourceContainer(AudioSource audioSource) 
         {
             AudioSource = audioSource;
         }
