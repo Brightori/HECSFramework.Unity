@@ -124,6 +124,7 @@ namespace HECSFramework.Unity
                 }
             }
 
+            PlayerPrefs.DeleteAll();
             Debug.Log("удалили сейв");
         }
     }
