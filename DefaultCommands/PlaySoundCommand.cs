@@ -24,7 +24,14 @@ namespace Commands
     [Documentation(Doc.Audio, "this command change volume on listeners")]
     public struct ChangeVolumeCommand : IGlobalCommand
     {
-        public bool IsMusic;
+        public VolumeType VolumeType;
         public float Volume;
+    }
+
+    public enum VolumeType
+    {
+        Master = 0,
+        Sound = 1,
+        Music = 2,
     }
 }

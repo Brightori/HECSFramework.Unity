@@ -1,10 +1,10 @@
-﻿using Commands;
+﻿using System;
+using System.Collections.Generic;
+using Commands;
 using Components;
 using DG.Tweening;
 using HECSFramework.Core;
 using HECSFramework.Unity;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -12,25 +12,26 @@ namespace Systems
 {
     [Serializable, BluePrint]
     [Documentation(Doc.Audio, Doc.Global, Doc.HECS, "Default sound solution for HECS, its all about 2d sound on this moment")]
-    public sealed partial class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor,
+    public sealed partial class SoundGlobalSystem : BaseSystem, ISoundGlobalSystem, IHaveActor, IUpdatable,
         IReactGlobalCommand<PlaySoundCommand>,
         IReactGlobalCommand<StopSoundCommand>,
         IReactGlobalCommand<UpdateSoundOptionsCommand>,
         IReactGlobalCommand<ChangeVolumeCommand>
     {
         [SerializeField] private AudioMixerGroup audioMixerGroup;
-        
+
         public SoundVolumeComponent volumeComponent;
 
-        private List<SoundSourceContainer> soundSources = new List<SoundSourceContainer>(32);
+        private HECSList<SoundSourceContainer> soundSources = new HECSList<SoundSourceContainer>(32);
 
+        private bool isDirty;
 
         public Actor Actor { get; set; }
 
         public override void InitSystem()
         {
             volumeComponent = EntityManager.GetSingleComponent<SoundVolumeComponent>();
-            
+
             Actor.TryGetComponents<AudioSource>(out var soundSources);
 
             if (soundSources != null)
@@ -81,7 +82,7 @@ namespace Systems
                     soundSource.Owner = playAudioCommand.Owner;
                     soundSource.AudioType = playAudioCommand.AudioType;
 
-                    source.volume = volumeComponent.SoundVolume;
+                    source.volume = volumeComponent.SoundVolume * volumeComponent.MasterVolume;
                     source.clip = playAudioCommand.Clip;
                     source.loop = playAudioCommand.IsRepeatable;
                     source.Play();
@@ -96,12 +97,11 @@ namespace Systems
         {
             for (int i = 0; i < soundSources.Count; i++)
             {
-                SoundSourceContainer soundSource = soundSources[i];
+                ref SoundSourceContainer soundSource = ref soundSources[i];
 
                 if (soundSource.AudioType == SoundType.Music)
                 {
-                    Stop(i);
-                    break;
+                    soundSource.StopFade();
                 }
             }
 
@@ -112,9 +112,9 @@ namespace Systems
 
             for (int i = 0; i < soundSources.Count; i++)
             {
-                SoundSourceContainer soundSource = soundSources[i];
+                ref SoundSourceContainer soundSource = ref soundSources[i];
 
-                if (!soundSource.IsBusy)
+                if (!soundSource.IsBusy && !soundSource.OnFade)
                 {
                     var source = soundSource.AudioSource;
                     soundSource.IsRepeatable = playAudioCommand.IsRepeatable;
@@ -123,10 +123,9 @@ namespace Systems
                     soundSource.AudioType = playAudioCommand.AudioType;
                     source.clip = playAudioCommand.Clip;
                     source.loop = playAudioCommand.IsRepeatable;
+                    source.volume = volumeComponent.MusicVolume * volumeComponent.MasterVolume;
                     source.Play();
-                    soundSource.AudioTween =  source.DOFade(volumeComponent.MusicVolume, 1);
-
-                    soundSources[i] = soundSource;
+                    isDirty = true;
                     return;
                 }
             }
@@ -136,13 +135,7 @@ namespace Systems
         {
             for (int i = 0; i < soundSources.Count; i++)
             {
-                var soundSource = soundSources[i];
-                var index = i;
-
-                if (soundSource.Owner == owner)
-                {
-                    Stop(index);
-                }
+                soundSources.Data[i].StopFade();
             }
         }
 
@@ -150,27 +143,16 @@ namespace Systems
         {
             for (int i = 0; i < soundSources.Count; i++)
             {
-                var soundSource = soundSources[i];
-                var index = i;
+                ref var soundSource = ref soundSources[i];
 
                 if (soundSource.Owner == owner && soundSource.AudioSource.clip == sound)
                 {
-                    Stop(index);
+                    soundSource.StopFade();
                     return;
                 }
             }
         }
 
-        public void EntityReact(Entity entity, bool isAdded)
-        {
-            if (!isAdded)
-                StopAllFromSource(entity.GUID);
-        }
-
-        private void Stop(int indexOfSource)
-        {
-            soundSources[indexOfSource].AudioSource.DOFade(0, 1).OnComplete(() => { soundSources[indexOfSource].Stop(); });
-        }
 
         public void CommandGlobalReact(PlaySoundCommand command)
         {
@@ -199,7 +181,7 @@ namespace Systems
             {
                 if (s.AudioTween != null)
                     DOTween.Kill(s.AudioTween);
-                
+
                 s.AudioSource.Stop();
             }
 
@@ -213,19 +195,50 @@ namespace Systems
 
         public void CommandGlobalReact(ChangeVolumeCommand command)
         {
-            if (command.IsMusic)
+            switch (command.VolumeType)
             {
-                volumeComponent.MusicVolume = command.Volume;
+                case VolumeType.Master:
+                    volumeComponent.MasterVolume = command.Volume;
+                    break;
+                case VolumeType.Sound:
+                    volumeComponent.SoundVolume = command.Volume;
+                    break;
+                case VolumeType.Music:
+                    volumeComponent.MusicVolume = command.Volume;
+                    break;
             }
-            else
-                volumeComponent.SoundVolume = command.Volume;
 
             foreach (var s in soundSources)
             {
-                if (command.IsMusic && s.AudioType == SoundType.Music)
-                    s.AudioSource.volume = command.Volume;
-                else
-                    s.AudioSource.volume = command.Volume;
+                s.UpdateVolume(volumeComponent);
+            }
+        }
+
+        public void UpdateLocal()
+        {
+            if (!isDirty)
+                return;
+
+            isDirty = false;
+
+            for (var i = 0; i < soundSources.Count; i++)
+            {
+                var s = soundSources[i];
+
+                if (s.OnFade)
+                {
+                    s.Progress -= Time.deltaTime;
+                    s.AudioSource.volume = Mathf.Lerp(s.AudioSource.volume, 0f, s.Progress);
+
+                    if (s.Progress < 0f)
+                    {
+                        s.Stop();
+                    }
+                    else
+                    {
+                        isDirty = true;
+                    }
+                }
             }
         }
     }
@@ -238,13 +251,22 @@ namespace Systems
         public Tween AudioTween;
 
         public bool IsRepeatable;
+        public bool OnFade;
+        public float Progress;
+
         private bool isBusy;
 
         public bool IsBusy { get => isBusy && AudioSource.isPlaying; set => isBusy = value; }
 
-        public SoundSourceContainer(AudioSource audioSource) 
+        public SoundSourceContainer(AudioSource audioSource)
         {
             AudioSource = audioSource;
+        }
+
+        public void StopFade()
+        {
+            Progress = 1;
+            OnFade = true;
         }
 
         public void Stop()
@@ -254,8 +276,9 @@ namespace Systems
             Owner = Guid.Empty;
             isBusy = false;
             IsRepeatable = false;
-            AudioType = SoundType.Default;
+            AudioType = SoundType.Sound;
             AudioSource.loop = false;
+            OnFade = false;
         }
 
         public override bool Equals(object obj)
@@ -264,6 +287,19 @@ namespace Systems
                    EqualityComparer<AudioSource>.Default.Equals(AudioSource, container.AudioSource) &&
                    Owner.Equals(container.Owner) &&
                    AudioType == container.AudioType;
+        }
+
+        public void UpdateVolume(SoundVolumeComponent volumeComponent)
+        {
+            switch (AudioType)
+            {
+                case SoundType.Sound:
+                    AudioSource.volume = volumeComponent.SoundVolume * volumeComponent.MasterVolume;
+                    break;
+                case SoundType.Music:
+                    AudioSource.volume = volumeComponent.MusicVolume * volumeComponent.MasterVolume;
+                    break;
+            }
         }
 
         public override int GetHashCode()
@@ -278,10 +314,10 @@ namespace Systems
 
     public enum SoundType
     {
-        Default = 0,
-        FX = 1,
-        Music = 2,
+        Sound = 0,
+        Music = 1,
     }
+
 
     public interface ISoundGlobalSystem : ISystem { }
 }
