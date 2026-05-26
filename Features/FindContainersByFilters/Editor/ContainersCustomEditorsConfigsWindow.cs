@@ -78,8 +78,9 @@ public class ContainersCustomEditorsConfigsWindow : OdinMenuEditorWindow
 public class CreateNewContainerFinderDrawler
 {
     [Space(10f)] public string SetName;
-    [ComponentIDDropDown] public int[] FilterParameters;
-    [ComponentIDDropDown] public int[] ShowingComponents;
+    [ComponentIDDropDown, BoxGroup("Filter")] public int[] FilterParameters;
+    [ComponentIDDropDown, BoxGroup("Filter")] public int[] ExcludeFilterParameters;
+    [ComponentIDDropDown, BoxGroup("Draw")] public int[] ShowingComponents;
 
     private ContainersFinderConfig newConfig;
 
@@ -94,6 +95,7 @@ public class CreateNewContainerFinderDrawler
 
         FilterParameters = null;
         ShowingComponents = null;
+        ExcludeFilterParameters = null;
     }
 
     [Button("@ButtonText()")]
@@ -106,6 +108,7 @@ public class CreateNewContainerFinderDrawler
 
         newConfig.ContainersFilter = FilterParameters;
         newConfig.ShowingComponents = ShowingComponents;
+        newConfig.ExcludeContainersFilter = ExcludeFilterParameters;
 
         InstallHECS.CheckFolder("Assets/BluePrints/ContainersFinders/");
 
