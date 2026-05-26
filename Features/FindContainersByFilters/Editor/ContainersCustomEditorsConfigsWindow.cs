@@ -5,12 +5,14 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
 using System.Linq;
+using HECSFramework.Core;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
 public class ContainersCustomEditorsConfigsWindow : OdinMenuEditorWindow
 {
-    private SOProvider<ContainersFinderConfig> sOProvider= new();
+    private SOProvider<ContainersFinderConfig> sOProvider = new();
     private CreateNewContainerFinderDrawler createDrawler;
 
     [Button("Refresh")]
@@ -36,12 +38,12 @@ public class ContainersCustomEditorsConfigsWindow : OdinMenuEditorWindow
         createDrawler = new CreateNewContainerFinderDrawler();
         tree.Add("Create New", createDrawler);
 
-        foreach (var c in sorted) 
+        foreach (var c in sorted)
         {
             tree.Add(c.name, new ContainersFinderConfigDrawler(c));
         }
 
-        // Создаем кастомный пункт меню с кнопкой
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         var buttonItem = new OdinMenuItem(tree, "Actions", null)
         {
             OnDrawItem = DrawButtonMenuItem
@@ -75,15 +77,15 @@ public class ContainersCustomEditorsConfigsWindow : OdinMenuEditorWindow
 [Serializable]
 public class CreateNewContainerFinderDrawler
 {
-    [Space(10f)]
-    public string SetName;
+    [Space(10f)] public string SetName;
     [ComponentIDDropDown] public int[] FilterParameters;
     [ComponentIDDropDown] public int[] ShowingComponents;
 
     private ContainersFinderConfig newConfig;
+
     private bool isButtonEnable => (FilterParameters != null && FilterParameters.Length > 0) &&
-        (ShowingComponents != null && ShowingComponents.Length > 0) &&
-        !string.IsNullOrWhiteSpace(SetName);
+                                   (ShowingComponents != null && ShowingComponents.Length > 0) &&
+                                   !string.IsNullOrWhiteSpace(SetName);
 
     public void Clear()
     {
@@ -113,7 +115,8 @@ public class CreateNewContainerFinderDrawler
 
     private string ButtonText()
     {
-        var isFiltersAndShowingSet = (FilterParameters == null || FilterParameters.Length == 0) || (ShowingComponents == null || ShowingComponents.Length == 0);
+        var isFiltersAndShowingSet = (FilterParameters == null || FilterParameters.Length == 0) ||
+                                     (ShowingComponents == null || ShowingComponents.Length == 0);
 
         if (isFiltersAndShowingSet && string.IsNullOrWhiteSpace(SetName))
         {
@@ -137,24 +140,32 @@ public class CreateNewContainerFinderDrawler
 [Serializable]
 public class ContainersFinderConfigDrawler
 {
-    [HorizontalGroup("Header")]
-    [ShowInInspector, HideLabel]
+    [PropertySpace(SpaceAfter = 5f)] [HorizontalGroup("Header")] [ShowInInspector, HideLabel]
     public ContainersFinderConfig Config;
-    [ComponentIDDropDown] public int[] FilterParameters;
-    [ComponentIDDropDown] public int[] ShowingComponents;
+
+    [ComponentIDDropDown, BoxGroup("Filter"), LabelText("Include")]
+    public int[] FilterParameters;
+
+    [ComponentIDDropDown, BoxGroup("Filter"), LabelText("Exclude")]
+    public int[] ExcludeContainersFilter;
+
+    [ComponentIDDropDown, BoxGroup("Draw"), ListDrawerSettings(OnTitleBarGUI =nameof(SortShowingComponents))]
+    public int[] ShowingComponents;
 
     public ContainersFinderConfigDrawler(ContainersFinderConfig config)
     {
         Config = config;
 
         FilterParameters = config.ContainersFilter;
+        ExcludeContainersFilter = config.ExcludeContainersFilter;
         ShowingComponents = config.ShowingComponents;
     }
 
     public static event Action<ContainersFinderConfig> OpenEditor;
 
+    [PropertySpace(SpaceAfter = 5f)]
     [HorizontalGroup("Header", Width = 80)]
-    [Button("Remove", ButtonHeight = 25)]
+    [Button("Remove", ButtonHeight = 25), GUIColor(1f, 0.17f, 0f)]
     private void Remove()
     {
         string path = AssetDatabase.GetAssetPath(Config);
@@ -164,24 +175,37 @@ public class ContainersFinderConfigDrawler
 
         Config = null;
         FilterParameters = null;
+        ExcludeContainersFilter = null;
 
         EditorUtility.FocusProjectWindow();
         AssetDatabase.Refresh();
     }
 
+    [PropertySpace(10f)]
     [Button("Save")]
     private void SaveChanges()
     {
         Config.ContainersFilter = FilterParameters;
+        Config.ExcludeContainersFilter = ExcludeContainersFilter;
         Config.ShowingComponents = ShowingComponents;
 
         EditorUtility.SetDirty(Config);
         AssetDatabase.SaveAssets();
     }
 
-    [Button("Show Containers")]
+    [PropertySpace(3f)]
+    [Button("Show Containers", ButtonSizes.Large)]
     private void OpenContainersEditWindow()
     {
         OpenEditor?.Invoke(Config);
+    }
+
+    private void SortShowingComponents()
+    {
+        if (SirenixEditorGUI.ToolbarButton(EditorIcons.ArrowDown))
+        {
+            var sorted = ShowingComponents.OrderBy(x => TypesMap.GetTypeByComponentHECSHash(x).Name).Distinct();
+            ShowingComponents = sorted.ToArray();
+        }
     }
 }

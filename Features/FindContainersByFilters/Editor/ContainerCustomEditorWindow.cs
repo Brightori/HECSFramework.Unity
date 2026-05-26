@@ -7,11 +7,13 @@ using Sirenix.OdinInspector.Editor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 
 [InitializeOnLoad]
-[Documentation(Doc.Editor, Doc.Containers, Doc.Config, "this window show and edit containers by rules (tags and masks for needed components) ")]
+[Documentation(Doc.Editor, Doc.Containers, Doc.Config,
+    "this window show and edit containers by rules (tags and masks for needed components) ")]
 public class ContainerCustomEditorWindow : OdinMenuEditorWindow
 {
     private static SOProvider<EntityContainer> sOProvider = new();
@@ -32,14 +34,17 @@ public class ContainerCustomEditorWindow : OdinMenuEditorWindow
     protected override OdinMenuTree BuildMenuTree()
     {
         var collection = sOProvider.GetCollection()
-        .Where(x => x is not PresetContainer && containersConfig.ContainersFilter.All(p => x.ContainsComponent(p))
-            && !x.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex, true))
-        .ToList();
+            .Where(x => x is not PresetContainer
+                        && containersConfig.ContainersFilter.All(p => x.ContainsComponent(p))
+                        && containersConfig.ExcludeContainersFilter.All(p => !x.ContainsComponent(p))
+                        && !x.ContainsComponent(ComponentProvider<IgnoreReferenceContainerTagComponent>.TypeIndex,
+                            true))
+            .ToList();
 
         var tree = new OdinMenuTree();
         tree.Config.DrawSearchToolbar = true;
 
-        foreach(var ec in collection)
+        foreach (var ec in collection)
         {
             tree.Add(ec.name, new EntityContainerDrawler(ec, containersConfig));
         }
@@ -51,11 +56,12 @@ public class ContainerCustomEditorWindow : OdinMenuEditorWindow
 [Serializable]
 public class EntityContainerDrawler
 {
-    [HorizontalGroup("Header")]
-    [ShowInInspector, HideLabel]
+    [HorizontalGroup("Header")] [ShowInInspector, HideLabel]
     public EntityContainer Container;
 
-    [ShowInInspector, ListDrawerSettings(ShowFoldout = false, DefaultExpandedState = true, HideAddButton = true, HideRemoveButton = true)]
+    [ShowInInspector,
+     ListDrawerSettings(ShowFoldout = false, DefaultExpandedState = true, HideAddButton = true,
+         HideRemoveButton = true)]
     public List<ComponentDrawler> components;
 
     public EntityContainerDrawler(EntityContainer container, ContainersFinderConfig config)
@@ -74,21 +80,25 @@ public class EntityContainerDrawler
                 if (c.GetTypeHashCode != config.ShowingComponents[i])
                     continue;
 
-                components.Add(new ComponentDrawler { ComponentID = c.GetTypeHashCode, Component = c, Name = c.GetType().Name });
+                components.Add(new ComponentDrawler
+                    { ComponentID = c.GetTypeHashCode, Component = c, Name = c.GetType().Name });
                 break;
             }
         }
+
+        var sorted = components.OrderBy(x => x.Name);
+        components = sorted.ToList();
     }
 
-    [HorizontalGroup("Header", Width = 80)]
+    [HorizontalGroup("Header", Width = 80), GUIColor(0.28f, 1f, 0f)]
     [Button("Save", ButtonHeight = 25)]
     private void SaveChanges()
     {
         var containerComponents = Container.GetComponents<IComponent>().ToList();
 
-        for(int i = 0; i < containerComponents.Count; i++)
+        for (int i = 0; i < containerComponents.Count; i++)
         {
-            for(int j = 0; j < components.Count; j++)
+            for (int j = 0; j < components.Count; j++)
             {
                 if (components[j].ComponentID == containerComponents[i].GetTypeHashCode)
                 {
@@ -106,9 +116,10 @@ public class EntityContainerDrawler
 [Serializable]
 public class ComponentDrawler
 {
-    [HideInInspector]
-    public int ComponentID;
-    [BoxGroup, HideLabel]
-    public string Name;
-    [ShowInInspector, HideLabel, HideReferenceObjectPicker, BoxGroup] public IComponent Component;
+    [HideInInspector] public int ComponentID;
+    [BoxGroup]
+    [HideLabel] [ReadOnly] public string Name;
+
+    [ShowInInspector, HideLabel, HideReferenceObjectPicker, BoxGroup]
+    public IComponent Component;
 }
