@@ -6,8 +6,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = nameof(ContainersFinderConfig), menuName = "Tools/ContainersFinderConfig", order = 0)]
 public class ContainersFinderConfig : ScriptableObject
 {
-    [ComponentIDDropDown] public int[] ContainersFilter;
-    [ComponentIDDropDown] public int[] ShowingComponents;
+    [ComponentIDDropDown, BoxGroup("Filter")] public int[] ContainersFilter;
+    [ComponentIDDropDown, BoxGroup("Filter")] public int[] ExcludeContainersFilter;
+    [ComponentIDDropDown, BoxGroup("Draw")] public int[] ShowingComponents;
 
     #region Editor
 #if UNITY_EDITOR
