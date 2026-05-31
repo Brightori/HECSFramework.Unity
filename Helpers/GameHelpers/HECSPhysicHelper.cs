@@ -2,6 +2,7 @@
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using Helpers;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Systems
@@ -96,6 +97,23 @@ namespace Systems
             }
 
             return result;
+        }
+
+        public static void SortRaycastsByDistance(Vector3 pos, RaycastHit[] raycastHits, int count)
+        {
+
+            for (int i = 0; i < count - 1; i++)
+            {
+                for (int j = 0; j < count - i - 1; j++)
+                {
+                    if (raycastHits[j].distance > raycastHits[j + 1].distance)
+                    {
+                        RaycastHit temp = raycastHits[j];
+                        raycastHits[j] = raycastHits[j + 1];
+                        raycastHits[j + 1] = temp;
+                    }
+                }
+            }
         }
 
         /// <summary>
