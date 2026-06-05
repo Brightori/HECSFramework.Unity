@@ -26,7 +26,7 @@ public class ValidateWindow : OdinEditorWindow
                     continue;
                 else
                 {
-                    Debug.LogError(check.name + " not valid");
+                    Debug.LogError(check.name + " not valid", check);
                 }
             }
         }
@@ -48,7 +48,7 @@ public class ValidateWindow : OdinEditorWindow
             }
             catch
             {
-                Debug.LogError("we have null refs at " + container.name);
+                Debug.LogError("we have null refs at " + container.name, container);
             }
         }
 
@@ -69,17 +69,17 @@ public class ValidateWindow : OdinEditorWindow
                     try
                     {
                         if (!c.IsValid())
-                            Debug.LogWarning($"we have problem with {c.GetType()} on {container.name}");
+                            Debug.LogWarning($"we have problem with {c.GetType()} on {container.name}", container);
                     }
                     catch
                     {
-                        Debug.LogError(container.name + " we have error here");
+                        Debug.LogError(container.name + " we have error here", container);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString() + $" {container.name}");
+                Debug.LogError(ex.ToString() + $" {container.name}", container);
             }
 
             try
@@ -88,16 +88,16 @@ public class ValidateWindow : OdinEditorWindow
                 {
                     if (viewReferenceComponent.ViewReference == null)
                     {
-                        Debug.LogError("viewRef null on container " + container.name);
+                        Debug.LogError("viewRef null on container " + container.name, container);
                     }
 
                     if (!AddressablesHelpers.IsAssetAddressable(viewReferenceComponent.ViewReference.AssetGUID))
-                        Debug.LogError("viewRef not addressable at " + container.name);
+                        Debug.LogError("viewRef not addressable at " + container.name, container);
                 }
             }
             catch
             {
-                Debug.LogError("we have problem with" + container.name);
+                Debug.LogError("we have problem with" + container.name, container);
             }
 
             EntityContainerEditorHelper.MarkDirtyAllInContainer(container);

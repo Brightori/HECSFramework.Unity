@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Components
 {
-    public abstract class StatComponent<T> : ModifiableFloatCounterComponent, IBaseValue<float> where T : IdentifierContainer
+    public abstract class StatComponent<T> : ModifiableFloatCounterComponent, IBaseValue<float>, IValidate where T : IdentifierContainer
     {
         [SerializeField] protected float startValue = 10;
         [SerializeField] private T counterIdentifier;
@@ -20,6 +20,17 @@ namespace Components
         public void SetupBaseValue(float newBaseValue)
         {
             modifiableFloatCounter.Setup(Id, SetupValue);
+        }
+
+        public bool IsValid()
+        {
+            if (counterIdentifier == null)
+            {
+                Debug.LogError($"Counter identifier is null in {GetType().Name}");
+                return false;
+            }
+
+            return true;
         }
     }
 }
