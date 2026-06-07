@@ -95,7 +95,7 @@ public class CreateIdentifierHelper : OdinEditorWindow
         }
     }
 
-    [MenuItem("HECS Options/Helpers/Create Identifier Helper")]
+    [MenuItem("HECS Options/Helpers/Create Identifier Helper %&#F11")]
     public static void ShowWindow()
     {
         GetWindow<CreateIdentifierHelper>();
