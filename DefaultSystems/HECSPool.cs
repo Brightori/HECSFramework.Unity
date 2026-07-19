@@ -5,7 +5,9 @@ using Cysharp.Threading.Tasks;
 using Systems;
 using UnityEngine;
 
-public class HECSPool : IDisposable 
+#pragma warning disable CS0612, CS0618
+
+public class HECSPool : IDisposable
 {
     private Queue<GameObject> queue;
     private HashSet<int> alrdyInpool = new HashSet<int>(32);
@@ -32,8 +34,11 @@ public class HECSPool : IDisposable
 
         foreach (GameObject obj in queue)
         {
+#if UNITY_2023_3_OR_NEWER
+            objectIDToPool.Remove(obj.GetEntityId().GetHashCode());
+#else
             objectIDToPool.Remove(obj.GetInstanceID());
-
+#endif
             if (obj != null)
                 MonoBehaviour.Destroy(obj);
         }
@@ -47,7 +52,7 @@ public class HECSPool : IDisposable
 
         if (queue.Count == 0)
         {
-            var task =  MonoBehaviour.Instantiate<GameObject>(container.CurrentObject, position, rotation, transform);
+            var task = MonoBehaviour.Instantiate<GameObject>(container.CurrentObject, position, rotation, transform);
 
             if (cancellationToken.IsCancellationRequested)
             {
@@ -56,7 +61,14 @@ public class HECSPool : IDisposable
             }
 
             container.RegisterObject(task);
+
+#if UNITY_2023_3_OR_NEWER
+            this.objectIDToPool[task.GetEntityId().GetHashCode()] = this;
+#else
             this.objectIDToPool[task.GetInstanceID()] = this;
+#endif
+
+
             return task;
         }
 
@@ -65,7 +77,13 @@ public class HECSPool : IDisposable
         if (needed == null)
             goto again;
 
-        alrdyInpool.Remove(needed.GetInstanceID());
+#if UNITY_2023_3_OR_NEWER
+        alrdyInpool.Remove(needed.GetEntityId().GetHashCode());
+#else
+             alrdyInpool.Remove(needed.GetInstanceID());
+#endif
+
+
         var neededTransform = needed.transform;
 
         neededTransform.SetPositionAndRotation(position, rotation);
@@ -85,11 +103,23 @@ public class HECSPool : IDisposable
             return;
         }
 
+#if UNITY_2023_3_OR_NEWER
+        if (alrdyInpool.Contains(pooledObj.GetEntityId().GetHashCode()))
+            return;
+#else
         if (alrdyInpool.Contains(pooledObj.GetInstanceID()))
             return;
+#endif
+
+
+#if UNITY_2023_3_OR_NEWER
+        alrdyInpool.Add(pooledObj.GetEntityId().GetHashCode());
+#else
+     alrdyInpool.Add(pooledObj.GetInstanceID());
+#endif
 
         //SceneManager.MoveGameObjectToScene(pooledObj, SceneManager.GetSceneByBuildIndex(0));
-        alrdyInpool.Add(pooledObj.GetInstanceID());
+
         queue.Enqueue(pooledObj);
     }
 }

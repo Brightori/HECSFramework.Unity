@@ -113,7 +113,7 @@ namespace Systems
             for (int i = 0; i < count; i++)
             {
                 var go = await assetService.GetAssetInstance(viewReference);
-                this.objectIDToPool[go.GetInstanceID()] = neededHandler;
+                this.objectIDToPool[go.GetAdaptedInstanceID()] = neededHandler;
                 ReleaseView(viewReference, go).Forget();
             }
         }
@@ -142,7 +142,7 @@ namespace Systems
             if (gameObject == null)
                 return;
 
-            if (objectIDToPool.TryGetValue(gameObject.GetInstanceID(), out var poolContainer))
+            if (objectIDToPool.TryGetValue(gameObject.GetAdaptedInstanceID(), out var poolContainer))
             {
                 gameObject.transform.SetParent(null);
                 gameObject.SetActive(false);

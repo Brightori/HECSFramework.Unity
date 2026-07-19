@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using HECSFramework.Core;
+using Helpers;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
@@ -130,7 +131,7 @@ namespace Systems
                 var newContainer = new AssetContainer<T>(result, resourceName, task, objectToContainer, isForceRelease);
 
                 AssetContainerHolder<T>.KeyToAssetContainer[resourceName] = newContainer;
-                objectToContainer.Add(result.GetInstanceID(), newContainer);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), newContainer);
                 assetsContainers.Add(newContainer);
                 return result;
             }
@@ -180,7 +181,7 @@ namespace Systems
             result = UnityEngine.Object.Instantiate(needed);
 
             if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
 
             return result;
         }
@@ -193,7 +194,7 @@ namespace Systems
             result = UnityEngine.Object.Instantiate(needed, parent);
 
             if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
 
             return result;
         }
@@ -225,7 +226,7 @@ namespace Systems
                 result = UnityEngine.Object.Instantiate(needed, pos, rotation, parent);
 
             if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
 
             return result;
         }
@@ -262,7 +263,7 @@ namespace Systems
                 result = UnityEngine.Object.Instantiate(needed, pos, rotation, parent);
 
             if (AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
 
             return result;
         }
@@ -292,7 +293,7 @@ namespace Systems
             for (int i = 0; i < instance.Result.Length; i++)
             {
                 if (AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference].RegisterObject(instance.Result[i]))
-                    objectToContainer.Add(instance.Result[i].GetInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
+                    objectToContainer.Add(instance.Result[i].GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
             }
 
             return instance.Result;
@@ -310,7 +311,7 @@ namespace Systems
             var result = instance;
 
             if (AssetContainerHolder<T>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
 
             return result;
         }
@@ -322,7 +323,7 @@ namespace Systems
             var result = instance;
 
             if (AssetContainerHolder<T>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
+                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
 
             return result;
         }
@@ -514,9 +515,9 @@ namespace Systems
             if (obj == null)
                 return false;
 
-            if (objectToContainer.TryGetValue(obj.GetInstanceID(), out var container))
+            if (objectToContainer.TryGetValue(obj.GetAdaptedInstanceID(), out var container))
             {
-                objectToContainer.Remove(obj.GetInstanceID());
+                objectToContainer.Remove(obj.GetAdaptedInstanceID());
                 var release = container.ReleaseObject(obj);
 
                 if (container.IsReleased)
@@ -652,6 +653,20 @@ namespace Systems
         private float fillProgress;
 
 
+#if UNITY_2023_3_OR_NEWER
+        /// <param name="asyncOperation"></param>
+        /// <param name="forceRelease">if this argument true, we release this asset only when  we use force release flag on release object</param>
+        /// <param name="size"></param>
+        public AssetContainer(T obj, string objectKey, AsyncOperationHandle<T> asyncOperation, Dictionary<int, AssetContainer> objectToContainer, bool forceRelease, int size = 1) : base(obj.GetEntityId().GetHashCode(), objectKey, objectToContainer)
+        {
+            asyncOperationHandle = asyncOperation;
+            needforceRelease = forceRelease;
+            activeObjects = new Dictionary<int, T>(size);
+            CurrentObject = obj;
+            isReady = true;
+        }
+#else
+
         /// <param name="asyncOperation"></param>
         /// <param name="forceRelease">if this argument true, we release this asset only when  we use force release flag on release object</param>
         /// <param name="size"></param>
@@ -663,6 +678,7 @@ namespace Systems
             CurrentObject = obj;
             isReady = true;
         }
+#endif
 
         public AssetContainer(string objectKey, Dictionary<int, AssetContainer> objectToContainer, bool forceRelease, int size = 1) : base(objectKey, objectToContainer)
         {
@@ -672,7 +688,7 @@ namespace Systems
 
         public bool RegisterObject(T obj)
         {
-            if (activeObjects.TryAdd(obj.GetInstanceID(), obj))
+            if (activeObjects.TryAdd(obj.GetAdaptedInstanceID(), obj))
             {
                 counter++;
                 return true;
@@ -689,7 +705,7 @@ namespace Systems
         /// <returns></returns>
         public override bool ReleaseObject(UnityEngine.Object obj, bool forceRelease = false)
         {
-            if (activeObjects.Remove(obj.GetInstanceID()))
+            if (activeObjects.Remove(obj.GetAdaptedInstanceID()))
             {
                 --counter;
                 UnityEngine.Object.Destroy(obj);
@@ -809,7 +825,7 @@ namespace Systems
 
                 isReady = true;
                 CurrentObject = task.Result;
-                ObjectID = task.Result.GetInstanceID();
+                ObjectID = task.Result.GetAdaptedInstanceID();
                 objectToContainer[ObjectID] = this;
                 assetsContainers.Add(this);
                 return task.Result;
@@ -871,7 +887,7 @@ namespace Systems
 
                 isReady = true;
                 CurrentObject = task.Result;
-                ObjectID = task.Result.GetInstanceID();
+                ObjectID = task.Result.GetAdaptedInstanceID();
                 objectToContainer[ObjectID] = this;
                 assetsContainers.Add(this);
                 return task.Result;
@@ -920,5 +936,5 @@ namespace Systems
             return $"{Math.Sign(byteCount) * num:F1} {suf[place]}";
         }
     }
-    #endregion
+#endregion
 }

@@ -8,6 +8,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+#pragma warning disable CS0612, CS0618
+
 namespace Components
 {
     [Documentation(Doc.HECS, Doc.UI, "this component provides access to ui parts, by adding them to collections")]
@@ -172,7 +174,12 @@ namespace Components
 
         public bool Equals(AccessToIdentifier<T> other)
         {
+#if UNITY_2023_3_OR_NEWER
+            return Value.GetEntityId() == other.Value.GetEntityId();
+#else
+
             return Value.GetInstanceID() == other.Value.GetInstanceID();
+#endif
         }
 
         public override int GetHashCode()

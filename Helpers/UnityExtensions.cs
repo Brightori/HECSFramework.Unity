@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Components;
 using HECSFramework.Unity;
 using UnityEngine;
@@ -74,6 +75,17 @@ namespace Helpers
 
                 if (containsNull) dictionary.Remove(toDestroy);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetAdaptedInstanceID(this UnityEngine.Object @object)
+        {
+#if UNITY_2023_3_OR_NEWER
+            return @object.GetEntityId().GetHashCode();
+#else
+            return @object.GetInstanceID();
+#endif
+
         }
 
         public static Vector3 GetRandomPositionInBounds(Bounds bounds)
