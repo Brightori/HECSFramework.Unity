@@ -144,6 +144,11 @@ namespace Systems
 
             if (objectIDToPool.TryGetValue(gameObject.GetAdaptedInstanceID(), out var poolContainer))
             {
+                if (gameObject.TryGetComponent(out IPoolableView poolableView))
+                {
+                    poolableView.Stop();
+                }
+
                 gameObject.transform.SetParent(null);
                 gameObject.SetActive(false);
                 poolContainer.Release(gameObject);

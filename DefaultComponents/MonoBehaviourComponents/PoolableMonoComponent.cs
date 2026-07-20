@@ -1,15 +1,28 @@
-﻿using HECSFramework.Core;
+﻿using System.Collections.Generic;
+using HECSFramework.Core;
 using Systems;
 using UnityEngine;
 
 [Documentation(Doc.GameLogic, Doc.Visual, Doc.Poolable, "Main monobeh component for tagging poolable view" + nameof(PoolingSystem))]
 public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 {
+    public bool RuntTimeCheck = false;
+
+    private List<IStopOnPooling> needForStop;
+    private List<IStartOnPooling> needForStart;
+
     public GameObject View => gameObject;
+
+    private void Awake()
+    {
+         GetComponentsInChildren<IStopOnPooling>(needForStop);
+        GetComponentsInChildren<IStartOnPooling>(needForStart);
+    }
 
     void IPoolableView.Stop()
     {
-        var needForStop = GetComponentsInChildren<IStopOnPooling>();
+        if (RuntTimeCheck)
+            GetComponentsInChildren<IStopOnPooling>(needForStop);
 
         foreach (var needed in needForStop)
             needed.Stop();
@@ -17,7 +30,8 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 
     void IPoolableView.Start()
     {
-        var needForStart = GetComponentsInChildren<IStartOnPooling>();
+        if (RuntTimeCheck)
+            GetComponentsInChildren<IStartOnPooling>(needForStart);
 
         foreach (var needed in needForStart)
             needed.StartOnPooling();
