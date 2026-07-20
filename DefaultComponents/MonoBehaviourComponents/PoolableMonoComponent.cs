@@ -8,14 +8,14 @@ public class PoolableMonoComponent : MonoBehaviour, IPoolableView
 {
     public bool RuntTimeCheck = false;
 
-    private List<IStopOnPooling> needForStop;
-    private List<IStartOnPooling> needForStart;
+    private List<IStopOnPooling> needForStop = new List<IStopOnPooling>(2);
+    private List<IStartOnPooling> needForStart = new List<IStartOnPooling>(2);
 
     public GameObject View => gameObject;
 
     private void Awake()
     {
-         GetComponentsInChildren<IStopOnPooling>(needForStop);
+        GetComponentsInChildren<IStopOnPooling>(needForStop);
         GetComponentsInChildren<IStartOnPooling>(needForStart);
     }
 
