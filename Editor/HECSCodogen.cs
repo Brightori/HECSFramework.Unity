@@ -12,116 +12,164 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 #pragma warning disable
 
-[InitializeOnLoad]
 public class HECSRoslynCodegen : OdinEditorWindow
 {
-    static HECSRoslynCodegen()
+    [Serializable]
+    private sealed class CodegenConfig
     {
-        try
+        private const string FileName = "HECSCodegenSettings.json";
+
+        [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
+        [OnValueChanged(nameof(Save))]
+        public string CodegenExePath = string.Empty;
+
+        [FolderPath(AbsolutePath = true)]
+        [OnValueChanged(nameof(Save))]
+        public string ClientScriptDirectory = string.Empty;
+
+        [FolderPath(AbsolutePath = true)]
+        [OnValueChanged(nameof(Save))]
+        public string ServerScriptDirectory = string.Empty;
+
+        [PropertySpace]
+
+        [FolderPath(AbsolutePath = true)]
+        [DisableIf("@!MspGenerationEnabled")]
+        [OnValueChanged(nameof(Save))]
+        public string MspScanDirectory = string.Empty;
+
+        [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
+        [DisableIf("@!MspGenerationEnabled")]
+        [OnValueChanged(nameof(Save))]
+        public string MspFilePath = string.Empty;
+
+        [BoxGroup("Settings")]
+        [HorizontalGroup("Settings/Split", Width = 200, LabelWidth = 120)]
+        [LabelText("MSP Generation")]
+        [OnValueChanged(nameof(Save))]
+        public bool MspGenerationEnabled;
+
+        [LabelText("| Serialization")]
+        [HorizontalGroup("Settings/Split/Next", Width = 200, LabelWidth = 120)]
+        [OnValueChanged(nameof(Save))]
+        public bool Serialization;
+
+        [HorizontalGroup("Settings/Split/Next/Next", Width = 200, LabelWidth = 150)]
+        [LabelText("| Network Command Map")]
+        [OnValueChanged(nameof(Save))]
+        public bool NetworkCommandMap;
+
+        private static string ConfigPath
+            => Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? string.Empty, "Library", FileName);
+
+        private static string DefaultMspFilePath
+            => Path.Combine(InstallHECS.ScriptPath.TrimEnd('/'), InstallHECS.HECSGenerated.Trim('/'), "msp.cs");
+
+        public static CodegenConfig Load()
         {
-            if (PlayerPrefs.HasKey(nameof(ClientScriptDirectory)))
+            var result = new CodegenConfig();
+
+            try
             {
-                if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(ClientScriptDirectory))))
-                    return;
+                if (File.Exists(ConfigPath))
+                    JsonUtility.FromJsonOverwrite(File.ReadAllText(ConfigPath), result);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[HECS] Failed to read codegen settings from {ConfigPath}, using defaults: {e}");
             }
 
-            PlayerPrefs.SetString(nameof(ClientScriptDirectory), Application.dataPath);
+            result.ApplyDefaults();
+            return result;
+        }
 
-
-            if (PlayerPrefs.HasKey(nameof(CodegenExePath)))
+        public void Save()
+        {
+            try
             {
-                if (!string.IsNullOrEmpty(EditorPrefs.GetString(nameof(CodegenExePath))))
-                    return;
+                Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath));
+                File.WriteAllText(ConfigPath, JsonUtility.ToJson(this, true));
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[HECS] Failed to write codegen settings to {ConfigPath}: {e}");
+            }
+        }
+
+        private void ApplyDefaults()
+        {
+            var changed = false;
+
+            if (!Directory.Exists(ClientScriptDirectory))
+            {
+                ClientScriptDirectory = Application.dataPath;
+                changed = true;
             }
 
-#if OSX_ARM
-            var find = Directory.GetFiles(Application.dataPath, "script.sh.command", SearchOption.AllDirectories);
-#elif OSX_INTEL
-            var find = Directory.GetFiles(Application.dataPath, "script_x86.sh.command", SearchOption.AllDirectories);
+            if (!File.Exists(CodegenExePath))
+            {
+                CodegenExePath = FindCodegenExecutable();
+                changed = true;
+            }
+
+            if (!Directory.Exists(MspScanDirectory))
+            {
+                MspScanDirectory = Application.dataPath;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(MspFilePath))
+            {
+                MspFilePath = DefaultMspFilePath;
+                changed = true;
+            }
+
+            if (changed)
+                Save();
+        }
+
+        private static string FindCodegenExecutable()
+        {
+#if UNITY_EDITOR_OSX
+#if OSX_INTEL
+            var patterns = new[] { "script_x86.sh.command", "script.sh.command" };
 #else
-            var find = Directory.GetFiles(Application.dataPath, "RoslynHECS.exe", SearchOption.AllDirectories);
+            var patterns = new[] { "script.sh.command", "script_x86.sh.command" };
 #endif
-            if (find != null && find.Length > 0 && !string.IsNullOrEmpty(find[0]))
-                PlayerPrefs.SetString(nameof(CodegenExePath), find[0]);
+#else
+            var patterns = new[] { "RoslynHECS.exe" };
+#endif
+            try
+            {
+                foreach (var pattern in patterns)
+                {
+                    var found = Directory.GetFiles(Application.dataPath, pattern, SearchOption.AllDirectories);
+
+                    if (found.Length > 0)
+                        return found[0];
+                }
+
+                Debug.LogWarning($"[HECS] Codegen executable not found under {Application.dataPath}.");
+                return string.Empty;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[HECS] Failed to locate the codegen executable under {Application.dataPath}: {e}");
+                return string.Empty;
+            }
         }
-        catch (Exception e)
-        {
-            Debug.LogWarning("Юнити шалит, попробуйте переоткрыть окно или юнити");
-        }
     }
 
-    [Sirenix.OdinInspector.FilePath(AbsolutePath = true)]
-    [OnInspectorInit("@CodegenExePath")]
-    public string CodegenExePath
+    private const int GenerationTimeoutMs = 5 * 60 * 1000;
+
+    private static CodegenConfig config;
+
+    [ShowInInspector, InlineProperty, HideLabel, HideReferenceObjectPicker, PropertyOrder(-1)]
+    private static CodegenConfig Config
     {
-        get => PlayerPrefs.GetString(nameof(CodegenExePath), "");
-        set => PlayerPrefs.SetString(nameof(CodegenExePath), value);
+        get => config ??= CodegenConfig.Load();
+        set => config = value;
     }
-
-    [FolderPath(AbsolutePath = true)]
-    [OnInspectorInit("@ClientScriptDirectory")]
-    public string ClientScriptDirectory
-    {
-        get => PlayerPrefs.GetString(nameof(ClientScriptDirectory), "");
-        set => PlayerPrefs.SetString(nameof(ClientScriptDirectory), value);
-    }
-
-    [FolderPath(AbsolutePath = true)]
-    [OnInspectorInit("@ServerScriptDirectory")]
-    public string ServerScriptDirectory
-    {
-        get => PlayerPrefs.GetString(nameof(ServerScriptDirectory), "");
-        set => PlayerPrefs.SetString(nameof(ServerScriptDirectory), value);
-    }
-
-    [PropertySpace]
-
-    [FolderPath(AbsolutePath = true)]
-    [OnInspectorInit("@MspScanDirectory")]
-    [DisableIf("@!MspGenerationEnabled")]
-    public string MspScanDirectory
-    {
-        get => PlayerPrefs.GetString(nameof(MspScanDirectory), "");
-        set => PlayerPrefs.SetString(nameof(MspScanDirectory), value);
-    }
-
-    [FolderPath(AbsolutePath = true)]
-    [OnInspectorInit("@MspFilePath")]
-    [DisableIf("@!MspGenerationEnabled")]
-    public string MspFilePath
-    {
-        get => PlayerPrefs.GetString(nameof(MspFilePath), "");
-        set => PlayerPrefs.SetString(nameof(MspFilePath), value);
-    }
-
-    [BoxGroup("Settings")]
-    [HorizontalGroup("Settings/Split", Width = 200, LabelWidth = 120)]
-    [LabelText("MSP Generation")]
-    [OnInspectorInit("@MspGenerationEnabled")]
-    public bool MspGenerationEnabled
-    {
-        get => PlayerPrefs.GetInt(nameof(MspGenerationEnabled), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(MspGenerationEnabled), value ? 1 : 0);
-    }
-
-    [LabelText("| Serialization")]
-    [HorizontalGroup("Settings/Split/Next", Width = 200, LabelWidth = 120)]
-    [OnInspectorInit("@Serialization")]
-    public bool Serialization
-    {
-        get => PlayerPrefs.GetInt(nameof(Serialization), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(Serialization), value ? 1 : 0);
-    }
-
-    [HorizontalGroup("Settings/Split/Next/Next", Width = 200, LabelWidth = 150)]
-    [LabelText("| Network Command Map")]
-    [OnInspectorInit("@NetworkCommandMap")]
-    public bool NetworkCommandMap
-    {
-        get => PlayerPrefs.GetInt(nameof(NetworkCommandMap), 0) == 1;
-        set => PlayerPrefs.SetInt(nameof(NetworkCommandMap), value ? 1 : 0);
-    }
-
 
     [MenuItem("HECS Options/Roslyn Codegen %&#F10", priority = -30)]
     public static void RoslynCodegenMenu()
@@ -129,33 +177,36 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
     [Button]
     public async void CodegenClient()
-        => await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
+        => await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}", false);
 
     [Button]
     public async void CodegenServer()
-        => await Generate($"path:{ServerScriptDirectory} server no_blueprints", true);
+        => await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints", true);
 
     [Button]
-    public void CodegenAll()
-    {
-        CodegenServer();
-        CodegenClient();
-    }
+    public async void CodegenAll()
+        => await CodegenAsync();
 
     public async Task CodegenAsync()
     {
-        await Generate($"path:{ServerScriptDirectory} server no_blueprints", true);
-        await Generate($"path:{ClientScriptDirectory} {ClientArguments()}", false);
+        await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints", true);
+        await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}", false);
     }
+
+    private static string PathArgument(string directory)
+        => directory != null && directory.Contains(' ') ? $"\"path:{directory}\"" : $"path:{directory}";
+
+    private static string Quote(string value)
+        => value != null && value.Contains(' ') ? $"\"{value}\"" : value;
 
     private string ClientArguments()
     {
         string args = string.Empty;
 
-        if (!NetworkCommandMap)
+        if (!Config.NetworkCommandMap)
             args += " no_commands";
 
-        if (!Serialization)
+        if (!Config.Serialization)
             args += " no_resolvers";
 
         return args;
@@ -165,54 +216,93 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         Debug.Log("Generating Roslyn files...");
 
+        var exePath = Config.CodegenExePath;
+
+        if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+        {
+            Debug.LogError($"[HECS] Codegen executable not found at '{exePath}'. " +
+                           "Set Codegen Exe Path in HECS Options / Roslyn Codegen.");
+            return;
+        }
+
 #if UNITY_EDITOR_OSX
-        OSX();
-        return;
+        var fileName = "/bin/bash";
+        var arguments = $"{Quote(exePath)} {args}";
+#else
+        var fileName = exePath;
+        var arguments = args;
 #endif
 
         Process myProcess = new Process
         {
             StartInfo =
             {
-                FileName = CodegenExePath,
-                Arguments = args,
-                WorkingDirectory = CodegenExePath
+                FileName = fileName,
+                Arguments = arguments,
+                WorkingDirectory = Path.GetDirectoryName(exePath)
             },
             EnableRaisingEvents = true
         };
-        myProcess.Start();
 
-        if (isServer) return;
-
-        //Debug.Log("Generating counters map...");
-        //GenerateCountersMap.GenerateCountersMapFunc();
-
-        if (!MspGenerationEnabled) return;
+        var exited = new TaskCompletionSource<bool>();
+        myProcess.Exited += (a, b) => exited.TrySetResult(true);
 
         EditorApplication.LockReloadAssemblies();
 
-        var tcs = new TaskCompletionSource<bool>();
-        myProcess.Exited += (a, b) => tcs.SetResult(true);
-        await tcs.Task;
+        try
+        {
+            try
+            {
+                myProcess.Start();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[HECS] Failed to start codegen '{fileName}': {e}");
+                return;
+            }
 
-        Debug.Log("Generating MessagePack files...");
-        var result = await MspGeneration(MspScanDirectory, MspFilePath, Application.dataPath);
-        Debug.Log(result);
+            if (await Task.WhenAny(exited.Task, Task.Delay(GenerationTimeoutMs)) != exited.Task)
+            {
+                Debug.LogError($"[HECS] Codegen did not finish within {GenerationTimeoutMs / 1000} seconds.");
+                return;
+            }
 
-        EditorApplication.UnlockReloadAssemblies();
-    }
+            if (myProcess.ExitCode != 0)
+            {
+                Debug.LogError($"[HECS] Codegen exited with code {myProcess.ExitCode}.");
+                return;
+            }
 
-    private void OSX()
-    {
-        string open = $@"open {CodegenExePath}";
-        Process.Start(@"/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"
-            , open);
+            Debug.Log("Roslyn files generated.");
+
+            if (isServer)
+                return;
+
+            //Debug.Log("Generating counters map...");
+            //GenerateCountersMap.GenerateCountersMapFunc();
+
+            if (!Config.MspGenerationEnabled)
+                return;
+
+            Debug.Log("Generating MessagePack files...");
+            var result = await MspGeneration(Config.MspScanDirectory, Config.MspFilePath, Application.dataPath);
+            Debug.Log(result);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[HECS] Codegen failed: {e}");
+        }
+        finally
+        {
+            EditorApplication.UnlockReloadAssemblies();
+            myProcess.Dispose();
+        }
     }
 
     private static Task<string> MspGeneration(string input, string output, string dataPath)
     {
         var fileName = "mpc";
-        var arguments = $"-i {input} -o {output}";
+        var arguments = $"-i {Quote(input)} -o {Quote(output)}";
         var psi = new ProcessStartInfo
         {
             CreateNoWindow = true,
@@ -228,6 +318,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         };
 
         Process p;
+
         try
         {
             p = Process.Start(psi);
@@ -237,15 +328,41 @@ public class HECSRoslynCodegen : OdinEditorWindow
             return Task.FromException<string>(ex);
         }
 
+        if (p == null)
+            return Task.FromException<string>(new InvalidOperationException($"Failed to start '{fileName}'"));
+
         var tcs = new TaskCompletionSource<string>();
+        var stdout = new StringBuilder();
+        var stderr = new StringBuilder();
+
         p.EnableRaisingEvents = true;
+
+        p.OutputDataReceived += (a, b) =>
+        {
+            if (b.Data != null)
+                stdout.AppendLine(b.Data);
+        };
+
+        p.ErrorDataReceived += (a, b) =>
+        {
+            if (b.Data != null)
+                stderr.AppendLine(b.Data);
+        };
+
         p.Exited += (a, b) =>
         {
-            var data = p.StandardOutput.ReadToEnd();
-            p.Dispose();
-            p = null;
-            tcs.TrySetResult(data);
+            p.WaitForExit();
+
+            if (stderr.Length > 0)
+                Debug.LogWarning($"[HECS] {fileName}: {stderr}");
+
+            tcs.TrySetResult(stdout.ToString());
         };
+
+        p.BeginOutputReadLine();
+        p.BeginErrorReadLine();
+
+        tcs.Task.ContinueWith(_ => p.Dispose(), TaskScheduler.Default);
 
         var path = InstallHECS.ScriptPath + InstallHECS.HECSGenerated + "mpcHeader.cs";
         File.WriteAllText(path, GetResolverMapStaticConstructor().ToString());
