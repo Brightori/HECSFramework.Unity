@@ -14,7 +14,7 @@ namespace HECSFramework.Unity
         public static bool operator ==(IdentifierContainer lhs, IdentifierContainer rhs) => lhs.EqualsIdentifiers(rhs);
         public static bool operator !=(IdentifierContainer lhs, IdentifierContainer rhs) => !lhs.EqualsIdentifiers(rhs);
 
-        public static implicit operator int(IdentifierContainer lhs) => lhs.Id;
+        public static implicit operator int(IdentifierContainer lhs) => lhs ? lhs.Id : 0;
 
         public int Id
         {
