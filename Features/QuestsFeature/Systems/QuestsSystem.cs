@@ -94,8 +94,6 @@ namespace Systems
 
             foreach (var s in questsHolder.QuestStages)
             {
-                var stageIndex = s.QuestStageInfo.QuestStageIndex;
-
                 if (QuestsHistoryComponent.CompletedStages.Contains(s.QuestStageInfo))
                     continue;
 
@@ -114,7 +112,7 @@ namespace Systems
 
                     if (!QuestsStateComponent.ActiveGroups.Contains(g.GroupQuestInfo))
                     {
-                        if (!s.IsReady(Owner))
+                        if (!g.IsReady(Owner))
                             continue;
 
                         QuestsStateComponent.ActiveGroups.Add(g.GroupQuestInfo);

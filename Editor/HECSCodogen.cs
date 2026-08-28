@@ -59,6 +59,13 @@ public class HECSRoslynCodegen : OdinEditorWindow
         [OnValueChanged(nameof(Save))]
         public bool NetworkCommandMap;
 
+        [HorizontalGroup("Settings/Split/Next/Next/Next", Width = 200, LabelWidth = 120)]
+        [LabelText("| Force Rebuild")]
+        [Tooltip("Полностью чистит Containers/Resolvers/FastComponentsProviders и пишет генерат без сверки. " +
+                 "Разовая операция: снимается сама после успешного прогона.")]
+        [OnValueChanged(nameof(Save))]
+        public bool ForceRebuild;
+
         private static string ConfigPath
             => Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? string.Empty, "Library", FileName);
 
@@ -177,11 +184,17 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
     [Button]
     public async void CodegenClient()
-        => await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}", false);
+    {
+        if (await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}{ForceRebuildArgument()}", false))
+            ResetForceRebuild();
+    }
 
     [Button]
     public async void CodegenServer()
-        => await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints", true);
+    {
+        if (await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints{ForceRebuildArgument()}", true))
+            ResetForceRebuild();
+    }
 
     [Button]
     public async void CodegenAll()
@@ -189,8 +202,12 @@ public class HECSRoslynCodegen : OdinEditorWindow
 
     public async Task CodegenAsync()
     {
-        await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints", true);
-        await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}", false);
+        //оба захода читают флаг до сброса, поэтому force_rebuild уходит и в сервер, и в клиент
+        var server = await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints{ForceRebuildArgument()}", true);
+        var client = await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}{ForceRebuildArgument()}", false);
+
+        if (server && client)
+            ResetForceRebuild();
     }
 
     private static string PathArgument(string directory)
@@ -212,7 +229,22 @@ public class HECSRoslynCodegen : OdinEditorWindow
         return args;
     }
 
-    private async Task Generate(string args, bool isServer)
+    private static string ForceRebuildArgument()
+        => Config.ForceRebuild ? " force_rebuild" : string.Empty;
+
+    //force_rebuild чистит директории генерата и пишет без сверки — это разовая операция,
+    //забытая включённой она молча убивает write-if-changed и заставляет Unity реимпортить всё
+    private static void ResetForceRebuild()
+    {
+        if (!Config.ForceRebuild)
+            return;
+
+        Config.ForceRebuild = false;
+        Config.Save();
+        Debug.Log("[HECS] Force rebuild выполнен, галка снята.");
+    }
+
+    private async Task<bool> Generate(string args, bool isServer)
     {
         Debug.Log("Generating Roslyn files...");
 
@@ -222,7 +254,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         {
             Debug.LogError($"[HECS] Codegen executable not found at '{exePath}'. " +
                            "Set Codegen Exe Path in HECS Options / Roslyn Codegen.");
-            return;
+            return false;
         }
 
 #if UNITY_EDITOR_OSX
@@ -258,39 +290,41 @@ public class HECSRoslynCodegen : OdinEditorWindow
             catch (Exception e)
             {
                 Debug.LogError($"[HECS] Failed to start codegen '{fileName}': {e}");
-                return;
+                return false;
             }
 
             if (await Task.WhenAny(exited.Task, Task.Delay(GenerationTimeoutMs)) != exited.Task)
             {
                 Debug.LogError($"[HECS] Codegen did not finish within {GenerationTimeoutMs / 1000} seconds.");
-                return;
+                return false;
             }
 
             if (myProcess.ExitCode != 0)
             {
                 Debug.LogError($"[HECS] Codegen exited with code {myProcess.ExitCode}.");
-                return;
+                return false;
             }
 
             Debug.Log("Roslyn files generated.");
 
             if (isServer)
-                return;
+                return true;
 
             //Debug.Log("Generating counters map...");
             //GenerateCountersMap.GenerateCountersMapFunc();
 
             if (!Config.MspGenerationEnabled)
-                return;
+                return true;
 
             Debug.Log("Generating MessagePack files...");
             var result = await MspGeneration(Config.MspScanDirectory, Config.MspFilePath, Application.dataPath);
             Debug.Log(result);
+            return true;
         }
         catch (Exception e)
         {
             Debug.LogError($"[HECS] Codegen failed: {e}");
+            return false;
         }
         finally
         {
