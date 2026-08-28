@@ -9,7 +9,7 @@ namespace Components
     [Serializable]
 
 #if JsonSerialize
-    [JSONHECSSerialize]
+    [HECSFramework.Serialize.JSONHECSSerialize]
 #endif
 
     [Feature(Doc.Quests)]

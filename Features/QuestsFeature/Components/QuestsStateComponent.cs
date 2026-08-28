@@ -9,7 +9,7 @@ namespace Components
     [Serializable]
     [Feature(Doc.Quests)]
 #if JsonSerialize
-    [JSONHECSSerialize]
+    [HECSFramework.Serialize.JSONHECSSerialize]
 #endif
     [Documentation(Doc.Quests, "here we hold active quests and active hierarchy of quests")]
     public sealed partial class QuestsStateComponent : BaseComponent, IBeforeSerializationComponent, IAfterSerializationComponent, ISavebleComponent, IDirty, IWorldSingleComponent
