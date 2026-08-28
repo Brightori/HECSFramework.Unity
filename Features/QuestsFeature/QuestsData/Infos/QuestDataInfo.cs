@@ -5,17 +5,34 @@ using Sirenix.OdinInspector;
 
 [Serializable]
 [MessagePackObject]
+#if JsonSerialize
+[Newtonsoft.Json.JsonObject]
+#endif
 public struct QuestDataInfo : IEquatable<QuestDataInfo>, IEquatable<QuestGroupInfo>
 {
     [Key(0)]
+#if JsonSerialize
+    [Newtonsoft.Json.JsonProperty("QuestsHolderIndex")]
+#endif
     public int QuestsHolderIndex;
+
     [Key(1)]
+#if JsonSerialize
+    [Newtonsoft.Json.JsonProperty("QuestStageIndex")]
+#endif
     public int QuestStageIndex;
+
     [Key(2)]
+#if JsonSerialize
+    [Newtonsoft.Json.JsonProperty("QuestGroupIndex")]
+#endif
     public int QuestGroupIndex;
 
     [ReadOnly]
     [Key(3)]
+#if JsonSerialize
+    [Newtonsoft.Json.JsonProperty("QuestContainerIndex")]
+#endif
     public int QuestContainerIndex;
 
     public static implicit operator QuestGroupInfo(QuestDataInfo info) => new QuestGroupInfo

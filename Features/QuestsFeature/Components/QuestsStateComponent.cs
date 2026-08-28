@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using HECSFramework.Core;
 using HECSFramework.Unity;
 using UnityEngine;
@@ -9,6 +8,9 @@ namespace Components
 {
     [Serializable]
     [Feature(Doc.Quests)]
+#if JsonSerialize
+    [JSONHECSSerialize]
+#endif
     [Documentation(Doc.Quests, "here we hold active quests and active hierarchy of quests")]
     public sealed partial class QuestsStateComponent : BaseComponent, IBeforeSerializationComponent, IAfterSerializationComponent, ISavebleComponent, IDirty, IWorldSingleComponent
     {
