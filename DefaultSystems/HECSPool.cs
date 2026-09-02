@@ -2,24 +2,36 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Helpers;
 using Systems;
 using UnityEngine;
-
-#pragma warning disable CS0612, CS0618
+using UnityEngine.AddressableAssets;
 
 public class HECSPool : IDisposable
 {
-    private Queue<GameObject> queue;
-    private HashSet<int> alrdyInpool = new HashSet<int>(32);
-    private AssetContainer<GameObject> container;
+    private readonly Queue<GameObject> queue;
+    private readonly HashSet<int> alreadyInPool = new HashSet<int>(32);
+    private readonly AssetService assetService;
+    private readonly AssetReference assetReference;
     private readonly Dictionary<int, HECSPool> objectIDToPool;
     private int maxCount;
+    private bool isDisposed;
 
-    public HECSPool(AssetContainer<GameObject> getObject, Dictionary<int, HECSPool> objectIDToPool, int maxCount = 256)
+    public AssetReference AssetReference => assetReference;
+    public int MaxCount => maxCount;
+    public int Count => queue.Count;
+    public bool IsDisposed => isDisposed;
+    public IEnumerable<GameObject> PooledObjects => queue;
+
+    public GameObject Prefab
+        => assetService.TryGetContainer<GameObject>(assetReference, out var container) ? container.CurrentObject : null;
+
+    public HECSPool(AssetService assetService, AssetReference assetReference, Dictionary<int, HECSPool> objectIDToPool, int maxCount = 256)
     {
         queue = new Queue<GameObject>(maxCount);
         this.maxCount = maxCount;
-        container = getObject;
+        this.assetService = assetService;
+        this.assetReference = assetReference;
         this.objectIDToPool = objectIDToPool;
     }
 
@@ -28,68 +40,31 @@ public class HECSPool : IDisposable
         this.maxCount = maxCount;
     }
 
-    public void Dispose()
+    public async UniTask<GameObject> Get(Vector3 position, Quaternion rotation, Transform parent, CancellationToken cancellationToken = default)
     {
-        container = default;
+        if (isDisposed)
+            throw new ObjectDisposedException(nameof(HECSPool), "[HECSPool] pool of " + assetReference.AssetGUID + " is disposed");
 
-        foreach (GameObject obj in queue)
+        while (queue.TryDequeue(out var pooled))
         {
-#if UNITY_2023_3_OR_NEWER
-            objectIDToPool.Remove(obj.GetEntityId().GetHashCode());
-#else
-            objectIDToPool.Remove(obj.GetInstanceID());
-#endif
-            if (obj != null)
-                MonoBehaviour.Destroy(obj);
-        }
+            var id = pooled.GetAdaptedInstanceID();
+            alreadyInPool.Remove(id);
 
-        queue.Clear();
-    }
-
-    public async UniTask<GameObject> Get(Vector3 position, Quaternion rotation, Transform transform, CancellationToken cancellationToken = default)
-    {
-    again:
-
-        if (queue.Count == 0)
-        {
-            var task = MonoBehaviour.Instantiate<GameObject>(container.CurrentObject, position, rotation, transform);
-
-            if (cancellationToken.IsCancellationRequested)
+            if (pooled == null)
             {
-                MonoBehaviour.Destroy(task);
-                throw new OperationCanceledException("[HECSPool] we cancel Get");
+                objectIDToPool.Remove(id);
+                continue;
             }
 
-            container.RegisterObject(task);
-
-#if UNITY_2023_3_OR_NEWER
-            this.objectIDToPool[task.GetEntityId().GetHashCode()] = this;
-#else
-            this.objectIDToPool[task.GetInstanceID()] = this;
-#endif
-
-
-            return task;
+            var pooledTransform = pooled.transform;
+            pooledTransform.SetPositionAndRotation(position, rotation);
+            pooledTransform.SetParent(parent);
+            return pooled;
         }
 
-        var needed = queue.Dequeue();
-
-        if (needed == null)
-            goto again;
-
-#if UNITY_2023_3_OR_NEWER
-        alrdyInpool.Remove(needed.GetEntityId().GetHashCode());
-#else
-             alrdyInpool.Remove(needed.GetInstanceID());
-#endif
-
-
-        var neededTransform = needed.transform;
-
-        neededTransform.SetPositionAndRotation(position, rotation);
-        neededTransform.SetParent(transform);
-
-        return needed;
+        var instance = await assetService.GetAssetInstance(assetReference, position, rotation, parent, cancellationToken: cancellationToken);
+        objectIDToPool[instance.GetAdaptedInstanceID()] = this;
+        return instance;
     }
 
     public void Release(GameObject pooledObj)
@@ -97,29 +72,38 @@ public class HECSPool : IDisposable
         if (pooledObj == null)
             return;
 
-        if (queue.Count > maxCount)
+        var id = pooledObj.GetAdaptedInstanceID();
+
+        if (isDisposed || queue.Count >= maxCount)
         {
-            container.ReleaseObject(pooledObj);
+            objectIDToPool.Remove(id);
+            assetService.Release(pooledObj);
             return;
         }
 
-#if UNITY_2023_3_OR_NEWER
-        if (alrdyInpool.Contains(pooledObj.GetEntityId().GetHashCode()))
+        if (!alreadyInPool.Add(id))
             return;
-#else
-        if (alrdyInpool.Contains(pooledObj.GetInstanceID()))
-            return;
-#endif
 
-
-#if UNITY_2023_3_OR_NEWER
-        alrdyInpool.Add(pooledObj.GetEntityId().GetHashCode());
-#else
-     alrdyInpool.Add(pooledObj.GetInstanceID());
-#endif
-
-        //SceneManager.MoveGameObjectToScene(pooledObj, SceneManager.GetSceneByBuildIndex(0));
-
+        objectIDToPool[id] = this;
         queue.Enqueue(pooledObj);
+    }
+
+    public void Dispose()
+    {
+        if (isDisposed)
+            return;
+
+        isDisposed = true;
+
+        while (queue.TryDequeue(out var pooled))
+        {
+            if (pooled == null)
+                continue;
+
+            objectIDToPool.Remove(pooled.GetAdaptedInstanceID());
+            assetService.Release(pooled);
+        }
+
+        alreadyInPool.Clear();
     }
 }

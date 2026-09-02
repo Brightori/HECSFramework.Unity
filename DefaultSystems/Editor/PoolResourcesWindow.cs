@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HECSFramework.Core;
 using HECSFramework.Core.Helpers;
 using Sirenix.OdinInspector;
@@ -39,9 +40,9 @@ public class PoolResourcesWindow : OdinEditorWindow
         {
             list.Add(new DrawPool
             {
-                MainPrfb = ReflectionHelpers.GetPrivateFieldValue<AssetContainer<GameObject>>(pool.Value, "container").CurrentObject,
-                MaxCount = ReflectionHelpers.GetPrivateFieldValue<int>(pool.Value, "maxCount"),
-                CurrentViews = ReflectionHelpers.GetPrivateFieldValue<Queue<GameObject>>(pool.Value, "queue").ToArray(),
+                MainPrfb = pool.Value.Prefab,
+                MaxCount = pool.Value.MaxCount,
+                CurrentViews = pool.Value.PooledObjects.ToArray(),
             });
         }
 

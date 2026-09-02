@@ -12,33 +12,32 @@ using UnityEngine.AddressableAssets;
 
 namespace Systems
 {
-    [Documentation(Doc.GameLogic, Doc.HECS, "Global pooling system, contains pooling views, containers, actors")]
+    [Documentation(Doc.GameLogic, Doc.HECS, "Global pooling system, contains pooling views, containers, actors. Every asset load, instantiate and destroy goes through AssetService")]
     public partial class PoolingSystem : BaseSystem
     {
         public const int minPoolSize = 5;
         public const int maxPoolSize = 512;
 
         private readonly Dictionary<string, HECSPool> pools = new(64);
-        private Dictionary<int, HECSPool> objectIDToPool = new Dictionary<int, HECSPool>(64);
+        private readonly Dictionary<int, HECSPool> objectIDToPool = new Dictionary<int, HECSPool>(64);
+        private AssetService assetService;
+
+        private AssetService AssetService => assetService ??= Owner.World.GetSingleSystem<AssetService>();
 
         private async UniTask<HECSPool> GetPool(AssetReference assetReference)
         {
-        getPool:
-
             if (pools.TryGetValue(assetReference.AssetGUID, out var pool))
                 return pool;
 
-            var assetService = EntityManager.Default.GetSingleSystem<AssetService>();
-            await assetService.GetAsset<GameObject>(assetReference, isForceRelease: true);
+            await AssetService.GetAsset<GameObject>(assetReference, isForceRelease: true);
 
-            if (!assetService.TryGetContainer<GameObject>(assetReference, out var container))
-                throw new InvalidOperationException("[Pooling] asset container is missing right after load " + assetReference.AssetGUID);
+            // a concurrent GetPool for the same reference may have won while we awaited
+            if (pools.TryGetValue(assetReference.AssetGUID, out pool))
+                return pool;
 
-            if (pools.ContainsKey(assetReference.AssetGUID))
-                goto getPool;
-
-            pools.Add(assetReference.AssetGUID, new HECSPool(container, objectIDToPool, maxPoolSize));
-            return pools[assetReference.AssetGUID];
+            pool = new HECSPool(AssetService, assetReference, objectIDToPool, maxPoolSize);
+            pools.Add(assetReference.AssetGUID, pool);
+            return pool;
         }
 
         public void ReleasePool(AssetReference assetReference)
@@ -109,14 +108,13 @@ namespace Systems
 
         public async UniTask Warmup(AssetReference viewReference, int count, CancellationToken token = default)
         {
-            var neededHandler = await GetPool(viewReference);
-            var assetService = Owner.World.GetSingleSystem<AssetService>();
+            var pool = await GetPool(viewReference);
 
             for (int i = 0; i < count; i++)
             {
-                var go = await assetService.GetAssetInstance(viewReference);
-                this.objectIDToPool[go.GetAdaptedInstanceID()] = neededHandler;
-                ReleaseView(viewReference, go).Forget();
+                var go = await pool.Get(default, Quaternion.identity, null, token);
+                go.SetActive(false);
+                pool.Release(go);
             }
         }
 
@@ -144,31 +142,23 @@ namespace Systems
             if (gameObject == null)
                 return;
 
-            if (objectIDToPool.TryGetValue(gameObject.GetAdaptedInstanceID(), out var poolContainer))
+            if (objectIDToPool.TryGetValue(gameObject.GetAdaptedInstanceID(), out var pool))
             {
-                if (gameObject.TryGetComponent(out IPoolableView poolableView))
-                {
-                    poolableView.Stop();
-                }
-
-                gameObject.transform.SetParent(null);
-                gameObject.SetActive(false);
-                poolContainer.Release(gameObject);
+                StopView(gameObject);
+                pool.Release(gameObject);
             }
             else
             {
-                MonoBehaviour.Destroy(gameObject);
+                AssetService.Release(gameObject);
             }
         }
 
         public async UniTask ReleaseView(AssetReference assetReference, GameObject gameObject)
         {
-            if (gameObject.TryGetComponent(out IPoolableView poolableView))
-                poolableView.Stop();
+            if (gameObject == null)
+                return;
 
-            gameObject.SetActive(false);
-            gameObject.transform.SetParent(null);
-
+            StopView(gameObject);
             var pool = await GetPool(assetReference);
             pool.Release(gameObject);
         }
@@ -176,10 +166,11 @@ namespace Systems
         /// <summary>
         /// we dont check here is poolable or not and just remove to pool
         /// </summary>
-        /// <param name="assetReference"></param>
-        /// <param name="gameObject"></param>
         public async UniTask ReleaseViewFast(AssetReference assetReference, GameObject gameObject)
         {
+            if (gameObject == null)
+                return;
+
             gameObject.SetActive(false);
             gameObject.transform.SetParent(null);
 
@@ -187,30 +178,34 @@ namespace Systems
             pool.Release(gameObject);
         }
 
+        private static void StopView(GameObject gameObject)
+        {
+            if (gameObject.TryGetComponent(out IPoolableView poolableView))
+                poolableView.Stop();
+
+            gameObject.transform.SetParent(null);
+            gameObject.SetActive(false);
+        }
+
         public override void Dispose()
         {
             base.Dispose();
-
-            foreach (var pool in pools.Values)
-            {
-                pool.Dispose();
-            }
-
-            objectIDToPool.Clear();
-            pools.Clear();
+            DisposePools();
         }
 
         public void Clear()
         {
+            DisposePools();
+            AssetService.UnloadUnusedResources();
+        }
+
+        private void DisposePools()
+        {
             foreach (var pool in pools.Values)
-            {
                 pool.Dispose();
-            }
 
-            objectIDToPool.Clear();
             pools.Clear();
-
-            Owner.World.GetSingleSystem<AssetService>().UnloadUnusedResources();
+            objectIDToPool.Clear();
         }
     }
 }
