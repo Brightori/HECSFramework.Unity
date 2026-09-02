@@ -30,7 +30,9 @@ namespace Systems
 
             var assetService = EntityManager.Default.GetSingleSystem<AssetService>();
             await assetService.GetAsset<GameObject>(assetReference, isForceRelease: true);
-            var container = AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference];
+
+            if (!assetService.TryGetContainer<GameObject>(assetReference, out var container))
+                throw new InvalidOperationException("[Pooling] asset container is missing right after load " + assetReference.AssetGUID);
 
             if (pools.ContainsKey(assetReference.AssetGUID))
                 goto getPool;
@@ -77,8 +79,8 @@ namespace Systems
             return actor;
         }
 
-        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer, 
-            World world = null, bool init = true, Vector3 position = default, 
+        public async UniTask<T> GetActorFromPool<T>(EntityContainer entityContainer,
+            World world = null, bool init = true, Vector3 position = default,
             Quaternion rotation = default, Transform parent = null, CancellationToken cancellationToken = default) where T : Actor
         {
             var viewReferenceComponent = entityContainer.GetComponent<ViewReferenceComponent>();
@@ -108,8 +110,8 @@ namespace Systems
         public async UniTask Warmup(AssetReference viewReference, int count, CancellationToken token = default)
         {
             var neededHandler = await GetPool(viewReference);
-            var assetService = Owner.World.GetSingleSystem<AssetService>(); 
-            
+            var assetService = Owner.World.GetSingleSystem<AssetService>();
+
             for (int i = 0; i < count; i++)
             {
                 var go = await assetService.GetAssetInstance(viewReference);
@@ -121,7 +123,7 @@ namespace Systems
         public async UniTask Warmup(EntityContainer entityContainer, int count, CancellationToken token = default)
         {
             if (entityContainer.TryGetComponent(out ViewReferenceComponent view))
-               await Warmup(view.ViewReference, count, token); 
+                await Warmup(view.ViewReference, count, token);
             else
                 throw new InvalidOperationException("we dont have view ref on this container " + entityContainer);
         }
@@ -207,7 +209,7 @@ namespace Systems
 
             objectIDToPool.Clear();
             pools.Clear();
-            
+
             Owner.World.GetSingleSystem<AssetService>().UnloadUnusedResources();
         }
     }
