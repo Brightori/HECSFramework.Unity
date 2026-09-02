@@ -3,8 +3,8 @@ using HECSFramework.Core;
 using Helpers;
 using Sirenix.OdinInspector;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -22,213 +22,217 @@ namespace Systems
     {
         protected HashSet<AssetContainer> assetsContainers = new HashSet<AssetContainer>(64);
         private readonly Dictionary<int, AssetContainer> objectToContainer = new Dictionary<int, AssetContainer>(32);
-
-        private Queue<AssetContainer> releasedContainers = new Queue<AssetContainer>(32);
+        private readonly Dictionary<AssetKey, AssetContainer> keyToContainer = new Dictionary<AssetKey, AssetContainer>(32);
+        private readonly Queue<AssetContainer> releasedContainers = new Queue<AssetContainer>(32);
 
         public override void InitSystem()
         {
         }
+
+        public override void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            foreach (var container in assetsContainers)
+                container.Dispose();
+
+            assetsContainers.Clear();
+            objectToContainer.Clear();
+            keyToContainer.Clear();
+            releasedContainers.Clear();
+            base.Dispose();
+        }
+
+        #region Containers
+
+        private AssetContainer<T> GetOrCreateContainer<T>(AssetKey key, bool isForceRelease, out bool created) where T : UnityEngine.Object
+        {
+            if (keyToContainer.TryGetValue(key, out var existing) && !existing.IsReleased)
+            {
+                var typed = (AssetContainer<T>)existing;
+
+                if (isForceRelease)
+                    typed.LockContainer();
+
+                created = false;
+                return typed;
+            }
+
+            var container = new AssetContainer<T>(key, objectToContainer, keyToContainer, assetsContainers, isForceRelease);
+            keyToContainer[key] = container;
+            created = true;
+            return container;
+        }
+
+        private async UniTask<AssetContainer<T>> LoadContainer<T>(AssetKey key, object addressableKey, ProgressUpdate progress, bool isForceRelease, CancellationToken cancellationToken) where T : UnityEngine.Object
+        {
+#if UNITY_EDITOR
+            Debug.Log($"[AssetService] GetAsset {key}");
+#endif
+            var container = GetOrCreateContainer<T>(key, isForceRelease, out var created);
+
+            if (created)
+                await container.LoadAsset(addressableKey, progress, cancellationToken);
+            else
+                await container.WaitAsset(progress, cancellationToken);
+
+            return container;
+        }
+
+        private AssetContainer<T> LoadContainerSync<T>(AssetKey key, object addressableKey, bool isForceRelease) where T : UnityEngine.Object
+        {
+#if UNITY_EDITOR
+            Debug.Log($"[AssetService] GetAssetSync {key}");
+#endif
+            var container = GetOrCreateContainer<T>(key, isForceRelease, out var created);
+
+            if (created)
+                container.LoadAssetSync(addressableKey);
+            else
+                container.WaitAssetSync();
+
+            return container;
+        }
+
+        public bool TryGetContainer<T>(string resourceName, out AssetContainer<T> container) where T : UnityEngine.Object
+            => TryGetContainer(AssetKey.Address<T>(resourceName), out container);
+
+        public bool TryGetContainer<T>(AssetReference assetReference, out AssetContainer<T> container) where T : UnityEngine.Object
+            => TryGetContainer(AssetKey.Reference<T>(assetReference), out container);
+
+        private bool TryGetContainer<T>(AssetKey key, out AssetContainer<T> container) where T : UnityEngine.Object
+        {
+            if (keyToContainer.TryGetValue(key, out var existing) && !existing.IsReleased)
+            {
+                container = (AssetContainer<T>)existing;
+                return true;
+            }
+
+            container = null;
+            return false;
+        }
+
+        private void RegisterInstance<T>(AssetContainer<T> container, T instance) where T : UnityEngine.Object
+        {
+            if (container.RegisterObject(instance))
+                objectToContainer[instance.GetAdaptedInstanceID()] = container;
+        }
+
+        private static Quaternion SafeRotation(Quaternion rotation)
+            => rotation.x == 0f && rotation.y == 0f && rotation.z == 0f && rotation.w == 0f ? Quaternion.identity : rotation;
+
+        #endregion
 
         #region GetAsset
 
         public async UniTask<T> GetAsset<T>(string resourceName, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
             if (string.IsNullOrEmpty(resourceName))
-                throw new Exception("[AssetService] GetAsset invalid name provided ");
+                throw new ArgumentException("[AssetService] GetAsset invalid name provided", nameof(resourceName));
 
-#if UNITY_EDITOR
-            Debug.Log($"[AssetService] GetAsset {resourceName}");
-#endif
+            var container = await LoadContainer<T>(AssetKey.Address<T>(resourceName), resourceName, progress, isForceRelease, cancellationToken);
+            return container.CurrentObject;
+        }
 
-            if (AssetContainerHolder<T>.KeyToAssetContainer.TryGetValue(resourceName, out var container) && !container.IsReleased)
-            {
-                return await container.GetAsset(resourceName, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
-            }
+        public async UniTask<T> GetAsset<T>(AssetReference assetReference, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        {
+            if (assetReference == null || !assetReference.RuntimeKeyIsValid())
+                throw new ArgumentException("[AssetService] GetAsset invalid asset reference provided", nameof(assetReference));
 
-            var newcontainer = AssetContainerHolder<T>.KeyToAssetContainer[resourceName] = new AssetContainer<T>(resourceName, objectToContainer, isForceRelease);
-            return await newcontainer.LoadAsset(resourceName, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
+            var container = await LoadContainer<T>(AssetKey.Reference<T>(assetReference), assetReference.RuntimeKey, progress, isForceRelease, cancellationToken);
+            return container.CurrentObject;
         }
 
         public async UniTask<(bool, T)> TryGetAsset<T>(string resourceName, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
             if (string.IsNullOrEmpty(resourceName))
-                throw new Exception("[AssetService] GetAsset invalid name provided ");
+                throw new ArgumentException("[AssetService] TryGetAsset invalid name provided", nameof(resourceName));
 
-#if UNITY_EDITOR
-            Debug.Log($"[AssetService] GetAsset {resourceName}");
-#endif
+            if (TryGetContainer<T>(resourceName, out var ready))
+                return (true, await ready.WaitAsset(progress, cancellationToken));
 
-            var resourceLocation = await Addressables.LoadResourceLocationsAsync(resourceName, typeof(T)).Task;
+            var locations = await LoadLocations(resourceName, typeof(T));
 
-            if (resourceLocation.Count == 0)
+            if (locations.Count == 0)
                 return (false, null);
 
-            if (AssetContainerHolder<T>.KeyToAssetContainer.TryGetValue(resourceName, out var container) && !container.IsReleased)
-            {
-                var result = await container.GetAsset(resourceName, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
-                return (true, result);
-            }
-            else
-            {
-                var newcontainer = AssetContainerHolder<T>.KeyToAssetContainer[resourceName] = new AssetContainer<T>(resourceName, objectToContainer, isForceRelease);
-                var result = await newcontainer.LoadAsset(resourceName, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
-                return (true, result);
-            }
+            return (true, await GetAsset<T>(resourceName, progress, isForceRelease, cancellationToken));
         }
 
-        public async UniTask<T> GetAsset<T>(AssetReference assetReference, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        public async UniTask<IList<T>> GetAssetsByTag<T>(string label, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
-            if (assetReference == null)
-                throw new Exception("[AssetService] GetAsset invalid name provided ");
+            var locations = await LoadLocations(label, typeof(T));
+            var list = new List<UniTask<T>>(locations.Count);
 
+            foreach (var location in locations)
+                list.Add(GetAsset<T>(location.PrimaryKey, null, isForceRelease, cancellationToken));
 
-            if (AssetContainerHolder<T>.AssetReferenceToAssetContainer.TryGetValue(assetReference, out var container) && !container.IsReleased)
-            {
-                return await container.GetAsset(assetReference, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
-            }
-
-            var newcontainer = AssetContainerHolder<T>.AssetReferenceToAssetContainer[assetReference] = new AssetContainer<T>(assetReference.AssetGUID, objectToContainer, isForceRelease);
-            return await newcontainer.LoadAsset(assetReference, objectToContainer, assetsContainers, progress, isForceRelease, cancellationToken);
-        }
-
-
-        public async UniTask<IList<T>> GetAssetsByTag<T>(string label) where T : UnityEngine.Object
-        {
-            var t = await Addressables.LoadResourceLocationsAsync(label, typeof(T)).Task;
-            var list = new List<UniTask<T>>(t.Count);
-
-            foreach (var rl in t)
-            {
-                list.Add(GetAsset<T>(rl.PrimaryKey));
-            }
-
-            var result = await UniTask.WhenAll(list);
-            return result;
+            return await UniTask.WhenAll(list);
         }
 
         public T GetAssetSync<T>(string resourceName, bool isForceRelease = false) where T : UnityEngine.Object
         {
-#if UNITY_EDITOR
-            Debug.Log($"[AssetService] GetAsset {resourceName}");
-#endif
+            if (string.IsNullOrEmpty(resourceName))
+                throw new ArgumentException("[AssetService] GetAssetSync invalid name provided", nameof(resourceName));
 
-            if (AssetContainerHolder<T>.KeyToAssetContainer.TryGetValue(resourceName, out var container) && !container.IsReleased && container.IsReady)
-            {
-                return container.CurrentObject;
-            }
-
-            try
-            {
-                var task = Addressables.LoadAssetAsync<T>(resourceName);
-                var result = task.WaitForCompletion();
-
-                if (AssetContainerHolder<T>.KeyToAssetContainer.TryGetValue(resourceName, out var assetContainer))
-                {
-                    if (!assetContainer.IsReleased)
-                        return result;
-                }
-
-                var newContainer = new AssetContainer<T>(result, resourceName, task, objectToContainer, isForceRelease);
-
-                AssetContainerHolder<T>.KeyToAssetContainer[resourceName] = newContainer;
-                objectToContainer.Add(result.GetAdaptedInstanceID(), newContainer);
-                assetsContainers.Add(newContainer);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError("[AssetService] addressable load failed " + ex.ToString());
-            }
-
-            throw new Exception("[AssetService] GetAssetSync > we dont have addressable for " + resourceName);
+            return LoadContainerSync<T>(AssetKey.Address<T>(resourceName), resourceName, isForceRelease).CurrentObject;
         }
+
         #endregion
 
         #region GetComponentFromAsset
+
         public T GetComponentFromAssetSync<T>(string resourceName, bool isForceRelease = false) where T : Component
         {
-            var prefab = GetAssetSync<GameObject>(resourceName, isForceRelease);
-            return prefab.GetComponent<T>();
+            return GetAssetSync<GameObject>(resourceName, isForceRelease).GetComponent<T>();
         }
+
         public async UniTask<T> GetComponentFromAsset<T>(string resourceName, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : Component
         {
             var prefab = await GetAsset<GameObject>(resourceName, progress, isForceRelease, cancellationToken);
             return prefab.GetComponent<T>();
         }
+
         #endregion
 
         #region GetComponentFromInstance
+
         public async UniTask<T> GetComponentFromGameObjectInstance<T>(string resourceName, Transform parent = null, Vector3 pos = default, Quaternion rotation = default, ProgressUpdate progress = null, bool newAsyncInstatiate = false, CancellationToken cancellationToken = default) where T : Component
         {
-            var task = await GetAssetInstance(resourceName, pos, rotation, parent, progress, newAsyncInstatiate, cancellationToken);
-            return task.GetComponent<T>();
+            var instance = await GetAssetInstance(resourceName, pos, rotation, parent, progress, newAsyncInstatiate, cancellationToken);
+            return instance.GetComponent<T>();
         }
 
-        public T GetComponentFromGameObjectInstanceSync<T>(string resourceName, Transform parent = null, Vector3 pos = default, Quaternion rotation = default, ProgressUpdate progress = null, CancellationToken cancellationToken = default) where T : Component
+        public T GetComponentFromGameObjectInstanceSync<T>(string resourceName, Transform parent = null, Vector3 pos = default, Quaternion rotation = default) where T : Component
         {
-            var task = GetAssetInstanceSync<GameObject>(resourceName, parent, pos, rotation, progress, cancellationToken);
-            return task.GetComponent<T>();
+            return GetAssetInstanceSync<GameObject>(resourceName, parent, pos, rotation).GetComponent<T>();
         }
+
         #endregion
 
         #region GetAssetInstance
 
-        public async UniTask<GameObject> GetAssetInstance(string resourceName)
+        public async UniTask<GameObject> GetAssetInstance(string resourceName, CancellationToken cancellationToken = default)
         {
-            var needed = await GetAsset<GameObject>(resourceName, null);
-            GameObject result = null;
-
-            result = UnityEngine.Object.Instantiate(needed);
-
-            if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
-
+            var container = await LoadContainer<GameObject>(AssetKey.Address<GameObject>(resourceName), resourceName, null, false, cancellationToken);
+            var result = UnityEngine.Object.Instantiate(container.CurrentObject);
+            RegisterInstance(container, result);
             return result;
         }
 
         public async UniTask<GameObject> GetAssetInstance(string resourceName, Transform parent, CancellationToken cancellationToken = default)
         {
-            var needed = await GetAsset<GameObject>(resourceName, cancellationToken: cancellationToken);
-            GameObject result = null;
-
-            result = UnityEngine.Object.Instantiate(needed, parent);
-
-            if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
-
+            var container = await LoadContainer<GameObject>(AssetKey.Address<GameObject>(resourceName), resourceName, null, false, cancellationToken);
+            var result = UnityEngine.Object.Instantiate(container.CurrentObject, parent);
+            RegisterInstance(container, result);
             return result;
         }
 
         public async UniTask<GameObject> GetAssetInstance(string resourceName, Vector3 pos, Quaternion rotation, Transform parent = null, ProgressUpdate progress = null, bool newAsyncInstatiate = false, CancellationToken cancellationToken = default)
         {
-            var needed = await GetAsset<GameObject>(resourceName, progress);
-            GameObject result = null;
-
-            if (newAsyncInstatiate)
-            {
-                var instance = UnityEngine.Object.InstantiateAsync(needed, parent, pos, rotation);
-
-                while (!instance.isDone)
-                {
-                    progress?.Invoke(instance.progress);
-                    await UniTask.Yield();
-                }
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    UnityEngine.Object.Destroy(instance.Result[0]);
-                    throw new Exception("[AssetService] GetAssetInstance canceled: " + resourceName);
-                }
-
-                result = instance.Result[0];
-            }
-            else
-                result = UnityEngine.Object.Instantiate(needed, pos, rotation, parent);
-
-            if (AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.KeyToAssetContainer[resourceName]);
-
-            return result;
+            var container = await LoadContainer<GameObject>(AssetKey.Address<GameObject>(resourceName), resourceName, progress, false, cancellationToken);
+            return await InstantiateOne(container, pos, rotation, parent, progress, newAsyncInstatiate, cancellationToken);
         }
 
         public async UniTask<GameObject> GetAssetInstance(AssetReference assetReference, bool newAsyncInstatiate = false, CancellationToken cancellationToken = default)
@@ -238,65 +242,74 @@ namespace Systems
 
         public async UniTask<GameObject> GetAssetInstance(AssetReference assetReference, Vector3 pos, Quaternion rotation, Transform parent = null, ProgressUpdate progress = null, bool newAsyncInstatiate = false, CancellationToken cancellationToken = default)
         {
-            var needed = await GetAsset<GameObject>(assetReference, progress);
-            GameObject result = null;
-
-            if (newAsyncInstatiate)
-            {
-                var instance = UnityEngine.Object.InstantiateAsync(needed, parent, pos, rotation);
-
-                while (!instance.isDone)
-                {
-                    progress?.Invoke(instance.progress);
-                    await UniTask.Yield();
-                }
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    UnityEngine.Object.Destroy(instance.Result[0]);
-                    throw new Exception("[AssetService] GetAssetInstance canceled: " + assetReference.RuntimeKey);
-                }
-
-                result = instance.Result[0];
-            }
-            else
-                result = UnityEngine.Object.Instantiate(needed, pos, rotation, parent);
-
-            if (AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
-
-            return result;
+            var container = await LoadContainer<GameObject>(AssetKey.Reference<GameObject>(assetReference), assetReference.RuntimeKey, progress, false, cancellationToken);
+            return await InstantiateOne(container, pos, rotation, parent, progress, newAsyncInstatiate, cancellationToken);
         }
 
         public async UniTask<GameObject[]> GetAssetsInstance(AssetReference assetReference, Vector3 pos, Quaternion rotation, Transform parent = null, ProgressUpdate progress = null, CancellationToken cancellationToken = default, int neededCount = 1)
         {
-            if (neededCount == 0)
+            if (neededCount <= 0)
                 return Array.Empty<GameObject>();
 
-            var needed = await GetAsset<GameObject>(assetReference, progress);
+            var container = await LoadContainer<GameObject>(AssetKey.Reference<GameObject>(assetReference), assetReference.RuntimeKey, progress, false, cancellationToken);
+            var result = await InstantiateAsync(container.CurrentObject, neededCount, parent, pos, SafeRotation(rotation), progress, cancellationToken);
 
-                var instance = UnityEngine.Object.InstantiateAsync(needed, neededCount, parent, pos, rotation);
+            foreach (var instance in result)
+                RegisterInstance(container, instance);
 
-                while (!instance.isDone)
-                {
-                    progress?.Invoke(instance.progress);
-                    await UniTask.Yield();
-                }
+            return result;
+        }
 
+        private async UniTask<GameObject> InstantiateOne(AssetContainer<GameObject> container, Vector3 pos, Quaternion rotation, Transform parent, ProgressUpdate progress, bool newAsyncInstatiate, CancellationToken cancellationToken)
+        {
+            rotation = SafeRotation(rotation);
+            GameObject result;
+
+            if (newAsyncInstatiate)
+                result = (await InstantiateAsync(container.CurrentObject, 1, parent, pos, rotation, progress, cancellationToken))[0];
+            else
+                result = UnityEngine.Object.Instantiate(container.CurrentObject, pos, rotation, parent);
+
+            RegisterInstance(container, result);
+            return result;
+        }
+
+        private static async UniTask<GameObject[]> InstantiateAsync(GameObject prefab, int count, Transform parent, Vector3 pos, Quaternion rotation, ProgressUpdate progress, CancellationToken cancellationToken)
+        {
+            var operation = UnityEngine.Object.InstantiateAsync(prefab, count, parent, pos, rotation);
+
+            while (!operation.isDone)
+            {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    UnityEngine.Object.Destroy(instance.Result[0]);
-                    throw new Exception("[AssetService] GetAssetInstance canceled: " + assetReference.RuntimeKey);
+                    operation.Cancel();
+                    DestroyAll(operation);
+                    throw new OperationCanceledException(cancellationToken);
                 }
 
-
-            for (int i = 0; i < instance.Result.Length; i++)
-            {
-                if (AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference].RegisterObject(instance.Result[i]))
-                    objectToContainer.Add(instance.Result[i].GetAdaptedInstanceID(), AssetContainerHolder<GameObject>.AssetReferenceToAssetContainer[assetReference]);
+                progress?.Invoke(operation.progress);
+                await UniTask.Yield();
             }
 
-            return instance.Result;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                DestroyAll(operation);
+                throw new OperationCanceledException(cancellationToken);
+            }
+
+            return operation.Result;
+        }
+
+        private static void DestroyAll(AsyncInstantiateOperation<GameObject> operation)
+        {
+            if (!operation.isDone || operation.Result == null)
+                return;
+
+            foreach (var instance in operation.Result)
+            {
+                if (instance != null)
+                    UnityEngine.Object.Destroy(instance);
+            }
         }
 
         public GameObject GetAssetInstanceSync(string resourceName)
@@ -306,106 +319,147 @@ namespace Systems
 
         public T GetAssetInstanceSync<T>(string resourceName, Transform parent) where T : UnityEngine.Object
         {
-            var needed = GetAssetSync<T>(resourceName);
-            var instance = UnityEngine.Object.Instantiate(needed, parent);
-            var result = instance;
-
-            if (AssetContainerHolder<T>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
-
+            var container = LoadContainerSync<T>(AssetKey.Address<T>(resourceName), resourceName, false);
+            var result = UnityEngine.Object.Instantiate(container.CurrentObject, parent);
+            RegisterInstance(container, result);
             return result;
         }
 
-        public T GetAssetInstanceSync<T>(string resourceName, Transform parent = null, Vector3 pos = default, Quaternion rotation = default, ProgressUpdate progress = null, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        public T GetAssetInstanceSync<T>(string resourceName, Transform parent = null, Vector3 pos = default, Quaternion rotation = default) where T : UnityEngine.Object
         {
-            var needed = GetAssetSync<T>(resourceName);
-            var instance = UnityEngine.Object.Instantiate(needed, pos, rotation, parent);
-            var result = instance;
-
-            if (AssetContainerHolder<T>.KeyToAssetContainer[resourceName].RegisterObject(result))
-                objectToContainer.Add(result.GetAdaptedInstanceID(), AssetContainerHolder<T>.KeyToAssetContainer[resourceName]);
-
+            var container = LoadContainerSync<T>(AssetKey.Address<T>(resourceName), resourceName, false);
+            var result = UnityEngine.Object.Instantiate(container.CurrentObject, pos, SafeRotation(rotation), parent);
+            RegisterInstance(container, result);
             return result;
         }
+
         #endregion
 
         #region WarmUp
-        public async UniTask WarmUpAssetsProgress<T>(string bundleNameOrTag, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
-        {
-            var list = await Addressables.LoadResourceLocationsAsync(bundleNameOrTag, Addressables.MergeMode.Union, typeof(T)).Task;
-            await ProcessWarmUpAssets<T>(list, progress);
-        }
 
-        public async UniTask WarmUpAssetsProgress<T>(IEnumerable<string> resources, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
-        {
-            var list = await Addressables.LoadResourceLocationsAsync(resources, Addressables.MergeMode.Union, typeof(T)).Task;
-            await ProcessWarmUpAssets<T>(list, progress);
-        }
+        public UniTask WarmUpAssetsProgress<T>(string bundleNameOrTag, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => WarmUpAssets<T>(bundleNameOrTag, progress, isForceRelease, cancellationToken);
+
+        public UniTask WarmUpAssetsProgress<T>(IEnumerable<string> resources, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => WarmUpAssets<T>(resources, progress, isForceRelease, cancellationToken);
 
         public async UniTask WarmUpAssets<T>(string bundleNameOrTag, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
-            var list = await Addressables.LoadResourceLocationsAsync(bundleNameOrTag, Addressables.MergeMode.Union, typeof(T)).Task;
-
-            await ProcessWarmUpAssets<T>(list, progress);
+            var locations = await LoadLocations(bundleNameOrTag, typeof(T));
+            await ProcessWarmUpAssets<T>(locations, progress, isForceRelease, cancellationToken);
         }
 
         public async UniTask WarmUpAssets<T>(IEnumerable<string> resources, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
-            var list = await Addressables.LoadResourceLocationsAsync(resources, Addressables.MergeMode.Union, typeof(T)).Task;
-            await ProcessWarmUpAssets<T>(list, progress);
+            var locations = await LoadLocationsMany(resources, typeof(T));
+            await ProcessWarmUpAssets<T>(locations, progress, isForceRelease, cancellationToken);
         }
 
-        private async UniTask ProcessWarmUpAssets<T>(IList<IResourceLocation> list, ProgressUpdate progress, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        public async UniTask WarmUpAsset<T>(AssetReference assetReference, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
         {
-            var resourceCount = list.Count;
+            await GetAsset<T>(assetReference, progress, isForceRelease, cancellationToken);
+        }
 
-            var tasks = new List<UniTask>(resourceCount);
+        public async UniTask WarmUpAssets<T>(AssetReference[] assetReferences, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        {
+            var count = assetReferences.Length;
 
-            if (progress != null)
+            if (count == 0)
             {
-                List<float> progressList = new List<float>(resourceCount);
-
-                void ProgressUpdatedHandler(float updatedProgress, int currentIndex)
-                {
-                    progressList[currentIndex] = updatedProgress;
-                    progress?.Invoke(progressList.Sum() / resourceCount);
-                }
-
-                for (int i = 0; i < list.Count; i++)
-                {
-                    IResourceLocation r = list[i];
-                    var index = i;
-                    progressList.Add(0);
-                    tasks.Add(GetAsset<T>(r.PrimaryKey, (x) => ProgressUpdatedHandler(x, index)));
-                }
-
-                await UniTask.WhenAll(tasks);
+                progress?.Invoke(1f);
+                return;
             }
-            else
-            {
-                for (int i = 0; i < list.Count; i++)
-                {
-                    IResourceLocation r = list[i];
-                    tasks.Add(GetAsset<T>(r.PrimaryKey));
-                }
 
-                await UniTask.WhenAll(tasks);
+            var tasks = new List<UniTask>(count);
+            var aggregator = progress != null ? new ProgressAggregator(count, progress) : null;
+
+            for (int i = 0; i < count; i++)
+                tasks.Add(GetAsset<T>(assetReferences[i], aggregator?.Part(i), isForceRelease, cancellationToken));
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        public async UniTask WarmUpAssets<T>(List<AssetReference> assetReferences, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+        {
+            var count = assetReferences.Count;
+
+            if (count == 0)
+            {
+                progress?.Invoke(1f);
+                return;
+            }
+
+            var tasks = new List<UniTask>(count);
+            var aggregator = progress != null ? new ProgressAggregator(count, progress) : null;
+
+            for (int i = 0; i < count; i++)
+                tasks.Add(GetAsset<T>(assetReferences[i], aggregator?.Part(i), isForceRelease, cancellationToken));
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        private async UniTask ProcessWarmUpAssets<T>(IList<IResourceLocation> locations, ProgressUpdate progress, bool isForceRelease, CancellationToken cancellationToken) where T : UnityEngine.Object
+        {
+            var count = locations.Count;
+
+            if (count == 0)
+            {
+                progress?.Invoke(1f);
+                return;
+            }
+
+            var tasks = new List<UniTask>(count);
+            var aggregator = progress != null ? new ProgressAggregator(count, progress) : null;
+
+            for (int i = 0; i < count; i++)
+                tasks.Add(GetAsset<T>(locations[i].PrimaryKey, aggregator?.Part(i), isForceRelease, cancellationToken));
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        #endregion
+
+        #region Locations
+
+        private static async UniTask<IList<IResourceLocation>> LoadLocations(object key, Type type = null)
+        {
+            var handle = Addressables.LoadResourceLocationsAsync(key, type);
+
+            try
+            {
+                var result = await handle.Task;
+                return new List<IResourceLocation>(result);
+            }
+            finally
+            {
+                Addressables.Release(handle);
+            }
+        }
+
+        private static async UniTask<IList<IResourceLocation>> LoadLocationsMany(IEnumerable keys, Type type = null)
+        {
+            var handle = Addressables.LoadResourceLocationsAsync(keys, Addressables.MergeMode.Union, type);
+
+            try
+            {
+                var result = await handle.Task;
+                return new List<IResourceLocation>(result);
+            }
+            finally
+            {
+                Addressables.Release(handle);
             }
         }
 
         #endregion
 
         #region LoadRemote
+
         public async UniTask LoadRemote(string groupNameOrTag, ProgressUpdate progress, DownloadSizeUpdate downloadSizeUpdate)
         {
             try
             {
                 var handle = Addressables.DownloadDependenciesAsync(groupNameOrTag);
-                long resourcesSize = handle.GetDownloadStatus().TotalBytes;
-
-#if UNITY_EDITOR
-                Debug.LogWarning($"[AssetService] DownLoadSize of remote {groupNameOrTag} bundle is {resourcesSize}");
-#endif
 
                 try
                 {
@@ -413,26 +467,24 @@ namespace Systems
                     {
                         await UniTask.Yield();
 
-                        long totalDownloadedBytes = handle.GetDownloadStatus().DownloadedBytes;
-                        var part = resourcesSize > 0 ? totalDownloadedBytes / resourcesSize : 1f;
-                        progress?.Invoke(part);
-                        downloadSizeUpdate?.Invoke(totalDownloadedBytes, resourcesSize);
+                        var status = handle.GetDownloadStatus();
+                        progress?.Invoke(status.Percent);
+                        downloadSizeUpdate?.Invoke(status.DownloadedBytes, status.TotalBytes);
 #if UNITY_EDITOR
-                        Debug.Log($"[BundleLoadingProcess] '{groupNameOrTag}' Loading..., Progress: {totalDownloadedBytes}/{resourcesSize} ({totalDownloadedBytes.FormatBytes()}/{resourcesSize.FormatBytes()})");
+                        Debug.Log($"[BundleLoadingProcess] '{groupNameOrTag}' Loading..., Progress: {status.DownloadedBytes}/{status.TotalBytes} ({status.DownloadedBytes.FormatBytes()}/{status.TotalBytes.FormatBytes()})");
 #endif
                     }
 
                     if (handle.Status == AsyncOperationStatus.Failed)
                     {
-                        Debug.LogError($"Downloading error: {GetDownloadError(handle)}");
+                        Debug.LogError($"[AssetService] Downloading error for '{groupNameOrTag}': {GetDownloadError(handle)}");
                     }
                     else
                     {
-                        var downloadStatus = handle.GetDownloadStatus();
-                        if (downloadStatus.DownloadedBytes < downloadStatus.TotalBytes)
-                        {
-                            Debug.LogError("Bundle downloading successfuly finished, but downloaded less than needed.");
-                        }
+                        var status = handle.GetDownloadStatus();
+
+                        if (status.DownloadedBytes < status.TotalBytes)
+                            Debug.LogError($"[AssetService] Bundle '{groupNameOrTag}' finished, but downloaded less than needed: {status.DownloadedBytes}/{status.TotalBytes}");
                     }
                 }
                 finally
@@ -448,100 +500,118 @@ namespace Systems
 
         public async UniTask LoadRemote(IEnumerable<string> resources, ProgressUpdate progress = null, DownloadSizeUpdate downloadSizeUpdate = null)
         {
-            var resourcesCount = resources.Count();
-            var list = new List<UniTask>(resourcesCount);
-            List<float> progressList = new List<float>(resourcesCount);
-            List<long> downLoadSize = new List<long>(resourcesCount);
-            int index = 0;
+            var resourceList = new List<string>(resources);
+            var count = resourceList.Count;
 
-            var resourcesLocations = await Addressables.LoadResourceLocationsAsync(resources, Addressables.MergeMode.Union).Task;
-            var overallSize = await Addressables.GetDownloadSizeAsync(resourcesLocations).Task;
+            if (count == 0)
+            {
+                progress?.Invoke(1f);
+                return;
+            }
+
+            var locations = await LoadLocationsMany(resourceList);
+
+            var sizeHandle = Addressables.GetDownloadSizeAsync(locations);
+            long overallSize;
+
+            try
+            {
+                overallSize = await sizeHandle.Task;
+            }
+            finally
+            {
+                Addressables.Release(sizeHandle);
+            }
 
 #if UNITY_EDITOR
             Debug.LogWarning($"[AssetService] DownLoadSize of all dependencies is {overallSize}");
 #endif
 
+            var tasks = new List<UniTask>(count);
+            var aggregator = progress != null ? new ProgressAggregator(count, progress) : null;
+            var downloaded = new long[count];
+            long downloadedSum = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                var index = i;
+                DownloadSizeUpdate sizeUpdate = downloadSizeUpdate == null ? null : (current, _) =>
+                {
+                    downloadedSum += current - downloaded[index];
+                    downloaded[index] = current;
+                    downloadSizeUpdate.Invoke(downloadedSum, overallSize);
+                };
+
+                tasks.Add(LoadRemote(resourceList[i], aggregator?.Part(i), sizeUpdate));
+            }
+
             try
             {
-                foreach (var r in resources)
-                {
-                    progressList.Add(0);
-                    downLoadSize.Add(0);
-                    var tempIndex = index;
-                    list.Add(LoadRemote(r, (x) => ProgressUpdatedHandler(x, tempIndex), (z, y) => DownloadSizeUpdatedHandler(z, y, tempIndex)));
-                    index++;
-                }
-
-                void ProgressUpdatedHandler(float updatedProgress, int currentIndex)
-                {
-                    progressList[currentIndex] = updatedProgress;
-                    progress?.Invoke(progressList.Sum() / resourcesCount);
-                }
-
-                void DownloadSizeUpdatedHandler(long currentSize, long totalSize, int currentIndex)
-                {
-                    downLoadSize[currentIndex] = currentSize;
-                    downloadSizeUpdate?.Invoke(downLoadSize.Sum(), overallSize);
-                }
+                await UniTask.WhenAll(tasks);
             }
             catch (Exception ex)
             {
-                Debug.LogError("[AssetService] addressable load failed " + ex.ToString());
+                Debug.LogError("[AssetService] remote load failed " + ex);
+                throw;
             }
-
-            await UniTask.WhenAll(list);
         }
 
-        private string GetDownloadError(AsyncOperationHandle fromHandle)
+        private static string GetDownloadError(AsyncOperationHandle fromHandle)
         {
             if (fromHandle.Status != AsyncOperationStatus.Failed)
                 return null;
 
-            Exception e = fromHandle.OperationException;
+            var e = fromHandle.OperationException;
+
             while (e != null)
             {
                 if (e is RemoteProviderException remoteException)
                     return remoteException.WebRequestResult.Error;
+
                 e = e.InnerException;
             }
 
-            return null;
+            return fromHandle.OperationException?.Message;
         }
+
         #endregion
 
         #region ReleaseAndUnload
+
         public bool Release<T>(T obj, bool force = false) where T : UnityEngine.Object
         {
             if (obj == null)
                 return false;
 
-            if (objectToContainer.TryGetValue(obj.GetAdaptedInstanceID(), out var container))
-            {
-                objectToContainer.Remove(obj.GetAdaptedInstanceID());
-                var release = container.ReleaseObject(obj);
+            var id = obj.GetAdaptedInstanceID();
 
-                if (container.IsReleased)
+            if (objectToContainer.TryGetValue(id, out var container))
+            {
+                if (container.ObjectID == id)
                 {
-                    ReleaseContainer(container);
+                    container.UpdateResourceStatus(force);
+                    return container.IsReleased;
                 }
 
-                return release;
+                objectToContainer.Remove(id);
+                return container.ReleaseObject(obj, force);
             }
 
-            UnityEngine.Object.Destroy(obj);
-            return false;
-        }
+            if (obj is GameObject gameObject && gameObject.scene.IsValid())
+            {
+                UnityEngine.Object.Destroy(gameObject);
+                return false;
+            }
 
-        private void ReleaseContainer(AssetContainer assetContainer)
-        {
-            objectToContainer.Remove(assetContainer.ObjectID);
+            Debug.LogWarning($"[AssetService] Release called for untracked object {obj.name} ({typeof(T).Name}), nothing done");
+            return false;
         }
 
         public void UnloadUnusedResources(bool forceRelease = false)
         {
             foreach (var container in assetsContainers)
             {
-                container.UpdateResourceStatus(objectToContainer, forceRelease);
+                container.UpdateResourceStatus(forceRelease);
 
                 if (container.IsReleased)
                     releasedContainers.Enqueue(container);
@@ -553,138 +623,243 @@ namespace Systems
 
         public async UniTask ReleaseByTag(string tag)
         {
-            var labelAssets = await Addressables.LoadResourceLocationsAsync(tag).Task;
+            var locations = await LoadLocations(tag);
 
-            foreach (var l in labelAssets)
+            foreach (var location in locations)
             {
-                if (AssetContainerHolder<GameObject>.KeyToAssetContainer.TryGetValue(l.PrimaryKey, out var container))
+                foreach (var container in assetsContainers)
                 {
+                    if (container.Key.ByReference || container.Key.Key != location.PrimaryKey)
+                        continue;
+
                     container.UnlockForceRelease();
-                    container.UpdateResourceStatus(objectToContainer);
+                    container.UpdateResourceStatus();
+
+                    if (container.IsReleased)
+                        releasedContainers.Enqueue(container);
                 }
             }
+
+            while (releasedContainers.TryDequeue(out var container))
+                assetsContainers.Remove(container);
         }
-
-       
-
-        //~AssetService() 
-        //{ 
-        //    foreach(var container in assetsContainers)
-        //        container.Dispose();
-        //}
 
         #endregion
     }
 
     #region AssetContainerAndHelpers
 
-    public abstract class AssetContainer : IDisposable, IEquatable<AssetContainer>
+    public readonly struct AssetKey : IEquatable<AssetKey>
+    {
+        public readonly string Key;
+        public readonly Type Type;
+        public readonly bool ByReference;
+
+        private AssetKey(string key, Type type, bool byReference)
+        {
+            Key = key;
+            Type = type;
+            ByReference = byReference;
+        }
+
+        public static AssetKey Address<T>(string address) => new AssetKey(address, typeof(T), false);
+
+        public static AssetKey Reference<T>(AssetReference reference) => new AssetKey(reference.RuntimeKey.ToString(), typeof(T), true);
+
+        public bool Equals(AssetKey other) => ByReference == other.ByReference && Type == other.Type && Key == other.Key;
+        public override bool Equals(object obj) => obj is AssetKey other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(Key, Type, ByReference);
+        public override string ToString() => Key;
+    }
+
+    public sealed class ProgressAggregator
+    {
+        private readonly float[] parts;
+        private readonly ProgressUpdate target;
+        private float sum;
+
+        public ProgressAggregator(int count, ProgressUpdate target)
+        {
+            parts = new float[count];
+            this.target = target;
+        }
+
+        public ProgressUpdate Part(int index) => value =>
+        {
+            sum += value - parts[index];
+            parts[index] = value;
+            target.Invoke(sum / parts.Length);
+        };
+    }
+
+    public abstract class AssetContainer : IDisposable
     {
         public int ObjectID { get; protected set; }
-        public readonly string ObjectKey;
-        protected Dictionary<int, AssetContainer> objectToContainer;
-        protected AssetReference assetReference;
+        public readonly AssetKey Key;
+        public string ObjectKey => Key.Key;
 
-        public abstract bool IsReady { get; }
-
+        protected readonly Dictionary<int, AssetContainer> objectToContainer;
+        protected readonly Dictionary<AssetKey, AssetContainer> keyToContainer;
+        protected readonly HashSet<AssetContainer> assetsContainers;
 
         [ShowInInspector]
         protected int counter;
 
-        protected AssetContainer(int objectID, string objectKey, Dictionary<int, AssetContainer> objectToContainer)
-        {
-            ObjectID = objectID;
-            ObjectKey = objectKey;
-            this.objectToContainer = objectToContainer;
-        }
-
-        protected AssetContainer(string objectKey, Dictionary<int, AssetContainer> objectToContainer)
-        {
-            ObjectKey = objectKey;
-            this.objectToContainer = objectToContainer;
-        }
-
+        public abstract bool IsReady { get; }
         public bool IsReleased { get; protected set; }
+
+        protected AssetContainer(AssetKey key, Dictionary<int, AssetContainer> objectToContainer, Dictionary<AssetKey, AssetContainer> keyToContainer, HashSet<AssetContainer> assetsContainers)
+        {
+            Key = key;
+            this.objectToContainer = objectToContainer;
+            this.keyToContainer = keyToContainer;
+            this.assetsContainers = assetsContainers;
+        }
 
         public abstract bool ReleaseObject(UnityEngine.Object obj, bool forceRelease = false);
         public abstract void LockContainer();
         public abstract void UnlockForceRelease();
-        public abstract void UpdateResourceStatus(Dictionary<int, AssetContainer> objectToContainers, bool forceRelease = false);
+        public abstract void UpdateResourceStatus(bool forceRelease = false);
         public abstract void Dispose();
-
-        public override bool Equals(object obj)
-        {
-            return obj is AssetContainer container &&
-                   ObjectID == container.ObjectID &&
-                   ObjectKey == container.ObjectKey;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ObjectID, ObjectKey);
-        }
-
-        public bool Equals(AssetContainer container)
-        {
-            return ObjectID == container.ObjectID &&
-                   ObjectKey == container.ObjectKey;
-        }
-    }
-
-    public static class AssetContainerHolder<T> where T : UnityEngine.Object
-    {
-        public static readonly Dictionary<string, AssetContainer<T>> KeyToAssetContainer = new Dictionary<string, AssetContainer<T>>(32);
-        public static readonly Dictionary<AssetReference, AssetContainer<T>> AssetReferenceToAssetContainer = new Dictionary<AssetReference, AssetContainer<T>>(32);
     }
 
     public class AssetContainer<T> : AssetContainer where T : UnityEngine.Object
     {
-        private Dictionary<int, T> activeObjects;
-        private AsyncOperationHandle<T> asyncOperationHandle;
+        private readonly Dictionary<int, T> activeObjects;
+        private AsyncOperationHandle<T> handle;
 
-        private bool needforceRelease;
+        private bool needForceRelease;
         private bool isDisposed;
+        private bool isReady;
+        private float fillProgress;
 
         [ShowInInspector]
         public T CurrentObject { get; private set; }
         public override bool IsReady => isReady;
 
-        private bool isReady;
-        private float fillProgress;
-
-
-#if UNITY_2023_3_OR_NEWER
-        /// <param name="asyncOperation"></param>
-        /// <param name="forceRelease">if this argument true, we release this asset only when  we use force release flag on release object</param>
-        /// <param name="size"></param>
-        public AssetContainer(T obj, string objectKey, AsyncOperationHandle<T> asyncOperation, Dictionary<int, AssetContainer> objectToContainer, bool forceRelease, int size = 1) : base(obj.GetEntityId().GetHashCode(), objectKey, objectToContainer)
+        public AssetContainer(AssetKey key, Dictionary<int, AssetContainer> objectToContainer, Dictionary<AssetKey, AssetContainer> keyToContainer, HashSet<AssetContainer> assetsContainers, bool forceRelease, int size = 1)
+            : base(key, objectToContainer, keyToContainer, assetsContainers)
         {
-            asyncOperationHandle = asyncOperation;
-            needforceRelease = forceRelease;
+            needForceRelease = forceRelease;
             activeObjects = new Dictionary<int, T>(size);
-            CurrentObject = obj;
+        }
+
+        #region Loading
+
+        public async UniTask<T> LoadAsset(object addressableKey, ProgressUpdate progress = null, CancellationToken cancellationToken = default)
+        {
+            ++counter;
+
+            try
+            {
+                handle = Addressables.LoadAssetAsync<T>(addressableKey);
+                return await WaitInternal(progress, cancellationToken);
+            }
+            finally
+            {
+                --counter;
+            }
+        }
+
+        public async UniTask<T> WaitAsset(ProgressUpdate progress = null, CancellationToken cancellationToken = default)
+        {
+            ++counter;
+
+            try
+            {
+                return await WaitInternal(progress, cancellationToken);
+            }
+            finally
+            {
+                --counter;
+            }
+        }
+
+        private async UniTask<T> WaitInternal(ProgressUpdate progress, CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!isReady)
+                {
+                    if (isDisposed)
+                        throw new Exception("[AssetService] container was released while loading " + Key);
+
+                    if (handle.IsValid() && handle.IsDone)
+                    {
+                        CompleteFromHandle();
+                        break;
+                    }
+
+                    fillProgress = handle.IsValid() ? handle.PercentComplete : 0f;
+                    progress?.Invoke(fillProgress);
+                    await UniTask.DelayFrame(1, cancellationToken: cancellationToken);
+                }
+
+                progress?.Invoke(1f);
+                return CurrentObject;
+            }
+            catch (OperationCanceledException)
+            {
+                if (counter <= 1)
+                    Dispose();
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[AssetService] addressable load failed for {Key} ({typeof(T).Name}): {ex}");
+                Dispose();
+                throw;
+            }
+        }
+
+        public T LoadAssetSync(object addressableKey)
+        {
+            handle = Addressables.LoadAssetAsync<T>(addressableKey);
+            return WaitAssetSync();
+        }
+
+        public T WaitAssetSync()
+        {
+            if (isReady)
+                return CurrentObject;
+
+            if (isDisposed || !handle.IsValid())
+                throw new Exception("[AssetService] container has no pending load for " + Key);
+
+            try
+            {
+                handle.WaitForCompletion();
+                CompleteFromHandle();
+                return CurrentObject;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[AssetService] addressable sync load failed for {Key} ({typeof(T).Name}): {ex}");
+                Dispose();
+                throw;
+            }
+        }
+
+        private void CompleteFromHandle()
+        {
+            if (isReady || isDisposed)
+                return;
+
+            if (handle.Status != AsyncOperationStatus.Succeeded || handle.Result == null)
+                throw new Exception($"[AssetService] cant load asset {Key}: {handle.OperationException?.Message}");
+
+            CurrentObject = handle.Result;
+            ObjectID = CurrentObject.GetAdaptedInstanceID();
             isReady = true;
+            fillProgress = 1f;
+            objectToContainer[ObjectID] = this;
+            assetsContainers.Add(this);
         }
-#else
 
-        /// <param name="asyncOperation"></param>
-        /// <param name="forceRelease">if this argument true, we release this asset only when  we use force release flag on release object</param>
-        /// <param name="size"></param>
-        public AssetContainer(T obj, string objectKey, AsyncOperationHandle<T> asyncOperation, Dictionary<int, AssetContainer> objectToContainer, bool forceRelease, int size = 1) : base(obj.GetInstanceID(), objectKey, objectToContainer)
-        {
-            asyncOperationHandle = asyncOperation;
-            needforceRelease = forceRelease;
-            activeObjects = new Dictionary<int, T>(size);
-            CurrentObject = obj;
-            isReady = true;
-        }
-#endif
+        #endregion
 
-        public AssetContainer(string objectKey, Dictionary<int, AssetContainer> objectToContainer, bool forceRelease, int size = 1) : base(objectKey, objectToContainer)
-        {
-            needforceRelease = forceRelease;
-            activeObjects = new Dictionary<int, T>(size);
-        }
+        #region Instances
 
         public bool RegisterObject(T obj)
         {
@@ -697,12 +872,6 @@ namespace Systems
             return false;
         }
 
-        /// <summary>
-        /// we should release every object b
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="forceRelease"></param>
-        /// <returns></returns>
         public override bool ReleaseObject(UnityEngine.Object obj, bool forceRelease = false)
         {
             if (activeObjects.Remove(obj.GetAdaptedInstanceID()))
@@ -718,223 +887,95 @@ namespace Systems
 
         private bool TryToRelease(bool forceRelease)
         {
-            if (counter <= 0)
-            {
-                if (!needforceRelease)
-                {
-                    Dispose();
-                    return true;
-                }
-                else if (forceRelease)
-                {
-                    Dispose();
-                    return true;
-                }
-            }
+            if (counter > 0)
+                return false;
 
-            return false;
+            if (needForceRelease && !forceRelease)
+                return false;
+
+            Dispose();
+            return true;
         }
 
         public override void LockContainer()
         {
-            needforceRelease = true;
+            needForceRelease = true;
         }
 
         public override void UnlockForceRelease()
         {
-            needforceRelease = false;
+            needForceRelease = false;
         }
 
-        public override void UpdateResourceStatus(Dictionary<int, AssetContainer> objectToContainers, bool forceRelease = false)
+        public override void UpdateResourceStatus(bool forceRelease = false)
         {
-            if (!isReady)
+            if (!isReady || isDisposed)
                 return;
 
             var activeObjectsCount = activeObjects.Count;
-            Span<int> hash = activeObjectsCount < 256 ? stackalloc int[activeObjectsCount] : new int[activeObjectsCount];
-
-            var invalidObjectsCount = 0;
+            Span<int> invalid = activeObjectsCount < 256 ? stackalloc int[activeObjectsCount] : new int[activeObjectsCount];
+            var invalidCount = 0;
 
             foreach (var activeObject in activeObjects)
             {
                 if (activeObject.Value == null)
                 {
-                    hash[invalidObjectsCount] = activeObject.Key;
-                    objectToContainers.Remove(activeObject.Key);
-                    invalidObjectsCount++;
+                    invalid[invalidCount++] = activeObject.Key;
+                    objectToContainer.Remove(activeObject.Key);
                     counter--;
                 }
             }
 
-            if (invalidObjectsCount > 0)
-            {
-                for (int i = 0; i < invalidObjectsCount; i++)
-                {
-                    activeObjects.Remove(hash[i]);
-                }
-            }
+            for (int i = 0; i < invalidCount; i++)
+                activeObjects.Remove(invalid[i]);
 
             TryToRelease(forceRelease);
         }
 
-        public async UniTask<T> GetAsset(string resourceName, Dictionary<int, AssetContainer> objectToContainer, HashSet<AssetContainer> assetsContainers, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default)
-        {
-            ++counter;
-
-            while (!isReady)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    --counter;
-                    throw new Exception("[AssetService] GetAssetInstance canceled: " + resourceName);
-                }
-
-                progress?.Invoke(fillProgress);
-                await UniTask.DelayFrame(1);
-            }
-
-            if (IsReleased)
-                throw new Exception("[AssetService] GetAssetInstance canceled: " + resourceName);
-
-            --counter;
-            progress?.Invoke(1f);
-            return CurrentObject;
-        }
-
-        public async UniTask<T> LoadAsset(string resourceName, Dictionary<int, AssetContainer> objectToContainer, HashSet<AssetContainer> assetsContainers, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var task = Addressables.LoadAssetAsync<T>(resourceName);
-
-                while (!task.IsDone)
-                {
-                    fillProgress = task.PercentComplete;
-                    progress?.Invoke(fillProgress);
-                    await UniTask.DelayFrame(1, cancellationToken: cancellationToken);
-                }
-
-                if (task.Status == AsyncOperationStatus.Failed)
-                    throw new Exception("[AssetService] cant load asset with ID " + resourceName);
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    Dispose();
-                    throw new Exception("[AssetService] loading resource canceled: " + resourceName);
-                }
-
-                isReady = true;
-                CurrentObject = task.Result;
-                ObjectID = task.Result.GetAdaptedInstanceID();
-                objectToContainer[ObjectID] = this;
-                assetsContainers.Add(this);
-                return task.Result;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError("[AssetService] addressable load failed " + ex.ToString() + $" {typeof(T).Name}");
-                Dispose();
-            }
-
-            throw new Exception("[AssetService] we dont have addressable for " + resourceName);
-        }
-
-        public async UniTask<T> GetAsset(AssetReference resourceName, Dictionary<int, AssetContainer> objectToContainer, HashSet<AssetContainer> assetsContainers, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default)
-        {
-            ++counter;
-
-            while (!isReady)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    --counter;
-                    throw new Exception("[AssetService] GetAssetInstance canceled: " + resourceName);
-                }
-
-                progress?.Invoke(fillProgress);
-                await UniTask.DelayFrame(1);
-            }
-
-            if (IsReleased)
-                throw new Exception("[AssetService] GetAssetInstance canceled: " + resourceName);
-
-            --counter;
-            progress?.Invoke(1f);
-            return CurrentObject;
-        }
-
-        public async UniTask<T> LoadAsset(AssetReference assetRef, Dictionary<int, AssetContainer> objectToContainer, HashSet<AssetContainer> assetsContainers, ProgressUpdate progress = null, bool isForceRelease = false, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var task = Addressables.LoadAssetAsync<T>(assetRef);
-
-                while (!task.IsDone)
-                {
-                    fillProgress = task.PercentComplete;
-                    progress?.Invoke(fillProgress);
-                    await UniTask.DelayFrame(1, cancellationToken: cancellationToken);
-                }
-
-                if (task.Status == AsyncOperationStatus.Failed)
-                    throw new Exception("[AssetService] cant load asset with ID " + assetRef);
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    Dispose();
-                    throw new Exception("[AssetService] loading resource canceled: " + assetRef);
-                }
-
-                isReady = true;
-                CurrentObject = task.Result;
-                ObjectID = task.Result.GetAdaptedInstanceID();
-                objectToContainer[ObjectID] = this;
-                assetsContainers.Add(this);
-                return task.Result;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError("[AssetService] addressable load failed " + ex.ToString() + $" {typeof(T).Name}");
-                Dispose();
-            }
-
-            throw new Exception("[AssetService] we dont have addressable for " + assetRef);
-        }
-
-
+        #endregion
 
         public override void Dispose()
         {
             if (isDisposed)
                 return;
 
-            objectToContainer.Remove(ObjectID);
-
             isDisposed = true;
-            isReady = true;
             IsReleased = true;
+            isReady = true;
+
+            if (objectToContainer.TryGetValue(ObjectID, out var byObject) && ReferenceEquals(byObject, this))
+                objectToContainer.Remove(ObjectID);
+
+            if (keyToContainer.TryGetValue(Key, out var byKey) && ReferenceEquals(byKey, this))
+                keyToContainer.Remove(Key);
+
+            activeObjects.Clear();
             CurrentObject = null;
 
-            AssetContainerHolder<T>.KeyToAssetContainer.Remove(ObjectKey);
+            if (handle.IsValid())
+                Addressables.Release(handle);
 
-            if (CurrentObject != null)
-                Addressables.Release(CurrentObject);
+            handle = default;
         }
     }
 
+
+
     public static class AssetServiceHelpers
     {
-        private static string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+        private static readonly string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
 
         public static string FormatBytes(this long byteCount)
         {
             if (byteCount == 0)
-                return "0" + suf[0];
+                return "0" + suffixes[0];
+
             long bytes = Math.Abs(byteCount);
             int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
             double num = Math.Round(bytes / Math.Pow(1024, place), 1);
-            return $"{Math.Sign(byteCount) * num:F1} {suf[place]}";
+            return $"{Math.Sign(byteCount) * num:F1} {suffixes[place]}";
         }
     }
-#endregion
+
+    #endregion
 }
