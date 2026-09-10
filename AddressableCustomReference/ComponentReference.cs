@@ -7,6 +7,7 @@ using UnityEditor;
 
 namespace HECSFramework.Unity.Helpers
 {
+    [System.Serializable]
     public class ComponentReference<TComponent> : AssetReference
     {
         public ComponentReference(string guid) : base(guid)
