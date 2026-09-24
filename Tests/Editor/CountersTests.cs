@@ -453,4 +453,117 @@ internal class CountersTests
         check.RemoveModifier(guid);
         Assert.IsTrue(check.GetCalculatedValue() == 4);
     }
+
+    [Test]
+    public void TestChangeModifierValueUpdatesCounter()
+    {
+        var counter = new ModifiableFloatCounter();
+        counter.Setup(1, 10);
+
+        var modifier = GetFloatModifier(ModifierCalculationType.Multiply, 0.5f);
+        counter.AddModifier(Guid.NewGuid(), modifier);
+
+        modifier.GetValue = 0.25f;
+        counter.SetIsDirty();
+
+        Assert.AreEqual(2.5f, counter.MaxValue, Delta);
+        Assert.AreEqual(2.5f, counter.Value, Delta);
+    }
+
+    [Test]
+    public void TestChangeModifierValueKeepsCurrentToMaxRatio()
+    {
+        var counter = new ModifiableFloatCounter();
+        counter.Setup(1, 10);
+
+        var modifier = GetFloatModifier(ModifierCalculationType.Add, 10);
+        counter.AddModifier(Guid.NewGuid(), modifier);
+        counter.ChangeValue(-10);
+
+        modifier.GetValue = 30;
+        counter.SetIsDirty();
+
+        Assert.AreEqual(40f, counter.MaxValue, Delta);
+        Assert.AreEqual(20f, counter.Value, Delta);
+    }
+
+    [Test]
+    public void TestChangeModifierValueRightAfterSetup()
+    {
+        var counter = new ModifiableFloatCounter();
+        counter.Setup(1, 10);
+
+        var modifier = GetFloatModifier(ModifierCalculationType.Multiply, 0.5f);
+        counter.AddModifier(Guid.NewGuid(), modifier);
+        counter.Setup(1, 20);
+
+        modifier.GetValue = 0.25f;
+        counter.SetIsDirty();
+
+        Assert.AreEqual(5f, counter.MaxValue, Delta);
+        Assert.AreEqual(5f, counter.Value, Delta);
+    }
+
+    [Test]
+    public void TestModifierAddedBeforeSetup()
+    {
+        var counter = new ModifiableFloatCounter();
+        counter.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Multiply, 0.5f));
+        counter.Setup(1, 10);
+
+        Assert.AreEqual(5f, counter.MaxValue, Delta);
+        Assert.AreEqual(5f, counter.Value, Delta);
+    }
+
+    [Test]
+    public void TestChangeModifierValueOnBaseValueCounter()
+    {
+        var counter = new ModifiableFloatCounterGeneric<BaseValueModifiersFloatContainer>();
+        counter.Setup(1, 4);
+
+        var modifier = GetFloatModifier(ModifierCalculationType.Add, 50, ModifierValueType.Percent);
+        counter.AddModifier(Guid.NewGuid(), modifier);
+
+        modifier.GetValue = 100;
+        counter.SetIsDirty();
+
+        Assert.AreEqual(8f, counter.MaxValue, Delta);
+        Assert.AreEqual(8f, counter.Value, Delta);
+    }
+
+    [Test]
+    public void TestChangeIntModifierValueUpdatesCounter()
+    {
+        var counter = new ModifiableIntCounter();
+        counter.Setup(1, 10);
+
+        var modifier = new DefaultIntModifier
+        {
+            GetCalculationType = ModifierCalculationType.Add,
+            GetValue = 5,
+            GetModifierType = ModifierValueType.Value,
+            ModifierGuid = Guid.NewGuid(),
+        };
+
+        counter.AddModifier(Guid.NewGuid(), modifier);
+
+        modifier.GetValue = 10;
+        counter.SetIsDirty();
+
+        Assert.AreEqual(20, counter.MaxValue);
+        Assert.AreEqual(20, counter.Value);
+    }
+
+    private const float Delta = 0.0001f;
+
+    private static DefaultFloatModifier GetFloatModifier(ModifierCalculationType calculationType, float value, ModifierValueType valueType = ModifierValueType.Value)
+    {
+        return new DefaultFloatModifier
+        {
+            GetCalculationType = calculationType,
+            GetValue = value,
+            GetModifierType = valueType,
+            ModifierGuid = Guid.NewGuid(),
+        };
+    }
 }

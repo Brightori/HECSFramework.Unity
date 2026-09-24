@@ -67,9 +67,6 @@ namespace Systems
 
         private async UniTask<AssetContainer<T>> LoadContainer<T>(AssetKey key, object addressableKey, ProgressUpdate progress, bool isForceRelease, CancellationToken cancellationToken) where T : UnityEngine.Object
         {
-#if UNITY_EDITOR
-            Debug.Log($"[AssetService] GetAsset {key}");
-#endif
             var container = GetOrCreateContainer<T>(key, isForceRelease, out var created);
 
             if (created)
