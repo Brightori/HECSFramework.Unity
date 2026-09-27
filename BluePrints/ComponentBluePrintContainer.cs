@@ -45,14 +45,14 @@ namespace HECSFramework.Unity
 
         public void LoadFromData(IComponent component)
         {
-            if (dataReady)
-                JsonUtility.FromJsonOverwrite(data, component);
-            else
+            if (!dataReady)
             {
                 data = JsonUtility.ToJson(this.GetHECSComponent);
                 dataReady = true;
-                JsonUtility.FromJsonOverwrite(data, component);
             }
+
+            if (data != "{}")
+                JsonUtility.FromJsonOverwrite(data, component);
         }
 
         public void ResetDataReady()
