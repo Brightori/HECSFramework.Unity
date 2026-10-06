@@ -28,9 +28,19 @@ namespace Systems
 
         public void CommandGlobalReact(UpdateQuestGlobalCommand command)
         {
+            using var pooled = HECSPooledArray<Entity>.GetArray(QuestsStateComponent.ActiveQuests.Count);
+
             foreach (var q in QuestsStateComponent.ActiveQuests)
             {
-                q.Command(command);
+                pooled.Add(q);
+            }
+
+            for (int i = 0; i < pooled.Count; i++)
+            {
+                var q = pooled.Items[i];
+
+                if (QuestsStateComponent.ActiveQuests.Contains(q))
+                    q.Command(command);
             }
         }
 
@@ -38,6 +48,13 @@ namespace Systems
         {
             QuestsStateComponent.ActiveQuests.Remove(command.Quest);
             var questDataInfo = command.Quest.GetComponent<QuestInfoComponent>().QuestDataInfo;
+
+            if (QuestsHistoryComponent.IsCompletedQuest(questDataInfo))
+            {
+                command.Quest.HECSDestroyEndOfFrame();
+                return;
+            }
+
             QuestsHistoryComponent.CompletedQuests.Add(questDataInfo);
 
             var holder = await QuestsHolderComponent.GetQuestsHolder();
@@ -123,7 +140,7 @@ namespace Systems
                         if (q.IsManualyStarted)
                             continue;
 
-                        if (QuestsHistoryComponent.CompletedQuests.Contains(q.QuestDataInfo) || IsActiveQuest(q.QuestDataInfo))
+                        if (QuestsHistoryComponent.IsCompletedQuest(q.QuestDataInfo) || IsActiveOrStartingQuest(q.QuestDataInfo))
                             continue;
 
                         if (!q.IsRequiredCompleted(Owner))
@@ -140,9 +157,31 @@ namespace Systems
 
         private async void StartQuest(QuestData questData, StartQuestCommand startQuestCommand = default, bool addCompleteInfo = false)
         {
-            var container = await questData.GetContainer();
-            var quest = container.GetEntity().Init();
-            QuestsStateComponent.ActiveQuests.Add(quest);
+            var questDataInfo = questData.QuestDataInfo;
+
+            if (!QuestsStateComponent.StartingQuests.Add(questDataInfo.QuestContainerIndex))
+                return;
+
+            Entity quest;
+
+            try
+            {
+                var container = await questData.GetContainer();
+
+                if (QuestsHistoryComponent.IsCompletedQuest(questDataInfo) || QuestsStateComponent.IsActiveQuest(questDataInfo))
+                    return;
+
+                quest = container.GetEntity().Init();
+
+                if (QuestsHistoryComponent.IsCompletedQuest(questDataInfo))
+                    return;
+
+                QuestsStateComponent.ActiveQuests.Add(quest);
+            }
+            finally
+            {
+                QuestsStateComponent.StartingQuests.Remove(questDataInfo.QuestContainerIndex);
+            }
 
             if (addCompleteInfo)
             {
@@ -167,9 +206,10 @@ namespace Systems
                 Owner.World.Command(new AfterCommand<StartQuestCommand>());
         }
 
-        private bool IsActiveQuest(QuestDataInfo questDataInfo)
+        private bool IsActiveOrStartingQuest(QuestDataInfo questDataInfo)
         {
-            return QuestsStateComponent.IsActiveQuest(questDataInfo);
+            return QuestsStateComponent.StartingQuests.Contains(questDataInfo.QuestContainerIndex)
+                || QuestsStateComponent.IsActiveQuest(questDataInfo);
         }
 
         public void CommandGlobalReact(ForceCompleteQuestCommand command)
@@ -191,7 +231,7 @@ namespace Systems
             var questHolder = await QuestsHolderComponent.GetQuestsHolder();
             if (questHolder.TryGetQuestData(command.QuestDataInfo, out var questData))
             {
-                if (IsActiveQuest(questData.QuestDataInfo))
+                if (IsActiveOrStartingQuest(questData.QuestDataInfo))
                     return;
                 
                 if (QuestsHistoryComponent.IsCompletedQuest(questData.QuestDataInfo))

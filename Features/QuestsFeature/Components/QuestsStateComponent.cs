@@ -21,8 +21,12 @@ namespace Components
 
         public HashSet<Entity> ActiveQuests = new HashSet<Entity>();
 
+        public HashSet<int> StartingQuests = new HashSet<int>();
+
         [Field(2)]
         private List<QuestDataInfo> QuestIndeces = new List<QuestDataInfo>();
+
+        private readonly List<QuestDataInfo> restoringQuests = new List<QuestDataInfo>();
 
         public bool IsDirty { get; set; }
 
@@ -30,24 +34,48 @@ namespace Components
         {
             ActiveQuests.Clear();
 
-            var holder = await Owner.GetComponent<QuestsHolderComponent>().GetQuestsHolder();
-
             foreach (var q in QuestIndeces)
             {
-                var questData = holder.QuestStages[q.QuestStageIndex]
-                    .QuestsGroups[q.QuestGroupIndex].GetDataByContainerIndex(q.QuestContainerIndex);
-
-                if (questData == null)
-                {
-                    Debug.LogError("we dont have quest container for index " + q.QuestContainerIndex);
-                    continue;
-                }
-
-                var neededContainer = await questData.GetContainer();
-
-                var quest = neededContainer.GetEntity().Init();
-                ActiveQuests.Add(quest);
+                if (StartingQuests.Add(q.QuestContainerIndex))
+                    restoringQuests.Add(q);
             }
+
+            var toRestore = restoringQuests.ToArray();
+
+            try
+            {
+                var holder = await Owner.GetComponent<QuestsHolderComponent>().GetQuestsHolder();
+
+                foreach (var q in toRestore)
+                {
+                    var questData = holder.QuestStages[q.QuestStageIndex]
+                        .QuestsGroups[q.QuestGroupIndex].GetDataByContainerIndex(q.QuestContainerIndex);
+
+                    if (questData == null)
+                    {
+                        Debug.LogError("we dont have quest container for index " + q.QuestContainerIndex);
+                        ReleaseRestoring(q);
+                        continue;
+                    }
+
+                    var neededContainer = await questData.GetContainer();
+
+                    var quest = neededContainer.GetEntity().Init();
+                    ActiveQuests.Add(quest);
+                    ReleaseRestoring(q);
+                }
+            }
+            finally
+            {
+                foreach (var q in toRestore)
+                    ReleaseRestoring(q);
+            }
+        }
+
+        private void ReleaseRestoring(QuestDataInfo questDataInfo)
+        {
+            if (restoringQuests.Remove(questDataInfo))
+                StartingQuests.Remove(questDataInfo.QuestContainerIndex);
         }
 
         public void BeforeSync()
@@ -61,6 +89,8 @@ namespace Components
 
                 QuestIndeces.Add(q.GetComponent<QuestInfoComponent>().QuestDataInfo);
             }
+
+            QuestIndeces.AddRange(restoringQuests);
         }
 
         public bool IsActiveQuest(QuestDataInfo questDataInfo)
