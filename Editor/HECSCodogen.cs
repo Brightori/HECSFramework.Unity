@@ -185,8 +185,20 @@ public class HECSRoslynCodegen : OdinEditorWindow
     [Button]
     public async void CodegenClient()
     {
-        if (await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}{ForceRebuildArgument()}", false))
+        if (await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments(Config.Serialization)}{ForceRebuildArgument()}", false, Config.MspGenerationEnabled))
             ResetForceRebuild();
+    }
+
+    //вход для внешних обёрток (MCP-меню агентов): сериализация задаётся на один прогон,
+    //MessagePack идёт вместе с ней, сохранённые настройки окна не меняются
+    public async Task<bool> CodegenClientAsync(bool serialization)
+    {
+        var result = await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments(serialization)}{ForceRebuildArgument()}", false, serialization);
+
+        if (result)
+            ResetForceRebuild();
+
+        return result;
     }
 
     [Button]
@@ -204,7 +216,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
     {
         //оба захода читают флаг до сброса, поэтому force_rebuild уходит и в сервер, и в клиент
         var server = await Generate($"{PathArgument(Config.ServerScriptDirectory)} server no_blueprints{ForceRebuildArgument()}", true);
-        var client = await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments()}{ForceRebuildArgument()}", false);
+        var client = await Generate($"{PathArgument(Config.ClientScriptDirectory)}{ClientArguments(Config.Serialization)}{ForceRebuildArgument()}", false, Config.MspGenerationEnabled);
 
         if (server && client)
             ResetForceRebuild();
@@ -216,14 +228,14 @@ public class HECSRoslynCodegen : OdinEditorWindow
     private static string Quote(string value)
         => value != null && value.Contains(' ') ? $"\"{value}\"" : value;
 
-    private string ClientArguments()
+    private static string ClientArguments(bool serialization)
     {
         string args = string.Empty;
 
         if (!Config.NetworkCommandMap)
             args += " no_commands";
 
-        if (!Config.Serialization)
+        if (!serialization)
             args += " no_resolvers";
 
         return args;
@@ -244,7 +256,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
         Debug.Log("[HECS] Force rebuild выполнен, галка снята.");
     }
 
-    private async Task<bool> Generate(string args, bool isServer)
+    private async Task<bool> Generate(string args, bool isServer, bool mspGeneration = false)
     {
         Debug.Log("Generating Roslyn files...");
 
@@ -271,9 +283,22 @@ public class HECSRoslynCodegen : OdinEditorWindow
             {
                 FileName = fileName,
                 Arguments = arguments,
-                WorkingDirectory = Path.GetDirectoryName(exePath)
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             },
             EnableRaisingEvents = true
+        };
+
+        myProcess.OutputDataReceived += (a, b) => ForwardCodegenOutput(b.Data);
+        myProcess.ErrorDataReceived += (a, b) =>
+        {
+            if (!string.IsNullOrEmpty(b.Data))
+                Debug.LogError($"[HECS] Codegen: {b.Data}");
         };
 
         var exited = new TaskCompletionSource<bool>();
@@ -286,6 +311,8 @@ public class HECSRoslynCodegen : OdinEditorWindow
             try
             {
                 myProcess.Start();
+                myProcess.BeginOutputReadLine();
+                myProcess.BeginErrorReadLine();
             }
             catch (Exception e)
             {
@@ -298,6 +325,9 @@ public class HECSRoslynCodegen : OdinEditorWindow
                 Debug.LogError($"[HECS] Codegen did not finish within {GenerationTimeoutMs / 1000} seconds.");
                 return false;
             }
+
+            //Exited приходит раньше, чем дочитан перенаправленный вывод; без аргумента ждёт его конца
+            myProcess.WaitForExit();
 
             if (myProcess.ExitCode != 0)
             {
@@ -313,7 +343,7 @@ public class HECSRoslynCodegen : OdinEditorWindow
             //Debug.Log("Generating counters map...");
             //GenerateCountersMap.GenerateCountersMapFunc();
 
-            if (!Config.MspGenerationEnabled)
+            if (!mspGeneration)
                 return true;
 
             Debug.Log("Generating MessagePack files...");
@@ -331,6 +361,20 @@ public class HECSRoslynCodegen : OdinEditorWindow
             EditorApplication.UnlockReloadAssemblies();
             myProcess.Dispose();
         }
+    }
+
+    //весь вывод генератора в консоль Unity не нужен: только предупреждения, ошибки записи и итоговая строка
+    private static void ForwardCodegenOutput(string line)
+    {
+        if (string.IsNullOrEmpty(line))
+            return;
+
+        if (line.StartsWith("ВНИМАНИЕ:", StringComparison.Ordinal))
+            Debug.LogWarning($"[HECS] Codegen: {line}");
+        else if (line.StartsWith("we cant", StringComparison.Ordinal) || line.StartsWith("не смогли", StringComparison.Ordinal))
+            Debug.LogError($"[HECS] Codegen: {line}");
+        else if (line.StartsWith("генерация:", StringComparison.Ordinal))
+            Debug.Log($"[HECS] Codegen: {line}");
     }
 
     private static Task<string> MspGeneration(string input, string output, string dataPath)
