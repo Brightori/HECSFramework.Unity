@@ -19,7 +19,7 @@ namespace Helpers
             var custom = member.GetCustomAttributes<IdentifierDropDownAttribute>();
             foreach (var attribute in custom)
             {
-                attributes.Add(new ValueDropdownAttribute($"@{typeof(IdentifiersProvider).FullName}.{nameof(IdentifiersProvider.Get)}(\"{attribute.identifierType}\")"));
+                attributes.Add(new ValueDropdownAttribute($"@{typeof(IdentifiersProvider).FullName}.{nameof(IdentifiersProvider.Get)}(\"{attribute.identifierType}\",\"{attribute.identifierType2}\")"));
             }
         }
     }
@@ -38,7 +38,19 @@ namespace Helpers
             }
             //if return empty list, check that your identifier does not have namespace 
             return list;
-        }       
+        }    
+        
+        public static IEnumerable Get(string typeName,string typeName2)
+        {
+            var list = new ValueDropdownList<int>();
+            foreach (var container in containersProvider.GetCollection())
+            {
+                if(container.GetType().Name == typeName || container.GetType().Name == typeName2)
+                    list.Add(container.name, container.Id);
+            }
+            //if return empty list, check that your identifier does not have namespace 
+            return list;
+        } 
     }
 }
 #endif
