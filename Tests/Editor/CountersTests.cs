@@ -554,11 +554,102 @@ internal class CountersTests
         Assert.AreEqual(20, counter.Value);
     }
 
+    [Test]
+    public void TestPercentMultiplyModifier()
+    {
+        var check = new ModifiersFloatContainer();
+        check.SetBaseValue(10);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Multiply, 130, ModifierValueType.Percent));
+
+        Assert.AreEqual(13f, check.GetCalculatedValue(), Delta);
+    }
+
+    [Test]
+    public void TestPercentDivideModifier()
+    {
+        var check = new ModifiersFloatContainer();
+        check.SetBaseValue(10);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Divide, 50, ModifierValueType.Percent));
+
+        Assert.AreEqual(20f, check.GetCalculatedValue(), Delta);
+    }
+
+    [Test]
+    public void TestDivideByZeroKeepsValue()
+    {
+        var check = new ModifiersFloatContainer();
+        check.SetBaseValue(10);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Divide, 0));
+
+        Assert.AreEqual(10f, check.GetCalculatedValue(), Delta);
+    }
+
+    [Test]
+    public void TestIntPercentAddBelowHundred()
+    {
+        var check = new ModifiersIntContainer();
+        check.SetBaseValue(50);
+        check.AddModifier(Guid.NewGuid(), GetIntModifier(ModifierCalculationType.Add, 10, ModifierValueType.Percent));
+
+        Assert.AreEqual(55, check.GetCalculatedValue());
+    }
+
+    [Test]
+    public void TestIntPercentAddAboveHundred()
+    {
+        var check = new ModifiersIntContainer();
+        check.SetBaseValue(150);
+        check.AddModifier(Guid.NewGuid(), GetIntModifier(ModifierCalculationType.Add, 10, ModifierValueType.Percent));
+
+        Assert.AreEqual(165, check.GetCalculatedValue());
+    }
+
+    [Test]
+    public void TestBaseValuePercentSubtract()
+    {
+        var check = new BaseValueModifiersFloatContainer();
+        check.SetBaseValue(100);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Subtract, 30, ModifierValueType.Percent));
+
+        Assert.AreEqual(70f, check.GetCalculatedValue(), Delta);
+    }
+
+    [Test]
+    public void TestBaseValueMultiply()
+    {
+        var check = new BaseValueModifiersFloatContainer();
+        check.SetBaseValue(10);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Multiply, 1.3f));
+
+        Assert.AreEqual(13f, check.GetCalculatedValue(), Delta);
+    }
+
+    [Test]
+    public void TestBaseValueDivide()
+    {
+        var check = new BaseValueModifiersFloatContainer();
+        check.SetBaseValue(100);
+        check.AddModifier(Guid.NewGuid(), GetFloatModifier(ModifierCalculationType.Divide, 4));
+
+        Assert.AreEqual(25f, check.GetCalculatedValue(), Delta);
+    }
+
     private const float Delta = 0.0001f;
 
     private static DefaultFloatModifier GetFloatModifier(ModifierCalculationType calculationType, float value, ModifierValueType valueType = ModifierValueType.Value)
     {
         return new DefaultFloatModifier
+        {
+            GetCalculationType = calculationType,
+            GetValue = value,
+            GetModifierType = valueType,
+            ModifierGuid = Guid.NewGuid(),
+        };
+    }
+
+    private static DefaultIntModifier GetIntModifier(ModifierCalculationType calculationType, int value, ModifierValueType valueType = ModifierValueType.Value)
+    {
+        return new DefaultIntModifier
         {
             GetCalculationType = calculationType,
             GetValue = value,
