@@ -110,12 +110,23 @@ namespace Systems
         {
             var pool = await GetPool(viewReference);
 
+            var taken = new List<GameObject>(count);
+
             for (int i = 0; i < count; i++)
             {
-                var go = await pool.Get(default, Quaternion.identity, null, token);
+                var (isCanceled, go) = await pool.Get(default, Quaternion.identity, null, token).SuppressCancellationThrow();
+
+                if (isCanceled)
+                    break;
+
                 go.SetActive(false);
-                pool.Release(go);
+                taken.Add(go);
             }
+
+            foreach (var go in taken)
+                pool.Release(go);
+
+            token.ThrowIfCancellationRequested();
         }
 
         public async UniTask Warmup(EntityContainer entityContainer, int count, CancellationToken token = default)
